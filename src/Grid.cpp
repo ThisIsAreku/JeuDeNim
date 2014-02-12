@@ -1,7 +1,7 @@
 #include <iostream>
-#include "Grille.h"
+#include "Grid.h"
 
-Grille::Grille(int width, int height)
+Grid::Grid(int width, int height)
 {
     this->width = width;
     this->height = height;
@@ -16,7 +16,7 @@ Grille::Grille(int width, int height)
     }
 }
 
-Grille::~Grille()
+Grid::~Grid()
 {
     for (int i = 0; i < this->width; ++i)
     {
