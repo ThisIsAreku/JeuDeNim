@@ -24,3 +24,28 @@ Grid::~Grid()
     }
     delete [] this->matrice;
 }
+
+
+int Grid::getGridAt(int &x, int &y)
+{
+    if((0 < x || x < width) || (0 < y || y < height))
+        return -1;
+    return this->matrice[x][y];
+}
+
+void Grid::setGridAt(int &x, int &y, int &v)
+{
+    if((0 < x || x < width) || (0 < y || y < height))
+        return;
+    this->matrice[x][y] = v;
+}
+
+
+int &Grid::getWidth()
+{
+    return this->width;
+}
+int &Grid::getHeight()
+{
+    return this->height;
+}
