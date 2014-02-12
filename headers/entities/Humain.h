@@ -7,10 +7,10 @@
 
 class Humain : public Entity
 {
-    Game& game;
+    Game &game;
 
 public:
-    Humain(Game&);
+    Humain(Game &);
     ~Humain();
 
     int turn();

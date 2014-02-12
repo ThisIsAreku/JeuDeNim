@@ -7,15 +7,15 @@
 
 class Entity
 {
-    Game& game;
+    Game &game;
 
 protected:
-    Entity(Game&);
+    Entity(Game &);
     ~Entity();
-    
+
 public:
-    int turn();
-    std::string getId();
+    virtual int turn();
+    virtual std::string getId();
 };
 
 #endif
