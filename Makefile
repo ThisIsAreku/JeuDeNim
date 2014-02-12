@@ -1,12 +1,12 @@
 # Makefile
 # Copyright 2013 Alexandre Boucey <alexandre.boucey@alumni.univ-avignon.fr>
 CXXFLAGS+=-std=c++0x -W -Wall -Wextra -O3
-LDFLAGS=-lncurses
+LDFLAGS=-lncurses -ltinfo
 EXEC=JeuDeNim
 HEADERS_DIR=headers
-SRC= $(wildcard src/*.cpp)
-HEADERS= $(wildcard ${HEADERS_DIR}/*.h)
-OBJ= $(addprefix obj/, $(notdir $(SRC:.cpp=.o)))
+SRC= $(shell find src/ -name "*.cpp")
+HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.h")
+OBJ= $(SRC:src/%.cpp=obj/%.o)
 
 all: init compile
 
@@ -25,6 +25,7 @@ $(EXEC): $(OBJ)
 obj/main.o: $(HEADERS)
 
 obj/%.o: src/%.cpp
+	if [ ! -d "$(shell dirname $@)" ]; then mkdir -p $(shell dirname $@); fi 
 	${CXX} ${CXXFLAGS} -c -I${HEADERS_DIR} -o $@ $<
 
 init:
