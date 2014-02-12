@@ -2,11 +2,12 @@
 
 Game::Game()
 {
+    this->grid = new Grid(5, 5);
     this->manager = new WindowManager();
 }
 Game::~Game()
 {
-    //delete this->grille;
+    delete this->grid;
     delete this->manager;
 }
 
@@ -18,7 +19,8 @@ Game::~Game()
 /***********/
 void Game::displayGrid()
 {
-    this->manager->print(WIN_GAME_GRID, 1, 1, "Hello");
+    this->manager->printGrid(WIN_GAME_GRID, grid);
+    /*this->manager->print(WIN_GAME_GRID, 1, 1, "Hello");
     this->manager->print(WIN_GAME_TURN, 1, 1, "Entre un truc:");
     this->manager->print(WIN_SCOREBOARD, 1, 1, "....");
     char c[256];
