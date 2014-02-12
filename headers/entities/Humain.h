@@ -1,7 +1,7 @@
 #ifndef _HUMAIN_H_
 #define _HUMAIN_H_
 
-#include <string>
+#include <cstring>
 
 #include "Game.h"
 
@@ -11,7 +11,7 @@ class Humain : public Entity
 
 public:
     Humain(Game &);
-    ~Humain();
+    virtual ~Humain();
 
     int turn();
     std::string getId();

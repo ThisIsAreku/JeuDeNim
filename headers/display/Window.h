@@ -1,7 +1,7 @@
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
 
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <ncurses.h>
 
@@ -15,11 +15,19 @@ class Window
     int y;
 public:
     Window(int, int, int, int, int);
-    ~Window();
+    virtual ~Window();
 
     void refresh();
     bool printAt(int, int, const char *);
     bool readAt(int, int, const char *);
+
+    void AttribOn(int);
+    void AttribOff(int);
+    void AttribSet(int);
+    void AttribResetOff();
+    void AttribResetOn();
+
+    void setChar(int, int, chtype);
 
 
     int getWidth();

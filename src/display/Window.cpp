@@ -20,13 +20,16 @@ Window::~Window()
 
 void Window::refresh()
 {
+    box(handle, 0 , 0);
     wrefresh(handle);
 }
 bool Window::printAt(int x, int y, const char *str)
 {
+    x++; //skip border
+    y++; //again
     if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
         return false;
-    mvwprintw(handle, x, y, str);
+    mvwprintw(handle, y, x, str);
     this->refresh();
     return true;
 }
@@ -40,6 +43,34 @@ bool Window::readAt(int x, int y, const char *str)
     return r;
 
 }
+
+void Window::AttribOn(int attr)
+{
+    wattron(handle, attr);
+}
+void Window::AttribOff(int attr)
+{
+    wattroff(handle, attr);
+}
+void Window::AttribSet(int attr)
+{
+    wattrset(handle, attr);
+}
+void Window::AttribResetOff()
+{
+    wstandend(handle);
+}
+void Window::AttribResetOn()
+{
+    wstandout(handle);
+}
+
+
+void Window::setChar(int x, int y, chtype ch)
+{
+    mvwaddch(handle, x, y, ch);
+}
+
 
 int Window::getWidth()
 {

@@ -10,10 +10,10 @@ class Grid
 
 public:
     Grid(int width, int height);
-    ~Grid();
+    virtual ~Grid();
 
-    int getGridAt(int &, int &);
-    void setGridAt(int &, int &, int &);
+    int getGridAt(int, int);
+    void setGridAt(int, int, int);
     int &getWidth();
     int &getHeight();
 

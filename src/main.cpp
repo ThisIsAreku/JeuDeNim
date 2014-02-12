@@ -4,7 +4,6 @@
 int main()
 {
     Game game;
-    game.displayGrid();
-    game.wait();
+    game.start();
 
 }

@@ -11,7 +11,7 @@ Grid::Grid(int width, int height)
         this->matrice[i] = new int[height];
         for (int j = 0; j < height; ++j)
         {
-            this->matrice[i][j] = -1;
+            this->matrice[i][j] = 0;
         }
     }
 }
@@ -26,18 +26,17 @@ Grid::~Grid()
 }
 
 
-int Grid::getGridAt(int &x, int &y)
+int Grid::getGridAt(int x, int y)
 {
-    if((0 < x || x < width) || (0 < y || y < height))
-        return -1;
-    return this->matrice[x][y];
+    if((0 <= x && x < width) && (0 <= y && y < height))
+        return this->matrice[x][y];
+    return 0;
 }
 
-void Grid::setGridAt(int &x, int &y, int &v)
+void Grid::setGridAt(int x, int y, int v)
 {
-    if((0 < x || x < width) || (0 < y || y < height))
-        return;
-    this->matrice[x][y] = v;
+    if((0 <= x && x < width) && (0 <= y && y < height))
+        this->matrice[x][y] = v;
 }
 
 

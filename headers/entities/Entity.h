@@ -1,7 +1,7 @@
 #ifndef _ENTITIY_H_
 #define _ENTITIY_H_
 
-#include <string>
+#include <cstring>
 
 #include "Game.h"
 
@@ -11,11 +11,11 @@ class Entity
 
 protected:
     Entity(Game &);
-    ~Entity();
+    virtual ~Entity();
 
 public:
-    virtual int turn();
-    virtual std::string getId();
+    virtual int turn() = 0;
+    virtual std::string getId() = 0;
 };
 
 #endif

@@ -2,7 +2,7 @@
 
 Game::Game()
 {
-    this->grid = new Grid(5, 5);
+    this->grid = new Grid(10, 10);
     this->manager = new WindowManager();
 }
 Game::~Game()
@@ -12,47 +12,71 @@ Game::~Game()
 }
 
 
+void Game::loop()
+{
+    this->manager->initialize("JeuDeNim v0.1");
+    init();
+    while(!interrupted)
+    {
+        this->manager->update();
+        render();
+
+        update();
+
+    }
+}
+
+void Game::init()
+{
+    this->manager->printBaseGrid(WIN_GAME_GRID, this->grid, 5, 5);
+}
+
+void Game::update()
+{
+    int ch = getch();
+    if(ch == KEY_F(2))
+        interrupted = true;
+    if(ch == KEY_F(5)){
+        this->manager->refreshAll();
+        this->manager->printBaseGrid(WIN_GAME_GRID, this->grid, 5, 5);
+    }
+}
+
+void Game::render()
+{
+}
+
+
 
 
 /***********/
 /* PUBLICS */
 /***********/
+void Game::start()
+{
+    interrupted = false;
+    loop();
+}
 void Game::displayGrid()
 {
-    this->manager->printGrid(WIN_GAME_GRID, grid);
-    /*this->manager->print(WIN_GAME_GRID, 1, 1, "Hello");
-    this->manager->print(WIN_GAME_TURN, 1, 1, "Entre un truc:");
-    this->manager->print(WIN_SCOREBOARD, 1, 1, "....");
-    char c[256];
-    if(this->manager->read(WIN_GAME_TURN, 2, 1, c))
-    {
-        if(c == NULL)
-        {
-            this->manager->print(WIN_SCOREBOARD, 5, 1, "NULL !");
-        }
-        else
-        {
-            this->manager->print(WIN_SCOREBOARD, 5, 1, c);
-        }
-    }
-    else
-    {
-        this->manager->print(WIN_SCOREBOARD, 5, 1, "Erreur");
-    }
-    /*char str[80];
-    getstr(str);
-    WINDOW* win = getWindow(WIN_SCOREBOARD);
-    mvwprintw(win, 0, 0, "You Entered: %s", str);
-    wrefresh(win);
-    int ch;
-    while((ch = getch()) != KEY_F(2))
-    {
-    }*/
+    grid->setGridAt(0, 0, 1);
+    grid->setGridAt(1, 0, 1);
+    grid->setGridAt(2, 0, 1);
+    grid->setGridAt(3, 0, 1);
+    grid->setGridAt(4, 0, 2);
+    grid->setGridAt(0, 1, 2);
+    grid->setGridAt(0, 2, 1);
+    grid->setGridAt(0, 3, 2);
+    this->manager->printGrid(WIN_GAME_GRID, grid, 2, 2);
 }
 void Game::wait()
 {
     int ch;
     while((ch = getch()) != KEY_F(2))
     {
+        if(ch == KEY_F(5))
+        {
+
+        }
     }
 }
