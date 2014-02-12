@@ -14,7 +14,7 @@ protected:
 public:
 
     virtual void init() = 0;
-    virtual void update() = 0;
+    virtual void update(int ch) = 0;
     virtual void render() = 0;
 
 };
