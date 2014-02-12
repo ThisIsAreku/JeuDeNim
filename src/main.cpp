@@ -1,9 +1,10 @@
 #include <iostream>
-#include "Jeu.h"
+#include "Game.h"
 
 int main()
 {
-    Jeu j;
-    j.afficheGrille();
+    Game game;
+    game.displayGrid();
+    game.wait();
 
 }
