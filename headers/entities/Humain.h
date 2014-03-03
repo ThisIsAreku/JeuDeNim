@@ -1,20 +1,28 @@
 #ifndef _HUMAIN_H_
 #define _HUMAIN_H_
 
-#include <cstring>
+#include "entities/Entity.h"
+#include "entities/EntityListener.h"
 
-#include "Game.h"
+#include "widgets/CellCursor.h"
 
 class Humain : public Entity
 {
-    Game &game;
+    CellCursor *cursor;
+    EntityTurnAction turnAction;
 
+    bool onCursorSelect(int, int);
 public:
-    Humain(Game &);
+    Humain(BaseGame *, int);
     virtual ~Humain();
 
     int turn();
-    std::string getId();
+
+    void init();
+    UpdateState update(int);
+    void render();
+
+    const char *getId();
 };
 
 #endif

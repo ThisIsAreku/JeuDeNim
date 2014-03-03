@@ -1,20 +1,27 @@
 #ifndef _RENDERABLE_H_
 #define _RENDERABLE_H_
 
-#include "display/Window.h"
+#include "display/WindowManager.h"
+#include "BaseGame.h"
+
+#include "structs/UpdateState.h"
 
 class Renderable
 {
-    Window *win;
-protected:
-    Renderable(Window *);
-    virtual ~Renderable();
+    int winId;
+    WindowManager *manager;
 
-    Window* getWindow();
+protected:
+    Renderable(WindowManager *, int);
+
+    Window *getWindow();
+    void log(const char *);
+    void log(int);
 public:
+    virtual ~Renderable() = 0;
 
     virtual void init() = 0;
-    virtual void update(int ch) = 0;
+    virtual UpdateState update(chtype) = 0;
     virtual void render() = 0;
 
 };

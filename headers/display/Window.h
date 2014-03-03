@@ -13,6 +13,9 @@ class Window
     int height;
     int x;
     int y;
+
+    int pos_x;
+    int pos_y;
 public:
     Window(int, int, int, int, int);
     virtual ~Window();
@@ -20,6 +23,11 @@ public:
     void refresh();
     bool printAt(int, int, const char *);
     bool readAt(int, int, const char *);
+    bool readAnyAt(int, int, const char *, const void *);
+    bool append(const char *);
+    bool newLine();
+
+    void clear();
 
     void AttribOn(int);
     void AttribOff(int);

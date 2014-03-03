@@ -1,21 +1,33 @@
 #ifndef _ENTITIY_H_
 #define _ENTITIY_H_
 
-#include <cstring>
+class BaseGame; // forward declaration
 
-#include "Game.h"
+#include "BaseGame.h"
+
+#include "structs/UpdateState.h"
 
 class Entity
 {
-    Game &game;
+    BaseGame *game;
+    int entityIndex;
 
 protected:
-    Entity(Game &);
-    virtual ~Entity();
+    Entity(BaseGame *, int);
+    BaseGame *getBaseGame();
 
 public:
+    virtual ~Entity() = 0;
+
+    int getEntityIndex();
+
     virtual int turn() = 0;
-    virtual std::string getId() = 0;
+
+    virtual void init() = 0;
+    virtual UpdateState update(int) = 0;
+    virtual void render() = 0;
+
+    virtual const char *getId() = 0;
 };
 
 #endif

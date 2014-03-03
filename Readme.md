@@ -1,5 +1,9 @@
 # JeuDeNim
 ## Un mélange entre Puissance 4 et le Morpion
+
+### Sites web utilisés:
+* http://tldp.org/HOWTO/text/NCURSES-Programming-HOWTO
+*
         
 ## License
 

@@ -2,6 +2,7 @@
 # Copyright 2013 Alexandre Boucey <alexandre.boucey@alumni.univ-avignon.fr>
 CXXFLAGS+=-std=c++0x -W -Wall -Wextra -O3
 LDFLAGS=-lncurses -ltinfo
+NCURSES= $(shell find /usr/lib -name "libncurses.so" -print -quit 2>/dev/null)
 EXEC=JeuDeNim
 HEADERS_DIR=headers
 SRC= $(shell find src/ -name "*.cpp")
@@ -20,12 +21,13 @@ format:
 	astyle $(HEADERS) $(SRC)
 
 $(EXEC): $(OBJ)
-	${CXX} ${LDFLAGS} -o bin/$@ $^
+	@echo "Using ncurses @ ${NCURSES}"
+	${CXX} ${LDFLAGS} -o bin/$@ $^ $(NCURSES)
 
 obj/main.o: $(HEADERS)
 
 obj/%.o: src/%.cpp
-	if [ ! -d "$(shell dirname $@)" ]; then mkdir -p $(shell dirname $@); fi 
+	-@if [ ! -d "$(shell dirname $@)" ]; then mkdir -p $(shell dirname $@); fi 
 	${CXX} ${CXXFLAGS} -c -I${HEADERS_DIR} -o $@ $<
 
 init:

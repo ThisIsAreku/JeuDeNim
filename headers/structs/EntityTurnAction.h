@@ -1,0 +1,12 @@
+#ifndef _STRUCT_ENTITY_TURN_ACTION_
+#define _STRUCT_ENTITY_TURN_ACTION_
+
+enum EntityTurnAction
+{
+    TOKEN_PLACE,
+    TOKEN_REMOVE,
+    ROTATE_CLOCKWISE,
+    ROTATE_COUNTERCLOCKWISE,
+};
+
+#endif

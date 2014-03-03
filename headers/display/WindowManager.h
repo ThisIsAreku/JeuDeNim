@@ -7,36 +7,28 @@
 #include <ncurses.h>
 
 #include "display/Window.h"
-#include "Grid.h"
-
-#define WIN_COUNT 3
-#define WIN_GAME_GRID 0
-#define WIN_GAME_TURN 1
-#define WIN_SCOREBOARD 2
-
-#define CELL_WIDTH 4
-#define CELL_HEIGHT 2
+#include "constants.h"
 
 class WindowManager
 {
-    static bool wich_raised;
     bool initialized;
+    bool releasing;
 
     Window **win;
 
 
     void createWindow(int, int, int, int, int);
     void deleteWindow(int);
-    Window *getWindow(int);
     void initWindows();
     void initNcurses();
-    void initSignal();
     void releaseNcurses();
     void initColors();
 
+    void ntoc(const int &, char *);
+    void safe_ntoc(const int &, char *);
+
 
 public:
-    static void handle_winch(int sig);
 
     struct WindowSize
     {
@@ -49,6 +41,8 @@ public:
     WindowManager();
     virtual ~WindowManager();
 
+    Window *getWindow(int);
+
     void initialize(const char *);
 
     void leaveCurseMode();
@@ -60,22 +54,27 @@ public:
     int getLines();
     int getCols();
 
-    void print(int, int, int, std::string &);
-    void print(int, int, int, const char *);
+    bool print(int, int, int, std::string &);
+    bool printInt(int, int, int, const int);
+    bool print(int, int, int, const char *);
+    bool print(int, int, int, const char);
+
+    bool append(int, std::string &);
+    bool appendInt(int, const int);
+    bool append(int, const char *);
+    bool append(int, const char);
+    bool newLine(int);
+
+    void clearWindow(int);
+
     bool read(int, int, int, std::string &);
+    //void read(int, int, int, const int &);
     bool read(int, int, int, const char *);
 
-    void printGrid(int, Grid *, int, int);
-    void printBaseGrid(int, Grid *, int, int);
-
-    void getWindowSize(int, WindowSize *);
-
-    void setWindowColor(int, int);
-    void clearWindowColor(int, int);
+    bool getWindowSize(int, WindowSize *);
 
     void refreshAll();
-
-    void update();
+    void refreshWindow(int);
 };
 
 #endif
