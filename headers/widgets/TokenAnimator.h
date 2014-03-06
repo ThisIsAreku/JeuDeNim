@@ -7,9 +7,12 @@
 class TokenAnimator : public Renderable
 {
     BaseGrid *_grid;
+    double modifier;
 public:
     TokenAnimator(WindowManager *, int, BaseGrid *);
     void animateToken(int, int, int, int);
+
+    void setModifier(double);
 
     void init();
     UpdateState update(chtype);

@@ -37,6 +37,8 @@ class Grid :  public BaseGrid, public Renderable
     void drawTokens();
     void clearGridArea();
 
+    void redrawAll();
+
 public:
     Grid(WindowManager *, int, int, int);
     virtual ~Grid();
@@ -66,6 +68,12 @@ public:
 
     bool isEmpty();
     bool isFull();
+
+    int getShiftX();
+    int getShiftY();
+
+    void setShiftX(int);
+    void setShiftY(int);
 
 };
 

@@ -10,6 +10,7 @@
 
 Game::Game()
 {
+
     this->manager = new WindowManager();
     this->players = NULL;
     //this->playTurns = new std::list<const char *>();
@@ -81,20 +82,44 @@ void Game::deinit()
 
 void Game::update()
 {
+    timeout(1000);
     chtype ch = getch();
+    if((int)ch == -1)
+        return;
 
     getWindowManager()->appendInt(WIN_GAME_TURN, ch);
     getWindowManager()->append(WIN_GAME_TURN, " ");
     getWindowManager()->append(WIN_GAME_TURN, ch);
+    getWindowManager()->append(WIN_GAME_TURN, " - ");
     getWindowManager()->refreshWindow(WIN_GAME_TURN);
 
     if(ch == KEY_F(12))
         interrupted = true;
 
+    switch(ch)
+    {
+    case 'o':
+        getBaseGrid()->setShiftY(getBaseGrid()->getShiftY() - 1);
+        break;
+    case 'l':
+        getBaseGrid()->setShiftY(getBaseGrid()->getShiftY() + 1);
+        break;
+    case 'k':
+        getBaseGrid()->setShiftX(getBaseGrid()->getShiftX() - 1);
+        break;
+    case 'm':
+        getBaseGrid()->setShiftX(getBaseGrid()->getShiftX() + 1);
+        break;
+    case 'i':
+        getBaseGrid()->setShiftX(0);
+        getBaseGrid()->setShiftY(0);
+    default:
+        getCurrentPlayer()->update(ch);
+    }
 
-    getCurrentPlayer()->update(ch);
 
-    this->grid->update(ch);
+
+    // this->grid->update(ch);
 }
 
 void Game::render()
@@ -118,7 +143,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     bool valid = true;
     if(action == TOKEN_PLACE)
     {
-        valid = this->grid->placeToken(currentPlayer + 1, x);
+        valid = getBaseGrid()->placeToken(currentPlayer + 1, x);
         if(valid)
         {
             oss << "Joueur " << currentPlayer + 1 << " a joué dans la colonne " << x;
@@ -126,7 +151,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     }
     else if(action == TOKEN_REMOVE)
     {
-        valid = this->grid->removeToken(x, y);
+        valid = getBaseGrid()->removeToken(x, y);
         if(valid)
         {
             oss << "Joueur " << currentPlayer + 1 << " a supprimé un jeton (" << x << "," << y << ")";
@@ -145,6 +170,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         {
             oss << "gauche";
         }
+        getBaseGrid()->rotate(action);
         //this->grid->doGravity();
     }
     if(valid)

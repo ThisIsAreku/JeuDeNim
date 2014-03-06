@@ -51,12 +51,10 @@ UpdateState Humain::update(int ch)
         {
         case 'r':
             turnAction = ROTATE_CLOCKWISE;
-            getBaseGame()->getBaseGrid()->rotate(ROTATE_CLOCKWISE);
             getBaseGame()->onEntityTurnCompleted(turnAction, -1, -1);
             break;
         case 't':
             turnAction = ROTATE_COUNTERCLOCKWISE;
-            getBaseGame()->getBaseGrid()->rotate(ROTATE_COUNTERCLOCKWISE);
             getBaseGame()->onEntityTurnCompleted(turnAction, -1, -1);
             break;
         case 'p':

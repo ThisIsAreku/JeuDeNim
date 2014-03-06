@@ -5,19 +5,11 @@ GravityProvider::GravityProvider(BaseGrid *grid)
     _grid = grid;
 }
 
-void GravityProvider::doGravity()
+void GravityProvider::doGravity(std::function<void(int, int, int, int)> callback)
 {
-    int newY;
     for(int i = 0; i < _grid->getWidth(); ++i)
     {
-        for(int j = _grid->getHeight() - 1; j >= 0; --j)
-        {
-            if(_grid->getGridAt(i, j) > 0)
-            {
-                newY = findNewTokenY(i, j);
-                _grid->moveToken(i, j, i, newY);
-            }
-        }
+        doColumnGravity(i, callback);
     }
 }
 
@@ -60,7 +52,8 @@ void GravityProvider::doColumnGravity(int x, std::function<void(int, int, int, i
             if(newY != j)
             {
                 _grid->moveToken(x, j, x, newY);
-                callback(player, x, j, newY);
+                if(callback != NULL)
+                    callback(player, x, j, newY);
             }
         }
     }

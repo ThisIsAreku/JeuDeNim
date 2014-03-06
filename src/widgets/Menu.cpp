@@ -13,7 +13,7 @@ Menu::~Menu()
 void Menu::init()
 {
 }
-UpdateState Menu::update(chtype ch)
+UpdateState Menu::update(chtype)
 {
     return SUCCESS;
 }

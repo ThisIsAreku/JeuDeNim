@@ -14,6 +14,9 @@ class Window
     int x;
     int y;
 
+    int shift_x;
+    int shift_y;
+
     int pos_x;
     int pos_y;
 public:
@@ -43,6 +46,12 @@ public:
     int getX();
     int getY();
     int getId();
+
+    int getShiftX();
+    int getShiftY();
+
+    void setShiftX(int);
+    void setShiftY(int);
 
 };
 

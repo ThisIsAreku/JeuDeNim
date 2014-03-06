@@ -51,11 +51,11 @@ void WindowManager::initWindows()
     if(releasing || !initialized)
         return;
 
-    int cols = COLS - 12;
+    double cols = (COLS / 8.);
     int lines = LINES - 6;
 
-    createWindow(WIN_GAME_GRID,     cols,   lines,  0,              1);
-    createWindow(WIN_GAME_TURN,    11,       lines,  cols + 1,   1);
+    createWindow(WIN_GAME_GRID,     6 * cols,   lines,  0,              1);
+    createWindow(WIN_GAME_TURN,    2 * cols,       lines,  6 * cols + 1,   1);
     createWindow(WIN_SCOREBOARD,     COLS,   5,      0,              lines + 1);
 }
 void WindowManager::initNcurses()
@@ -117,7 +117,7 @@ void WindowManager::ntoc(const int &n, char *str)
     str[0] = '0' + n;
     str[1] = '\0';
 }
-void WindowManager::safe_ntoc(const int &n, char *str)
+void WindowManager::safe_ntoc(const int &, char *)
 {
     /*std::ostringstream oss;
     oss << n;
@@ -256,4 +256,15 @@ void WindowManager::refreshWindow(int winId)
     if(releasing)
         return;
     getWindow(winId)->refresh();
+}
+
+
+void WindowManager::leaveCurseMode()
+{
+    def_prog_mode();
+    endwin();
+}
+void WindowManager::restoreCurseMode()
+{
+    reset_prog_mode();
 }

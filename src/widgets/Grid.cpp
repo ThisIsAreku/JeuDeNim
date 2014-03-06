@@ -19,7 +19,6 @@ Grid::Grid(WindowManager *manager, int winId, int width, int height) : Renderabl
     currentRotationValue  = 0;
     this->gravityProvider = new GravityProvider(this);
     this->tokenAnimator = new TokenAnimator(manager, winId, this);
-
 }
 
 Grid::~Grid()
@@ -38,6 +37,20 @@ Grid::~Grid()
 bool Grid::isDoingSteppedGravity()
 {
     return doingSteppedGravity;
+}
+
+void Grid::redrawAll()
+{
+
+    Window *win = getWindow();
+    if(win == NULL)
+        return;
+
+    clearGridArea();
+    drawBaseGrid();
+    drawTokens();
+
+    win->refresh();
 }
 
 void Grid::drawBaseGrid()
@@ -140,15 +153,13 @@ void Grid::drawTokens()
             {
                 s[1] = '0' + val;
                 win->AttribOn(COLOR_PAIR(val));
-                win->printAt(i * CELL_WIDTH + 3, j * CELL_HEIGHT + 2, s);
-                win->AttribOff(COLOR_PAIR(val));
             }
             else
             {
                 s[1] = ' ';
                 win->AttribResetOff();
-                win->printAt(i * CELL_WIDTH + 3, j * CELL_HEIGHT + 2, s);
             }
+            win->printAt(i * CELL_WIDTH + 3, j * CELL_HEIGHT + 2, s);
         }
     }
     win->AttribResetOff();
@@ -156,6 +167,8 @@ void Grid::drawTokens()
 
 void Grid::init()
 {
+    setShiftY(-5);
+
     doingSteppedGravity = false;
     this->last_x = this->last_y = -1;
     currentRotationValue = 0;
@@ -168,7 +181,7 @@ void Grid::init()
     win->refresh();
 
 }
-UpdateState Grid::update(chtype ch)
+UpdateState Grid::update(chtype)
 {
     /*if(steppedGravityValue != -1 && steppedGravityValue < getHeight())
     {
@@ -356,13 +369,18 @@ void Grid::rotate(EntityTurnAction r)
         return;
     clearGridArea();
     drawBaseGrid();
+    drawTokens();
     win->refresh();
 
-    steppedGravityValue = 0;
-    ungetch(0);
-    /*doGravity();
-    drawTokens();*/
-    win->refresh();
+    this->tokenAnimator->setModifier(2.0);
+    this->gravityProvider->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
+                                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    this->tokenAnimator->setModifier(1.0);
+
+    /*steppedGravityValue = 0;
+    ungetch(0);*/
+    /*doGravity();*/
+    //win->refresh();
 }
 
 
@@ -386,4 +404,26 @@ bool Grid::isEmpty()
 bool Grid::isFull()
 {
     return this->filledCells == this->totalCells;
+}
+
+int Grid::getShiftX()
+{
+    return getWindow()->getShiftX() / CELL_WIDTH;
+}
+
+int Grid::getShiftY()
+{
+    return getWindow()->getShiftY() / CELL_HEIGHT;
+}
+
+void Grid::setShiftX(int x)
+{
+    getWindow()->setShiftX(x * CELL_WIDTH);
+    redrawAll();
+}
+
+void Grid::setShiftY(int y)
+{
+    getWindow()->setShiftY(y * CELL_HEIGHT);
+    redrawAll();
 }

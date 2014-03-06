@@ -19,9 +19,6 @@ class CellCursor : public Renderable
     int max_x;
     int max_y;
 
-    int grid_w;
-    int grid_h;
-
     int cursor_height;
     int cursor_width;
 
@@ -31,6 +28,8 @@ class CellCursor : public Renderable
 
     void drawBox(int x, int y);
     void drawBox();
+
+    void constraintCursor();
 public:
     CellCursor(WindowManager *, int, BaseGrid *, int);
     virtual ~CellCursor();

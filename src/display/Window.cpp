@@ -8,8 +8,10 @@ Window::Window(int winId, int w, int h, int x, int y)
     this->y = y;
     this->id = winId;
     this->pos_x = this->pos_y = 0;
+    this->shift_x = this->shift_y = 0;
     handle = NULL;
     handle = newwin(h, w, y, x);
+    keypad(handle, TRUE);
     box(handle, 0 , 0);
     wrefresh(handle);
 }
@@ -44,7 +46,7 @@ bool Window::printAt(int x, int y, const char *str)
     y++; //again
     if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
         return false;
-    mvwprintw(handle, y, x, str);
+    mvwprintw(handle, y + shift_y, x + shift_x, str);
     //this->refresh();
     return true;
 }
@@ -58,7 +60,7 @@ bool Window::readAt(int x, int y, const char *str)
         return false;
     curs_set(1);
     echo();
-    int r = mvwscanw(handle, y, x, "%s", str);
+    int r = mvwscanw(handle, y + shift_y, x + shift_x, "%s", str);
     noecho();
     curs_set(0);
     return r;
@@ -73,7 +75,7 @@ bool Window::readAnyAt(int x, int y, const char *format, const void *str)
         return false;
     curs_set(1);
     echo();
-    int r = mvwscanw(handle, y, x, format, str);
+    int r = mvwscanw(handle, y + shift_y, x + shift_x, format, str);
     noecho();
     curs_set(0);
     return r;
@@ -142,7 +144,7 @@ void Window::setChar(int x, int y, chtype ch)
     y++; //again
     if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
         return;
-    mvwaddch(handle, y, x, ch);
+    mvwaddch(handle, y + shift_y, x + shift_x, ch);
 }
 
 
@@ -168,4 +170,25 @@ int Window::getY()
 int Window::getId()
 {
     return this->id;
+}
+
+
+int Window::getShiftX()
+{
+    return shift_x;
+}
+
+int Window::getShiftY()
+{
+    return shift_y;
+}
+
+void Window::setShiftX(int x)
+{
+    shift_x = x;
+}
+
+void Window::setShiftY(int y)
+{
+    shift_y = y;
 }

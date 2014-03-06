@@ -20,6 +20,12 @@ public:
 
     virtual bool isEmpty() = 0;
     virtual bool isFull() = 0;
+
+    virtual int getShiftX() = 0;
+    virtual int getShiftY() = 0;
+
+    virtual void setShiftX(int) = 0;
+    virtual void setShiftY(int) = 0;
 };
 
 #endif

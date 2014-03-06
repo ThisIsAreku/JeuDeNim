@@ -5,7 +5,6 @@
 
 CellCursor::CellCursor(WindowManager *manager, int winId, BaseGrid *grid, int color) : Renderable(manager, winId)
 {
-    log("CC_ctor ");
     this->color = color;
 
     this->cellSelected_callback = NULL;
@@ -20,11 +19,8 @@ CellCursor::CellCursor(WindowManager *manager, int winId, BaseGrid *grid, int co
     this->x = this->prev_x = 0;
     this->y = this->prev_y = 0;
 
-    this->grid_w = grid->getWidth();
-    this->grid_h = grid->getHeight();
-
-    this->max_x = this->grid_w - this->cursor_width;
-    this->max_y = this->grid_h - this->cursor_height;
+    this->max_x = this->grid->getWidth() - this->cursor_width;
+    this->max_y = this->grid->getHeight() - this->cursor_height;
 }
 CellCursor::~CellCursor()
 {
@@ -49,17 +45,22 @@ void CellCursor::setCursorPosition(int x, int y)
 {
     this->prev_x = this->x = x;
     this->prev_y = this->y = y;
+
+    constraintCursor();
 }
 
 void CellCursor::setCursorSize(int w, int h)
 {
     cursor_width = w;
     cursor_height = h;
+
+    constraintCursor();
 }
 
 void CellCursor::setVisible(bool visible)
 {
     this->visible = visible;
+    constraintCursor();
     if(visible)
         drawBox();
     else
@@ -84,8 +85,8 @@ void CellCursor::drawBox(int pos_x, int pos_y)
     if(win == NULL)
         return;
 
-    int full_x_coords = this->grid_w * CELL_WIDTH;
-    int full_y_coords = this->grid_h * CELL_HEIGHT;
+    int full_x_coords = this->grid->getWidth() * CELL_WIDTH;
+    int full_y_coords = this->grid->getHeight() * CELL_HEIGHT;
 
     int cursor_coords_width = this->cursor_width * CELL_WIDTH;
     int cursor_coords_height = this->cursor_height * CELL_HEIGHT;
@@ -153,18 +154,32 @@ void CellCursor::drawBox()
 
 }
 
+void CellCursor::constraintCursor()
+{
+    this->max_x = this->grid->getWidth() - this->cursor_width;
+    this->max_y = this->grid->getHeight() - this->cursor_height;
+
+    if(x < 0)
+        x = 0;
+    if(y < 0)
+        y = 0;
+    if(x > max_x)
+        x = max_x;
+    if(y > max_y)
+        y = max_y;
+
+
+    this->prev_x = this->x;
+    this->prev_y = this->y;
+}
+
 void CellCursor::init()
 {
-    log("CC_init ");
-
     this->x = this->prev_x = 0;
     this->y = this->prev_y = 0;
 
-    this->grid_w = this->grid->getWidth();
-    this->grid_h = this->grid->getHeight();
-
-    this->max_x = this->grid_w - this->cursor_width;
-    this->max_y = this->grid_h - this->cursor_height;
+    this->max_x = this->grid->getWidth() - this->cursor_width;
+    this->max_y = this->grid->getHeight() - this->cursor_height;
 }
 UpdateState CellCursor::update(chtype ch)
 {
@@ -192,11 +207,8 @@ UpdateState CellCursor::update(chtype ch)
             return REMOVE;
     }
 
-    this->grid_w = this->grid->getWidth();
-    this->grid_h = this->grid->getHeight();
-
-    this->max_x = this->grid_w - this->cursor_width;
-    this->max_y = this->grid_h - this->cursor_height;
+    this->max_x = this->grid->getWidth() - this->cursor_width;
+    this->max_y = this->grid->getHeight() - this->cursor_height;
 
     if(x < 0)
         x = 0;
