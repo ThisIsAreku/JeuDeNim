@@ -11,7 +11,6 @@ public:
     virtual int getWidth() = 0;
     virtual int getHeight() = 0;
 
-    virtual bool isDoingSteppedGravity() = 0;
     virtual void rotate(EntityTurnAction r) = 0;
 
     virtual bool placeToken(int, int) = 0;

@@ -227,7 +227,12 @@ void Game::start()
     int maxSize = fmin((int)((COLS - 5 - 12) / 4), (int)((LINES - 4 - 6) / 2));
     win->printAt(0, 0, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
     win->printAt(0, 1, "une grille de taille");
+
+    win->AttribOn(COLOR_PAIR(30));
     getWindowManager()->printInt(WIN_GAME_GRID, 21, 1, maxSize);
+    win->AttribOff(COLOR_PAIR(30));
+    win->printAt(0, 2, "Vous pouvez utiliser une grille plus grande, mais l'affichage");
+    win->printAt(0, 3, "souffre de quelques problèmes pour les grandes grilles...");
 
     win->printAt(0, 5, "Entrez la largeur de la grille: ");
     win->refresh();
@@ -235,22 +240,22 @@ void Game::start()
     {
         win->readAnyAt(31, 5, "%d", &initGridW);
     }
-    while(initGridW < 2 || initGridW > maxSize);
+    while(initGridW < 2/* || initGridW > maxSize*/);
     win->printAt(0, 6, "Entrez la hauteur de la grille: ");
     win->refresh();
     do
     {
         win->readAnyAt(31, 6, "%d", &initGridH);
     }
-    while(initGridH < 2 || initGridH > maxSize);
+    while(initGridH < 2/* || initGridH > maxSize*/);
 
-    win->printAt(0, 8, "Entrez le nombre de joueurs: ");
+    win->printAt(0, 8, "Entrez le nombre de joueurs (2-4): ");
     win->refresh();
     do
     {
-        win->readAnyAt(29, 8, "%d", &numberOfPlayers);
+        win->readAnyAt(35, 8, "%d", &numberOfPlayers);
     }
-    while(numberOfPlayers < 1 || numberOfPlayers > 4);
+    while(numberOfPlayers < 2 || numberOfPlayers > 4);
 
 
     win->clear();

@@ -19,12 +19,17 @@ class Window
 
     int pos_x;
     int pos_y;
+
+    void applyShift(int &, int &);
 public:
     Window(int, int, int, int, int);
     virtual ~Window();
 
+    bool contains(int, int);
+
     void refresh();
     bool printAt(int, int, const char *);
+    bool printAt_unshifted(int, int, const char *);
     bool readAt(int, int, const char *);
     bool readAnyAt(int, int, const char *, const void *);
     bool append(const char *);

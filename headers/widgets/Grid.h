@@ -18,11 +18,7 @@ class Grid :  public BaseGrid, public Renderable
     int last_x;
     int last_y;
 
-    int steppedGravityValue;
-
     int **matrice;
-
-    bool doingSteppedGravity;
 
     int currentRotationValue;
 
@@ -33,6 +29,7 @@ class Grid :  public BaseGrid, public Renderable
 
     bool forceSetGridAt(int, int, int);
 
+    void drawRuler();
     void drawBaseGrid();
     void drawTokens();
     void clearGridArea();
@@ -47,14 +44,6 @@ public:
     bool setGridAt(int, int, int);
     int getWidth();
     int getHeight();
-
-    void updateSteppedGravity();
-
-    int doGravityForCell(int, int);
-
-
-    void doGravity();
-    bool isDoingSteppedGravity();
 
     bool placeToken(int, int);
     bool removeToken(int, int);

@@ -30,8 +30,6 @@ void Humain::init()
 }
 UpdateState Humain::update(int ch)
 {
-    if(getBaseGame()->getBaseGrid()->isDoingSteppedGravity())
-        return SUCCESS;
     if(this->cursor->isVisible())
     {
         UpdateState r = this->cursor->update(ch);

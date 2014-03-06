@@ -23,6 +23,16 @@ Window::~Window()
     handle = NULL;
 }
 
+void Window::applyShift(int &x, int &y)
+{
+    x += shift_x;
+    y += shift_y;
+}
+bool Window::contains(int x, int y)
+{
+    return (x < 1 || width - 2 < x) || (y < 1 || height - 2 < y);
+}
+
 void Window::clear()
 {
     if(handle == NULL)
@@ -44,23 +54,49 @@ bool Window::printAt(int x, int y, const char *str)
         return false;
     x++; //skip border
     y++; //again
-    if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
+    applyShift(x, y);
+    if(contains(x, y))
         return false;
-    mvwprintw(handle, y + shift_y, x + shift_x, str);
+    mvwprintw(handle, y, x, str);
     //this->refresh();
     return true;
 }
+bool Window::printAt_unshifted(int x, int y, const char *str)
+{
+    if(handle == NULL)
+        return false;
+    x++; //skip border
+    y++; //again
+    if(contains(x, y))
+        return false;
+    mvwprintw(handle, y, x, str);
+    //this->refresh();
+    return true;
+}
+void Window::setChar(int x, int y, chtype ch)
+{
+    if(handle == NULL)
+        return;
+    x++; //skip border
+    y++; //again
+    applyShift(x, y);
+    if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
+        return;
+    mvwaddch(handle, y, x, ch);
+}
+
 bool Window::readAt(int x, int y, const char *str)
 {
     if(handle == NULL)
         return false;
     x++; //skip border
     y++; //again
-    if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
+    applyShift(x, y);
+    if(contains(x, y))
         return false;
     curs_set(1);
     echo();
-    int r = mvwscanw(handle, y + shift_y, x + shift_x, "%s", str);
+    int r = mvwscanw(handle, y, x, "%s", str);
     noecho();
     curs_set(0);
     return r;
@@ -71,15 +107,17 @@ bool Window::readAnyAt(int x, int y, const char *format, const void *str)
         return false;
     x++; //skip border
     y++; //again
-    if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
+    applyShift(x, y);
+    if(contains(x, y))
         return false;
     curs_set(1);
     echo();
-    int r = mvwscanw(handle, y + shift_y, x + shift_x, format, str);
+    int r = mvwscanw(handle, y, x, format, str);
     noecho();
     curs_set(0);
     return r;
 }
+
 bool Window::append(const char *c)
 {
     if(handle == NULL)
@@ -133,18 +171,6 @@ void Window::AttribResetOn()
     if(handle == NULL)
         return;
     wstandout(handle);
-}
-
-
-void Window::setChar(int x, int y, chtype ch)
-{
-    if(handle == NULL)
-        return;
-    x++; //skip border
-    y++; //again
-    if((x < 1 || width - 2 < x) || (y < 1 || height - 2 < y))
-        return;
-    mvwaddch(handle, y + shift_y, x + shift_x, ch);
 }
 
 

@@ -33,12 +33,6 @@ Grid::~Grid()
     delete this->tokenAnimator;
 }
 
-
-bool Grid::isDoingSteppedGravity()
-{
-    return doingSteppedGravity;
-}
-
 void Grid::redrawAll()
 {
 
@@ -49,8 +43,27 @@ void Grid::redrawAll()
     clearGridArea();
     drawBaseGrid();
     drawTokens();
+    drawRuler();
 
     win->refresh();
+}
+
+void Grid::drawRuler()
+{
+    Window *win = getWindow();
+    int inc = 0;
+    char s[10];
+    for(int i = 1 + getShiftX() * -1; i <= getWidth(); i++)
+    {
+        sprintf(s, "%d", (int)(i));
+        win->printAt_unshifted(++inc * CELL_WIDTH, 0, s);
+    }
+    inc = 0;
+    for(int j = 1 + getShiftY() * -1; j <= getHeight(); j++)
+    {
+        sprintf(s, "%d", (int)(j));
+        win->printAt_unshifted(0, ++inc * CELL_HEIGHT, s);
+    }
 }
 
 void Grid::drawBaseGrid()
@@ -58,25 +71,24 @@ void Grid::drawBaseGrid()
     Window *win = getWindow();
     //win->AttribResetOff();
     chtype drawChar = 0;
-    char s[10];
 
-    int h_max = getHeight() * CELL_HEIGHT;
-    int w_max = getWidth() * CELL_WIDTH;
+    int w_max = getWidth() * CELL_WIDTH ;
+    int h_max = getHeight() * CELL_HEIGHT ;
 
-    for(int i = 0; i <= w_max; i++)
+    for(int i = getShiftX() * -1; i <= w_max; i++)
     {
-        if(i % CELL_WIDTH == 0 && i != 0)
+        /*if(i % CELL_WIDTH == 0 && i != 0)
         {
             sprintf(s, "%d", (int)(i / CELL_WIDTH));
             win->printAt(i, 0, s);
-        }
-        for(int j = 0; j <= h_max; j++)
+        }*/
+        for(int j = getShiftY() * -1; j <= h_max; j++)
         {
-            if(j % CELL_HEIGHT == 0 && j != 0)
+            /*if(j % CELL_HEIGHT == 0 && j != 0)
             {
                 sprintf(s, "%d", (int)(j / CELL_HEIGHT));
                 win->printAt(0, j, s);
-            }
+            }*/
             if(i == 0 && j == 0)
                 drawChar = ACS_ULCORNER;
             else if(i == 0 && j == h_max)
@@ -144,9 +156,9 @@ void Grid::drawTokens()
     s[0] = ' ';
     s[2] = ' ';
     s[3] = '\0';
-    for(int i = 0; i < getWidth(); i++)
+    for(int i = getShiftX() * -1; i < getWidth(); i++)
     {
-        for(int j = 0; j < getHeight(); j++)
+        for(int j = getShiftY() * -1; j < getHeight(); j++)
         {
             val = getGridAt(i, j);
             if(val > 0)
@@ -167,17 +179,14 @@ void Grid::drawTokens()
 
 void Grid::init()
 {
-    setShiftY(-5);
-
-    doingSteppedGravity = false;
     this->last_x = this->last_y = -1;
     currentRotationValue = 0;
-    steppedGravityValue = -1;
 
     Window *win = getWindow();
     if(win == NULL)
         return;
     drawBaseGrid();
+    drawRuler();
     win->refresh();
 
 }
@@ -208,44 +217,6 @@ void Grid::render()
     r[2] += currentRotationValue;
     win->printAt(win->getWidth() - 10, 0, r);*/
     win->refresh();
-}
-
-void Grid::doGravity()
-{
-    for(int x = 0; x < this->getWidth(); x++)
-    {
-        for(int y = this->getHeight() - 1; y >= 0; y--)
-        {
-            y = doGravityForCell(x, y);
-        }
-    }
-}
-
-int Grid::doGravityForCell(int x, int y)
-{
-    if(getGridAt(x, y) == 0)
-    {
-        int token_val = getGridAt(x, y - 1);
-        if(token_val > 0)
-        {
-            forceSetGridAt(x, y - 1, 0);
-            setGridAt(x, y, token_val);
-            y = y + 2;
-        }
-    }
-    return y;
-}
-
-void Grid::updateSteppedGravity()
-{
-    for(int x = 0; x < this->getWidth(); x++)
-    {
-        for(int y = this->getHeight() - 1; y >= 0; y--)
-        {
-            doGravityForCell(x, y);
-        }
-    }
-    steppedGravityValue++;
 }
 
 void Grid::convertCoords(int &x, int &y)
@@ -364,13 +335,7 @@ void Grid::rotate(EntityTurnAction r)
     else if(currentRotationValue < 0)
         currentRotationValue = 3;
 
-    Window *win = getWindow();
-    if(win == NULL)
-        return;
-    clearGridArea();
-    drawBaseGrid();
-    drawTokens();
-    win->refresh();
+    redrawAll();
 
     this->tokenAnimator->setModifier(2.0);
     this->gravityProvider->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
@@ -418,12 +383,20 @@ int Grid::getShiftY()
 
 void Grid::setShiftX(int x)
 {
+    if(x > 0)
+        return;
+    if(x + getWidth() <= 0)
+        return;
     getWindow()->setShiftX(x * CELL_WIDTH);
     redrawAll();
 }
 
 void Grid::setShiftY(int y)
 {
+    if(y > 0)
+        return;
+    if(y + getHeight() <= 0)
+        return;
     getWindow()->setShiftY(y * CELL_HEIGHT);
     redrawAll();
 }
