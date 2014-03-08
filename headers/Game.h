@@ -12,14 +12,12 @@ class Game : public BaseGame
 {
     Grid *grid;
     WindowManager *manager;
+    GameSettings *gameSettings;
 
     int playTurnIndex;
 
     Entity **players;
     int currentPlayer;
-    int numberOfPlayers;
-
-    int initGridW, initGridH;
 
     bool interrupted;
 
@@ -42,7 +40,7 @@ public:
     WindowManager *getWindowManager();
     Entity *getCurrentPlayer();
     BaseGrid *getBaseGrid();
-    int getNumberOfPlayers();
+    GameSettings *getGameSettings();
 
     void invokeEntityTurn(int);
 

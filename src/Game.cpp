@@ -12,8 +12,9 @@ Game::Game()
 {
 
     this->manager = new WindowManager();
+    this->gameSettings = new GameSettings();
+
     this->players = NULL;
-    //this->playTurns = new std::list<const char *>();
     playTurnIndex = 0;
     currentPlayer = 0;
 }
@@ -22,9 +23,7 @@ Game::~Game()
     if(this->players != NULL)
         delete [] this->players;
 
-    //delete this->playTurns;
-
-
+    delete this->gameSettings;
     delete this->manager;
 }
 
@@ -41,9 +40,9 @@ BaseGrid *Game::getBaseGrid()
 {
     return this->grid;
 }
-int Game::getNumberOfPlayers()
+GameSettings *Game::getGameSettings()
 {
-    return 2;
+    return this->gameSettings;
 }
 
 
@@ -62,10 +61,10 @@ void Game::loop()
 
 void Game::init()
 {
-    this->grid = new Grid(this->manager, WIN_GAME_GRID, initGridW, initGridH);
-    this->players = new Entity*[numberOfPlayers];
+    this->grid = new Grid(this->manager, WIN_GAME_GRID, getGameSettings());
+    this->players = new Entity*[getGameSettings()->getNumPlayers()];
 
-    for(int i = 0; i < numberOfPlayers; ++i)
+    for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
         this->players[i] = new Humain(this, i + 1);
 
     this->grid->init();
@@ -74,7 +73,7 @@ void Game::init()
 }
 void Game::deinit()
 {
-    for(int i = 0; i < numberOfPlayers; ++i)
+    for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
         delete this->players[i];
 
     delete this->grid;
@@ -96,30 +95,8 @@ void Game::update()
     if(ch == KEY_F(12))
         interrupted = true;
 
-    switch(ch)
-    {
-    case 'o':
-        getBaseGrid()->setShiftY(getBaseGrid()->getShiftY() - 1);
-        break;
-    case 'l':
-        getBaseGrid()->setShiftY(getBaseGrid()->getShiftY() + 1);
-        break;
-    case 'k':
-        getBaseGrid()->setShiftX(getBaseGrid()->getShiftX() - 1);
-        break;
-    case 'm':
-        getBaseGrid()->setShiftX(getBaseGrid()->getShiftX() + 1);
-        break;
-    case 'i':
-        getBaseGrid()->setShiftX(0);
-        getBaseGrid()->setShiftY(0);
-    default:
-        getCurrentPlayer()->update(ch);
-    }
-
-
-
-    // this->grid->update(ch);
+    this->grid->update(ch);
+    getCurrentPlayer()->update(ch);
 }
 
 void Game::render()
@@ -176,7 +153,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     if(valid)
     {
         appendToPlayTurns(oss.str().c_str());
-        invokeEntityTurn(++currentPlayer % numberOfPlayers);
+        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
     }
     return valid;
 
@@ -219,46 +196,47 @@ void Game::appendToPlayTurns(const char *s)
 void Game::start()
 {
     this->manager->initialize("JeuDeNim v0.1");
+    getGameSettings()->commit();
+    /*
+        Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
+        if(win == NULL)
+            return;
 
-    Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
-    if(win == NULL)
-        return;
+        int maxSize = fmin((int)((COLS - 5 - 12) / 4), (int)((LINES - 4 - 6) / 2));
+        win->printAt(0, 0, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
+        win->printAt(0, 1, "une grille de taille");
 
-    int maxSize = fmin((int)((COLS - 5 - 12) / 4), (int)((LINES - 4 - 6) / 2));
-    win->printAt(0, 0, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
-    win->printAt(0, 1, "une grille de taille");
+        win->AttribOn(COLOR_PAIR(30));
+        getWindowManager()->printInt(WIN_GAME_GRID, 21, 1, maxSize);
+        win->AttribOff(COLOR_PAIR(30));
+        win->printAt(0, 2, "Vous pouvez utiliser une grille plus grande, mais l'affichage");
+        win->printAt(0, 3, "souffre de quelques problèmes pour les grandes grilles...");
 
-    win->AttribOn(COLOR_PAIR(30));
-    getWindowManager()->printInt(WIN_GAME_GRID, 21, 1, maxSize);
-    win->AttribOff(COLOR_PAIR(30));
-    win->printAt(0, 2, "Vous pouvez utiliser une grille plus grande, mais l'affichage");
-    win->printAt(0, 3, "souffre de quelques problèmes pour les grandes grilles...");
+        win->printAt(0, 5, "Entrez la largeur de la grille: ");
+        win->refresh();
+        do
+        {
+            win->readAnyAt(31, 5, "%d", &initGridW);
+        }
+        while(initGridW < 2);
+        win->printAt(0, 6, "Entrez la hauteur de la grille: ");
+        win->refresh();
+        do
+        {
+            win->readAnyAt(31, 6, "%d", &initGridH);
+        }
+        while(initGridH < 2);
 
-    win->printAt(0, 5, "Entrez la largeur de la grille: ");
-    win->refresh();
-    do
-    {
-        win->readAnyAt(31, 5, "%d", &initGridW);
-    }
-    while(initGridW < 2/* || initGridW > maxSize*/);
-    win->printAt(0, 6, "Entrez la hauteur de la grille: ");
-    win->refresh();
-    do
-    {
-        win->readAnyAt(31, 6, "%d", &initGridH);
-    }
-    while(initGridH < 2/* || initGridH > maxSize*/);
+        win->printAt(0, 8, "Entrez le nombre de joueurs (2-4): ");
+        win->refresh();
+        do
+        {
+            win->readAnyAt(35, 8, "%d", &getGameSettings()->getNumPlayers());
+        }
+        while(getGameSettings()->getNumPlayers() < 2 || getGameSettings()->getNumPlayers() > 4);
 
-    win->printAt(0, 8, "Entrez le nombre de joueurs (2-4): ");
-    win->refresh();
-    do
-    {
-        win->readAnyAt(35, 8, "%d", &numberOfPlayers);
-    }
-    while(numberOfPlayers < 2 || numberOfPlayers > 4);
-
-
-    win->clear();
+        win->clear();
+    */
     interrupted = false;
     loop();
 }

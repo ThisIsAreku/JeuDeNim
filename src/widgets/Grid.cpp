@@ -1,30 +1,33 @@
 #include <thread>
 #include "widgets/Grid.h"
 
-Grid::Grid(WindowManager *manager, int winId, int width, int height) : Renderable(manager, winId)
+Grid::Grid(WindowManager *manager, int winId, GameSettings *gameSettings) : Renderable(manager, winId)
 {
-    this->width = width;
-    this->height = height;
-    this->totalCells = width * height;
+    this->gameSettings = gameSettings;
+    this->currentRotationValue  = 0;
     this->filledCells = 0;
-    this->matrice = new int*[width];
-    for (int i = 0; i < width; ++i)
+    this->shiftEnabled = false;
+
+    this->totalCells = getWidth() * getHeight();
+    this->matrice = new int*[getWidth()];
+    for (int i = 0; i < getWidth(); ++i)
     {
-        this->matrice[i] = new int[height];
-        for (int j = 0; j < height; ++j)
+        this->matrice[i] = new int[getHeight()];
+        for (int j = 0; j < getHeight(); ++j)
         {
             this->matrice[i][j] = 0;
         }
     }
-    currentRotationValue  = 0;
+
     this->gravityProvider = new GravityProvider(this);
     this->tokenAnimator = new TokenAnimator(manager, winId, this);
+
 }
 
 Grid::~Grid()
 {
     clearGridArea();
-    for (int i = 0; i < this->width; ++i)
+    for (int i = 0; i < getWidth(); ++i)
     {
         delete [] this->matrice[i];
     }
@@ -185,25 +188,37 @@ void Grid::init()
     Window *win = getWindow();
     if(win == NULL)
         return;
+
+
+    this->shiftEnabled = (getWidth() > win->getWidth() || getHeight() > win->getHeight());
+
     drawBaseGrid();
     drawRuler();
     win->refresh();
 
 }
-UpdateState Grid::update(chtype)
+UpdateState Grid::update(chtype ch)
 {
-    /*if(steppedGravityValue != -1 && steppedGravityValue < getHeight())
+    if(!this->shiftEnabled)
+        return FAILURE;
+    switch(ch)
     {
-        ungetch(0);
-        updateSteppedGravity();
-        std::this_thread::sleep_for (std::chrono::milliseconds(50));
-        return OVERRIDE;
+    case 'o':
+        setShiftY(getShiftY() - 1);
+        break;
+    case 'l':
+        setShiftY(getShiftY() + 1);
+        break;
+    case 'k':
+        setShiftX(getShiftX() - 1);
+        break;
+    case 'm':
+        setShiftX(getShiftX() + 1);
+        break;
+    case 'i':
+        setShiftX(0);
+        setShiftY(0);
     }
-    else
-    {
-        steppedGravityValue = -1;
-    }*/
-    //doGravity();
     return SUCCESS;
 }
 void Grid::render()
@@ -229,14 +244,14 @@ void Grid::convertCoords(int &x, int &y)
         return;
     case 1:
         x2 = y;
-        y2 = height - 1 - x;
+        y2 = gameSettings->getBoardHeight() - 1 - x;
         break;
     case 2:
-        x2 = width - 1 - x;
-        y2 = height - 1 - y;
+        x2 = gameSettings->getBoardWidth() - 1 - x;
+        y2 = gameSettings->getBoardHeight() - 1 - y;
         break;
     case 3:
-        x2 = width - 1 - y;
+        x2 = gameSettings->getBoardWidth() - 1 - y;
         y2 = x;
         break;
     }
@@ -247,9 +262,15 @@ void Grid::convertCoords(int &x, int &y)
 
 int Grid::getGridAt(int x, int y)
 {
-    convertCoords(x, y);
-    if((0 <= x && x < width) && (0 <= y && y < height))
+    if((0 <= x && x < getWidth()) && (0 <= y && y < getHeight()))
+    {
+        convertCoords(x, y);
         return this->matrice[x][y];
+    }
+    else
+    {
+        std::cerr << "getGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
+    }
     return -1;
 }
 
@@ -257,11 +278,15 @@ bool Grid::setGridAt(int x, int y, int v)
 {
     this->last_x = x;
     this->last_y = y;
-    convertCoords(x, y);
-    if((0 <= x && x < width) && (0 <= y && y < height) && (this->matrice[x][y] == 0))
+    if(getGridAt(x, y) == 0)
     {
+        convertCoords(x, y);
         this->matrice[x][y] = v;
         return true;
+    }
+    else
+    {
+        std::cerr << "setGridAt: [" << x << "," << y << "] cell is not empty" << std::endl;
     }
     this->last_x = this->last_y = -1;
     return false;
@@ -271,11 +296,15 @@ bool Grid::forceSetGridAt(int x, int y, int v)
 {
     this->last_x = x;
     this->last_y = y;
-    convertCoords(x, y);
-    if((0 <= x && x < width) && (0 <= y && y < height))
+    if((0 <= x && x < getWidth()) && (0 <= y && y < getHeight()))
     {
+        convertCoords(x, y);
         this->matrice[x][y] = v;
         return true;
+    }
+    else
+    {
+        std::cerr << "forceSetGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
     }
     this->last_x = this->last_y = -1;
     return false;
@@ -314,14 +343,13 @@ bool Grid::removeToken(int x, int y)
 
 void Grid::moveToken(int src_x, int src_y, int dst_x, int dst_y)
 {
-    setGridAt(dst_x, dst_y, getGridAt(src_x, src_y));
-    forceSetGridAt(src_x, src_y, 0);
+    if(setGridAt(dst_x, dst_y, getGridAt(src_x, src_y)))
+        forceSetGridAt(src_x, src_y, 0);
 }
 
 
 void Grid::rotate(EntityTurnAction r)
 {
-
     if(r == ROTATE_CLOCKWISE)
     {
         currentRotationValue++;
@@ -352,14 +380,14 @@ void Grid::rotate(EntityTurnAction r)
 int Grid::getWidth()
 {
     if(currentRotationValue == 1 || currentRotationValue == 3)
-        return this->height;
-    return this->width;
+        return gameSettings->getBoardHeight();
+    return gameSettings->getBoardWidth();
 }
 int Grid::getHeight()
 {
     if(currentRotationValue == 1 || currentRotationValue == 3)
-        return this->width;
-    return this->height;
+        return gameSettings->getBoardWidth();
+    return gameSettings->getBoardHeight();
 }
 
 bool Grid::isEmpty()

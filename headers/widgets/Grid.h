@@ -9,11 +9,12 @@
 
 class Grid :  public BaseGrid, public Renderable
 {
-    int width;
-    int height;
+    GameSettings *gameSettings;
 
     int totalCells;
     int filledCells;
+
+    bool shiftEnabled;
 
     int last_x;
     int last_y;
@@ -37,7 +38,7 @@ class Grid :  public BaseGrid, public Renderable
     void redrawAll();
 
 public:
-    Grid(WindowManager *, int, int, int);
+    Grid(WindowManager *, int, GameSettings *);
     virtual ~Grid();
 
     int getGridAt(int, int);

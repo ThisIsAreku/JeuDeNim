@@ -10,7 +10,7 @@ class GravityProvider
 public:
     GravityProvider(BaseGrid *);
     void doGravity(std::function<void(int, int, int, int)>);
-    int findNewTokenY(int, int);
+    int findNewTokenY(int, int, int);
     int findFirstEmptyCell(int);
 
     void doColumnGravity(int, std::function<void(int, int, int, int)>);
