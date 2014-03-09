@@ -1,9 +1,12 @@
 #include <thread>
 #include "widgets/Grid.h"
+#include "providers/GravityProvider.h"
 
-Grid::Grid(WindowManager *manager, int winId, GameSettings *gameSettings) : Renderable(manager, winId)
+#include "WinnerChecker.h"
+
+Grid::Grid(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(manager, winId)
 {
-    this->gameSettings = gameSettings;
+    this->baseGame = baseGame;
     this->currentRotationValue  = 0;
     this->filledCells = 0;
     this->shiftEnabled = false;
@@ -19,7 +22,6 @@ Grid::Grid(WindowManager *manager, int winId, GameSettings *gameSettings) : Rend
         }
     }
 
-    this->gravityProvider = new GravityProvider(this);
     this->tokenAnimator = new TokenAnimator(manager, winId, this);
 
 }
@@ -32,7 +34,6 @@ Grid::~Grid()
         delete [] this->matrice[i];
     }
     delete [] this->matrice;
-    delete this->gravityProvider;
     delete this->tokenAnimator;
 }
 
@@ -244,14 +245,14 @@ void Grid::convertCoords(int &x, int &y)
         return;
     case 1:
         x2 = y;
-        y2 = gameSettings->getBoardHeight() - 1 - x;
+        y2 = this->baseGame->getGameSettings()->getBoardHeight() - 1 - x;
         break;
     case 2:
-        x2 = gameSettings->getBoardWidth() - 1 - x;
-        y2 = gameSettings->getBoardHeight() - 1 - y;
+        x2 = this->baseGame->getGameSettings()->getBoardWidth() - 1 - x;
+        y2 = this->baseGame->getGameSettings()->getBoardHeight() - 1 - y;
         break;
     case 3:
-        x2 = gameSettings->getBoardWidth() - 1 - y;
+        x2 = this->baseGame->getGameSettings()->getBoardWidth() - 1 - y;
         y2 = x;
         break;
     }
@@ -312,12 +313,13 @@ bool Grid::forceSetGridAt(int x, int y, int v)
 
 bool Grid::placeToken(int player, int col)
 {
-    int y = this->gravityProvider->findFirstEmptyCell(col);
+    int y = this->baseGame->getGravityProvider()->findFirstEmptyCell(col);
     if(y > -1)
     {
+        this->filledCells++;
         setGridAt(col, y, player);
         this->tokenAnimator->animateToken(player, col, 0, y);
-        this->filledCells++;
+        this->baseGame->getWinnerChecker()->onPlaceToken(col, y);
         return true;
     }
     return false;
@@ -327,14 +329,12 @@ bool Grid::removeToken(int x, int y)
 {
     if(getGridAt(x, y) > 0)
     {
-        forceSetGridAt(x, y, 0);
-        this->gravityProvider->doColumnGravity(x, std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
-                                               std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-        //steppedGravityValue = 0;
-        //ungetch(0);
-        /* doGravity();
-         drawTokens();*/
         this->filledCells--;
+        forceSetGridAt(x, y, 0);
+        this->baseGame->getGravityProvider()->doColumnGravity(x, std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+        this->baseGame->getWinnerChecker()->onRemoveToken(x, y);
         return true;
     }
     //
@@ -366,28 +366,26 @@ void Grid::rotate(EntityTurnAction r)
     redrawAll();
 
     this->tokenAnimator->setModifier(2.0);
-    this->gravityProvider->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
-                                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    this->baseGame->getGravityProvider()->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     this->tokenAnimator->setModifier(1.0);
 
-    /*steppedGravityValue = 0;
-    ungetch(0);*/
-    /*doGravity();*/
-    //win->refresh();
+
+    this->baseGame->getWinnerChecker()->onRotate();
 }
 
 
 int Grid::getWidth()
 {
     if(currentRotationValue == 1 || currentRotationValue == 3)
-        return gameSettings->getBoardHeight();
-    return gameSettings->getBoardWidth();
+        return this->baseGame->getGameSettings()->getBoardHeight();
+    return this->baseGame->getGameSettings()->getBoardWidth();
 }
 int Grid::getHeight()
 {
     if(currentRotationValue == 1 || currentRotationValue == 3)
-        return gameSettings->getBoardWidth();
-    return gameSettings->getBoardHeight();
+        return this->baseGame->getGameSettings()->getBoardWidth();
+    return this->baseGame->getGameSettings()->getBoardHeight();
 }
 
 bool Grid::isEmpty()

@@ -55,8 +55,8 @@ void WindowManager::initWindows()
     int lines = LINES - 6;
 
     createWindow(WIN_GAME_GRID,     6 * cols,   lines,  0,              1);
-    createWindow(WIN_GAME_TURN,    2 * cols,       lines,  6 * cols + 1,   1);
-    createWindow(WIN_SCOREBOARD,     COLS,   5,      0,              lines + 1);
+    createWindow(WIN_SCOREBOARD,    2 * cols,       lines,  6 * cols + 1,   1);
+    createWindow(WIN_GAME_TURN,     COLS,   5,      0,              lines + 1);
 }
 void WindowManager::initNcurses()
 {
@@ -257,7 +257,6 @@ void WindowManager::refreshWindow(int winId)
         return;
     getWindow(winId)->refresh();
 }
-
 
 void WindowManager::leaveCurseMode()
 {

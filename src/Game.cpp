@@ -7,16 +7,17 @@
 
 #include "widgets/CellCursor.h"
 #include "entities/Humain.h"
+#include "providers/DefaultGravityProvider.h"
 
 Game::Game()
 {
-
     this->manager = new WindowManager();
     this->gameSettings = new GameSettings();
 
     this->players = NULL;
     playTurnIndex = 0;
     currentPlayer = 0;
+    game_end = false;
 }
 Game::~Game()
 {
@@ -44,24 +45,48 @@ GameSettings *Game::getGameSettings()
 {
     return this->gameSettings;
 }
+GravityProvider *Game::getGravityProvider()
+{
+    return this->gravityProvider;
+}
+WinnerChecker *Game::getWinnerChecker()
+{
+    return this->winnerChecker;
+}
 
 
 void Game::loop()
 {
     init();
     render();
-    while(!interrupted)
+    while(!interrupted && !game_end)
     {
         update();
 
         render();
     }
     deinit();
+
+    if(!interrupted)
+    {
+        Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
+        if(win == NULL)
+            return;
+
+        win->printAt_unshifted(0, 5, "Partie terminée");
+        win->printAt_unshifted(0, 6, "Appuyez sur une touche pour quitter");
+        win->refresh();
+        getch();
+    }
+
 }
 
 void Game::init()
 {
-    this->grid = new Grid(this->manager, WIN_GAME_GRID, getGameSettings());
+    this->grid = new Grid(this->manager, WIN_GAME_GRID, this);
+    this->gravityProvider = new DefaultGravityProvider(this->grid);
+    this->winnerChecker = new WinnerChecker(this);
+
     this->players = new Entity*[getGameSettings()->getNumPlayers()];
 
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
@@ -77,20 +102,18 @@ void Game::deinit()
         delete this->players[i];
 
     delete this->grid;
+    delete this->gravityProvider;
+    delete this->winnerChecker;
 }
 
 void Game::update()
 {
-    timeout(1000);
     chtype ch = getch();
+
+    logKeyboard(ch);
+
     if((int)ch == -1)
         return;
-
-    getWindowManager()->appendInt(WIN_GAME_TURN, ch);
-    getWindowManager()->append(WIN_GAME_TURN, " ");
-    getWindowManager()->append(WIN_GAME_TURN, ch);
-    getWindowManager()->append(WIN_GAME_TURN, " - ");
-    getWindowManager()->refreshWindow(WIN_GAME_TURN);
 
     if(ch == KEY_F(12))
         interrupted = true;
@@ -109,6 +132,7 @@ void Game::render()
 
 void Game::invokeEntityTurn(int n)
 {
+    std::cerr << "Game: currentPlayer = " << n << std::endl;
     currentPlayer = n;
     getCurrentPlayer()->turn();
 }
@@ -117,13 +141,14 @@ void Game::invokeEntityTurn(int n)
 bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
 {
     std::ostringstream oss;
+    oss << "[" << currentPlayer + 1 << "] ";
     bool valid = true;
     if(action == TOKEN_PLACE)
     {
         valid = getBaseGrid()->placeToken(currentPlayer + 1, x);
         if(valid)
         {
-            oss << "Joueur " << currentPlayer + 1 << " a joué dans la colonne " << x;
+            oss << "++ @ " << x;
         }
     }
     else if(action == TOKEN_REMOVE)
@@ -131,29 +156,36 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         valid = getBaseGrid()->removeToken(x, y);
         if(valid)
         {
-            oss << "Joueur " << currentPlayer + 1 << " a supprimé un jeton (" << x << "," << y << ")";
+            oss << "-- @ " << x << "," << y;
         }
-        //this->grid->doGravity();
     }
     else
     {
-
-        oss << "Joueur " << currentPlayer + 1 << " a retourné le plateau vers la ";
+        oss << "R @ ";
         if(action == ROTATE_CLOCKWISE)
         {
-            oss << "droite";
+            oss << "Left";
         }
         else
         {
-            oss << "gauche";
+            oss << "Right";
         }
         getBaseGrid()->rotate(action);
-        //this->grid->doGravity();
     }
     if(valid)
     {
         appendToPlayTurns(oss.str().c_str());
-        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
+        if(getWinnerChecker()->getWinnerId() != -1)
+        {
+            oss.str("");
+            currentPlayer = getWinnerChecker()->getWinnerId();
+            oss << "[" << currentPlayer + 1 << "] WIN !";
+            appendToPlayTurns(oss.str().c_str());
+            std::cerr << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
+            game_end = true;
+        }
+        else
+            invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
     }
     return valid;
 
@@ -188,6 +220,44 @@ void Game::appendToPlayTurns(const char *s)
     win->printAt(2, playTurnIndex++, s);
     win->AttribOff(COLOR_PAIR(currentPlayer + 9));
     win->refresh();
+}
+
+void Game::logKeyboard(chtype ch)
+{
+
+    std::cerr << ch << " :: ";
+    unsigned long longVal = static_cast<unsigned long>(ch);
+
+    if(265 <= longVal && longVal <= 276)
+    {
+        std::cerr << "[F" << (longVal - 264) << "]";
+    }
+    else
+        switch(longVal)
+        {
+        case 32:
+            std::cerr << "[SPACE]";
+            break;
+        case 10:
+            std::cerr << "[ENTER]";
+            break;
+
+        case 258:
+            std::cerr << "[DOWN]";
+            break;
+        case 259:
+            std::cerr << "[UP]";
+            break;
+        case 260:
+            std::cerr << "[LEFT]";
+            break;
+        case 261:
+            std::cerr << "[RIGHT]";
+            break;
+        default:
+            std::cerr << static_cast<char>(ch & A_CHARTEXT);
+        }
+    std::cerr << std::endl;
 }
 
 /***********/

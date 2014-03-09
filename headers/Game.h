@@ -13,6 +13,8 @@ class Game : public BaseGame
     Grid *grid;
     WindowManager *manager;
     GameSettings *gameSettings;
+    GravityProvider *gravityProvider;
+    WinnerChecker *winnerChecker;
 
     int playTurnIndex;
 
@@ -20,6 +22,7 @@ class Game : public BaseGame
     int currentPlayer;
 
     bool interrupted;
+    bool game_end;
 
     void loop();
 
@@ -29,6 +32,7 @@ class Game : public BaseGame
     void deinit();
 
     void appendToPlayTurns(const char *);
+    void logKeyboard(chtype);
 
 public:
     Game();
@@ -41,8 +45,12 @@ public:
     Entity *getCurrentPlayer();
     BaseGrid *getBaseGrid();
     GameSettings *getGameSettings();
+    GravityProvider *getGravityProvider();
+    WinnerChecker *getWinnerChecker();
 
     void invokeEntityTurn(int);
+
+    void playerWin();
 
 
     bool onEntityTurnCompleted(EntityTurnAction, int, int);

@@ -18,6 +18,7 @@ Humain::~Humain()
 
 int Humain::turn()
 {
+    std::cerr << "Entity-Humain: turn (nothing to do)" << std::endl;
     //this->cursor->setCursorPosition(0, 0);
     //this->cursor->setVisible(!getBaseGame()->getBaseGrid()->isDoingSteppedGravity());
     return 0;

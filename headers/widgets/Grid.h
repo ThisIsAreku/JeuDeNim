@@ -4,12 +4,13 @@
 #include "BaseGrid.h"
 #include "display/Renderable.h"
 
-#include "GravityProvider.h"
-#include "TokenAnimator.h"
+
+#include "widgets/TokenAnimator.h"
 
 class Grid :  public BaseGrid, public Renderable
 {
-    GameSettings *gameSettings;
+
+    BaseGame *baseGame;
 
     int totalCells;
     int filledCells;
@@ -23,7 +24,6 @@ class Grid :  public BaseGrid, public Renderable
 
     int currentRotationValue;
 
-    GravityProvider *gravityProvider;
     TokenAnimator *tokenAnimator;
 
     void convertCoords(int &, int &);
@@ -38,7 +38,7 @@ class Grid :  public BaseGrid, public Renderable
     void redrawAll();
 
 public:
-    Grid(WindowManager *, int, GameSettings *);
+    Grid(WindowManager *, int, BaseGame *);
     virtual ~Grid();
 
     int getGridAt(int, int);
