@@ -51,11 +51,16 @@ void WindowManager::initWindows()
     if(releasing || !initialized)
         return;
 
-    double cols = (COLS / 8.);
+    double cols = (double)(COLS / 8.);
     int lines = LINES - 6;
+    int w_2 = (6 * cols + 1);
+    if(w_2 > cols)
+        w_2--;
+
+    std::cerr << cols << ", " << lines << " (" << w_2 << ")" << std::endl;
 
     createWindow(WIN_GAME_GRID,     6 * cols,   lines,  0,              1);
-    createWindow(WIN_SCOREBOARD,    2 * cols,       lines,  6 * cols + 1,   1);
+    createWindow(WIN_SCOREBOARD,    2 * cols,       lines,  w_2,   1);
     createWindow(WIN_GAME_TURN,     COLS,   5,      0,              lines + 1);
 }
 void WindowManager::initNcurses()
