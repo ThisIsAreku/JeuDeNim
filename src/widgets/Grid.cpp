@@ -191,8 +191,9 @@ void Grid::init()
         return;
 
 
-    this->shiftEnabled = (getWidth() > win->getWidth() || getHeight() > win->getHeight());
+    //this->shiftEnabled = (getWidth() > (win->getWidth() - 2) || getHeight() > (win->getHeight() - 2));
 
+    this->shiftEnabled = true;
     drawBaseGrid();
     drawRuler();
     win->refresh();
@@ -409,9 +410,10 @@ int Grid::getShiftY()
 
 void Grid::setShiftX(int x)
 {
+    std::cerr << (x + getWidth()) * CELL_WIDTH << " <= " << getWindow()->getWidth() - 3 * CELL_WIDTH << std::endl;
     if(x > 0)
         return;
-    if(x + getWidth() <= 0)
+    if((x + getWidth()) * CELL_WIDTH <= getWindow()->getWidth() - 3 * CELL_WIDTH)
         return;
     getWindow()->setShiftX(x * CELL_WIDTH);
     redrawAll();
@@ -419,9 +421,10 @@ void Grid::setShiftX(int x)
 
 void Grid::setShiftY(int y)
 {
+    std::cerr << (y + getHeight()) * CELL_HEIGHT << " <= " << getWindow()->getHeight() - 3 * CELL_HEIGHT << std::endl;
     if(y > 0)
         return;
-    if(y + getHeight() <= 0)
+    if((y + getHeight()) * CELL_HEIGHT <= getWindow()->getHeight() - 3 * CELL_HEIGHT)
         return;
     getWindow()->setShiftY(y * CELL_HEIGHT);
     redrawAll();

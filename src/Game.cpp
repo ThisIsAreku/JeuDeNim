@@ -266,7 +266,7 @@ void Game::logKeyboard(chtype ch)
 void Game::start()
 {
     this->manager->initialize("JeuDeNim v0.1");
-    getGameSettings()->commit();
+    getGameSettings()->setBoardWidth(35)->setBoardHeight(24)->commit();
     /*
         Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
         if(win == NULL)
