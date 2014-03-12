@@ -1,12 +1,11 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <algorithm>
 
 #include "Game.h"
 
 #include "widgets/CellCursor.h"
-#include "entities/Humain.h"
+#include "entities/Random.h"
 #include "providers/DefaultGravityProvider.h"
 
 Game::Game()
@@ -69,14 +68,14 @@ void Game::loop()
 
     if(!interrupted)
     {
-        Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
+        Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
         if(win == NULL)
             return;
 
-        win->printAt_unshifted(0, 5, "Partie terminée");
-        win->printAt_unshifted(0, 6, "Appuyez sur une touche pour quitter");
+        win->printAt(0, 0, "Partie terminée");
+        win->printAt(0, 1, "Appuyez sur [ESPACE] pour quitter");
         win->refresh();
-        getch();
+        while(getch() != 32) { };
     }
 
 }
@@ -90,7 +89,7 @@ void Game::init()
     this->players = new Entity*[getGameSettings()->getNumPlayers()];
 
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
-        this->players[i] = new Humain(this, i + 1);
+        this->players[i] = new Random(this, i + 1);
 
     this->grid->init();
     getCurrentPlayer()->init();
@@ -108,15 +107,20 @@ void Game::deinit()
 
 void Game::update()
 {
+    if(getCurrentPlayer()->getEntityType() != ENTITY_HUMAIN)
+        timeout(50);
+    else
+        timeout(-1);
     chtype ch = getch();
-
     logKeyboard(ch);
 
-    if((int)ch == -1)
-        return;
+    if(getCurrentPlayer()->getEntityType() == ENTITY_HUMAIN)
+    {
+        if((int)ch == -1)
+            return;
+    }
 
-    if(ch == KEY_F(12))
-        interrupted = true;
+    doKeyboardActions(ch);
 
     this->grid->update(ch);
     getCurrentPlayer()->update(ch);
@@ -124,10 +128,26 @@ void Game::update()
 
 void Game::render()
 {
+    getWindowManager()->print(WIN_GAME_TURN, 0, 0, "Animations: ");
+    if(getGameSettings()->animate)
+        getWindowManager()->print(WIN_GAME_TURN, 12, 0, "ON");
+    else
+        getWindowManager()->print(WIN_GAME_TURN, 12, 0, "OFF");
+
+    getWindowManager()->refreshWindow(WIN_GAME_TURN);
+
     getCurrentPlayer()->render();
 
     this->grid->render();
 
+}
+
+void Game::doKeyboardActions(chtype ch)
+{
+    if(ch == KEY_F(12))
+        interrupted = true;
+    if(ch == KEY_F(9))
+        getGameSettings()->animate = !getGameSettings()->animate;
 }
 
 void Game::invokeEntityTurn(int n)
@@ -142,25 +162,21 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
 {
     std::ostringstream oss;
     oss << "[" << currentPlayer + 1 << "] ";
-    bool valid = true;
     if(action == TOKEN_PLACE)
     {
-        valid = getBaseGrid()->placeToken(currentPlayer + 1, x);
-        if(valid)
-        {
-            oss << "++ @ " << x;
-        }
+        if(!getBaseGrid()->placeToken(currentPlayer + 1, x))
+            return false;
+        oss << "++ @ " << x;
     }
     else if(action == TOKEN_REMOVE)
     {
-        valid = getBaseGrid()->removeToken(x, y);
-        if(valid)
-        {
-            oss << "-- @ " << x << "," << y;
-        }
+        if(!getBaseGrid()->removeToken(x, y))
+            return false;
+        oss << "-- @ " << x << "," << y;
     }
     else
     {
+        getBaseGrid()->rotate(action);
         oss << "R @ ";
         if(action == ROTATE_CLOCKWISE)
         {
@@ -170,24 +186,20 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         {
             oss << "Right";
         }
-        getBaseGrid()->rotate(action);
     }
-    if(valid)
+    appendToPlayTurns(oss.str().c_str());
+    if(getWinnerChecker()->getWinnerId() != -1)
     {
+        oss.str("");
+        currentPlayer = getWinnerChecker()->getWinnerId();
+        oss << "[" << currentPlayer + 1 << "] WIN !";
         appendToPlayTurns(oss.str().c_str());
-        if(getWinnerChecker()->getWinnerId() != -1)
-        {
-            oss.str("");
-            currentPlayer = getWinnerChecker()->getWinnerId();
-            oss << "[" << currentPlayer + 1 << "] WIN !";
-            appendToPlayTurns(oss.str().c_str());
-            std::cerr << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
-            game_end = true;
-        }
-        else
-            invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
+        std::cerr << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
+        game_end = true;
     }
-    return valid;
+    else
+        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
+    return true;
 
 }
 void Game::appendToPlayTurns(const char *s)
@@ -224,7 +236,8 @@ void Game::appendToPlayTurns(const char *s)
 
 void Game::logKeyboard(chtype ch)
 {
-
+    if((int)ch == -1)
+        return;
     std::cerr << ch << " :: ";
     unsigned long longVal = static_cast<unsigned long>(ch);
 
@@ -265,8 +278,14 @@ void Game::logKeyboard(chtype ch)
 /***********/
 void Game::start()
 {
+    if(COLS < 80 || LINES < 24)
+    {
+        this->manager->leaveCurseMode();
+        std::cout << "Non, là c'est vraiment trop petit !" << std::endl << "La taille compte un peu, quand même..." << std::endl;
+        exit(-1);
+    }
     this->manager->initialize("JeuDeNim v0.1");
-    int initGridW, initGridH, initNumPlayers;
+
     Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
     if(win == NULL)
         return;
@@ -275,50 +294,28 @@ void Game::start()
 
     int maxWidth = (int)(((6 * COLS / 8.) - 2 - 2) / CELL_WIDTH) - 1;
     int maxHeight = (int)(((LINES - 6) - 1 - 2) / CELL_HEIGHT) - 1;
+    int maxSize = maxWidth;
+    if(maxSize > maxHeight)
+        maxSize = maxHeight;
 
-    win->printAt(0, 0, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
-    win->printAt(0, 1, "une grille de taille");
+    int dispLine = -1;
+
+    win->printAt(0, ++dispLine, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
+    win->printAt(0, ++dispLine, "une grille de taille");
 
     win->AttribOn(COLOR_PAIR(30));
-    getWindowManager()->printInt(WIN_GAME_GRID, 21, 1, maxWidth);
-    win->AttribOff(COLOR_PAIR(30));
-    win->printAt(23, 1, "x");
-    win->AttribOn(COLOR_PAIR(30));
-    getWindowManager()->printInt(WIN_GAME_GRID, 24, 1, maxHeight);
+    getWindowManager()->printInt(WIN_GAME_GRID, 21, dispLine, maxSize);
     win->AttribOff(COLOR_PAIR(30));
 
-    win->printAt(0, 2, "Vous pouvez utiliser une grille plus grande, mais l'affichage");
-    win->printAt(0, 3, "souffre de quelques problèmes pour les grandes grilles...");
+    win->printAt(24, dispLine, ".Vous pouvez utiliser une grille");
+    win->printAt(0, ++dispLine, "plus grande, mais l'affichage souffre de quelques problèmes");
+    win->printAt(0, ++dispLine, "pour les grandes grilles...");
 
-    win->printAt(0, 5, "Entrez la largeur de la grille: ");
+    dispLine++;
     win->refresh();
-    do
-    {
-        win->readAnyAt(31, 5, "%d", &initGridW);
-    }
-    while(initGridW < 2 || 40 < initGridW);
-    win->printAt(0, 6, "Entrez la hauteur de la grille: ");
-    win->refresh();
-    do
-    {
-        win->readAnyAt(31, 6, "%d", &initGridH);
-    }
-    while(initGridH < 2 || 40 < initGridH);
-
-    win->printAt(0, 8, "Entrez le nombre de joueurs (2-4): ");
-    win->refresh();
-    do
-    {
-        win->readAnyAt(35, 8, "%d", &initNumPlayers);
-    }
-    while(getGameSettings()->getNumPlayers() < 2 || getGameSettings()->getNumPlayers() > 4);
-
-    win->clear();
 
     getGameSettings()
-    ->setBoardWidth(initGridW)
-    ->setBoardHeight(initGridH)
-    ->setNumPlayers(initNumPlayers)
+    ->input(win, ++dispLine)
     ->commit();
 
     interrupted = false;

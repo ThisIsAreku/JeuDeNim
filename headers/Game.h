@@ -48,6 +48,8 @@ public:
     GravityProvider *getGravityProvider();
     WinnerChecker *getWinnerChecker();
 
+    void doKeyboardActions(chtype);
+
     void invokeEntityTurn(int);
 
     void playerWin();

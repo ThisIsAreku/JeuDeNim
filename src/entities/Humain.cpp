@@ -98,3 +98,7 @@ bool Humain::onCursorSelect(int x, int y)
 {
     return getBaseGame()->onEntityTurnCompleted(turnAction, x, y);
 }
+int Humain::getEntityType()
+{
+    return ENTITY_HUMAIN;
+}

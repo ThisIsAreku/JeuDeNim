@@ -22,7 +22,7 @@ Grid::Grid(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(m
         }
     }
 
-    this->tokenAnimator = new TokenAnimator(manager, winId, this);
+    this->tokenAnimator = new TokenAnimator(manager, winId, baseGame);
 
 }
 
@@ -320,6 +320,7 @@ bool Grid::placeToken(int player, int col)
         this->filledCells++;
         setGridAt(col, y, player);
         this->tokenAnimator->animateToken(player, col, 0, y);
+
         this->baseGame->getWinnerChecker()->onPlaceToken(col, y);
         return true;
     }

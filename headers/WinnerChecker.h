@@ -12,8 +12,9 @@ class WinnerChecker
     int totalCells;
     int filledCells;
 
-    bool checkColumnAlign(int);
-    bool checkRowAlign(int);
+    void checkColumnAlign(int);
+    void checkRowAlign(int);
+    bool searchAlign(int, int, int &, int &);
 
     int winnerId;
 public:

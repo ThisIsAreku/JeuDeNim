@@ -6,10 +6,10 @@
 
 class TokenAnimator : public Renderable
 {
-    BaseGrid *_grid;
+    BaseGame *baseGame;
     double modifier;
 public:
-    TokenAnimator(WindowManager *, int, BaseGrid *);
+    TokenAnimator(WindowManager *, int, BaseGame *);
     void animateToken(int, int, int, int);
 
     void setModifier(double);

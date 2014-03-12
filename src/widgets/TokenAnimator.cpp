@@ -2,9 +2,9 @@
 #include "widgets/TokenAnimator.h"
 #include "constants.h"
 
-TokenAnimator::TokenAnimator(WindowManager *manager, int winId, BaseGrid *grid) : Renderable(manager, winId)
+TokenAnimator::TokenAnimator(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(manager, winId)
 {
-    _grid = grid;
+    this->baseGame = baseGame;
     modifier = 1.0;
 }
 void TokenAnimator::setModifier(double d)
@@ -14,6 +14,9 @@ void TokenAnimator::setModifier(double d)
 
 void TokenAnimator::animateToken(int color, int x, int src, int dst)
 {
+    if(!baseGame->getGameSettings()->animate)
+        return;
+
     if(src == dst)
         return;
 
@@ -21,7 +24,7 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     if(win == NULL)
         return;
 
-    int timing = 500 / (_grid->getHeight() * modifier);
+    int timing = 400 / (baseGame->getBaseGrid()->getHeight() * modifier);
 
     if(timing == 0)
         timing = 1;
@@ -35,7 +38,9 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     token[3] = '\0';
     for(int j = src; j <= dst; ++j)
     {
-        if((int)getch() != -1)
+        chtype t = getch();
+        baseGame->doKeyboardActions(t);
+        if((int)t != -1)
             break;
         win->printAt(x * CELL_WIDTH + 3, prev * CELL_HEIGHT + 2, "   ");
         win->AttribOn(COLOR_PAIR(color));

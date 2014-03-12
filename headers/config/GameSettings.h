@@ -1,6 +1,8 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include "display/Window.h"
+
 class GameSettings
 {
     int numPlayers;
@@ -12,6 +14,8 @@ class GameSettings
     int alignSize;
 
     bool commited;
+
+    void askForProperty(Window *, int, const char * , int &, int, int);
 public:
     GameSettings();
 
@@ -31,7 +35,10 @@ public:
     int getNumAlign();
     int getAlignSize();
 
+    bool animate;
 
+
+    GameSettings *input(Window *, int);
     void commit();
 };
 

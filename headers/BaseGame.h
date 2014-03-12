@@ -24,6 +24,8 @@ public:
     virtual GravityProvider *getGravityProvider() = 0;
     virtual WinnerChecker *getWinnerChecker() = 0;
 
+    virtual void doKeyboardActions(chtype) = 0;
+
     virtual bool onEntityTurnCompleted(EntityTurnAction, int, int) = 0;
 
 };

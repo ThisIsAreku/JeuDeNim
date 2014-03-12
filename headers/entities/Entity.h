@@ -28,6 +28,7 @@ public:
     virtual void render() = 0;
 
     virtual const char *getId() = 0;
+    virtual int getEntityType() = 0;
 };
 
 #endif

@@ -23,6 +23,7 @@ public:
     void render();
 
     const char *getId();
+    int getEntityType();
 };
 
 #endif
