@@ -238,8 +238,8 @@ void Grid::render()
 
 void Grid::convertCoords(int &x, int &y)
 {
-    int x2;
-    int y2;
+    int x2(0);
+    int y2(0);
     switch(currentRotationValue)
     {
     case 0:
