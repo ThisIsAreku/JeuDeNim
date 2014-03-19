@@ -4,9 +4,9 @@
 
 #include "Logger.h"
 
-TokenAnimator::TokenAnimator(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(manager, winId)
+TokenAnimator::TokenAnimator(WindowManager *manager, int winId, Game *game) : Renderable(manager, winId)
 {
-    this->baseGame = baseGame;
+    this->game = game;
     modifier = 1.0;
 }
 void TokenAnimator::setModifier(double d)
@@ -16,7 +16,7 @@ void TokenAnimator::setModifier(double d)
 
 void TokenAnimator::animateToken(int color, int x, int src, int dst)
 {
-    if(!baseGame->getGameSettings()->animate)
+    if(!game->getGameSettings()->animate)
         return;
 
     if(src == dst)
@@ -26,7 +26,7 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     if(win == NULL)
         return;
 
-    int timing = 400 / (baseGame->getBaseGrid()->getHeight() * modifier);
+    int timing = 400 / (game->getGrid()->getHeight() * modifier);
 
     if(timing == 0)
         timing = 1;
@@ -41,7 +41,7 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     for(int j = src; j <= dst; ++j)
     {
         chtype t = getch();
-        baseGame->doKeyboardActions(t);
+        game->doKeyboardActions(t);
         if((int)t != -1)
             break;
         win->printAt(x * CELL_WIDTH + 3, prev * CELL_HEIGHT + 2, "   ");

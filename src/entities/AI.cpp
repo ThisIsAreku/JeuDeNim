@@ -4,7 +4,7 @@
 
 #include "Logger.h"
 
-AI::AI(BaseGame *game, int entityIndex) : Entity(game, entityIndex)
+AI::AI(Game *game, int entityIndex) : Entity(game, entityIndex)
 {
     exit(-1);
 }

@@ -6,7 +6,7 @@
 
 #include "Logger.h"
 
-Random::Random(BaseGame *game, int entityIndex) : Entity(game, entityIndex)
+Random::Random(Game *game, int entityIndex) : Entity(game, entityIndex)
 {
     srand(time(NULL));
 }
@@ -26,26 +26,26 @@ bool Random::doChoice()
     case 2:
     case 3:
     case 4:
-        x = rand() % getBaseGame()->getBaseGrid()->getWidth();
+        x = rand() % getGame()->getGrid()->getWidth();
         y = -1;
-        return getBaseGame()->onEntityTurnCompleted(TOKEN_PLACE, x, y);
+        return getGame()->onEntityTurnCompleted(TOKEN_PLACE, x, y);
 
     case 5:
-        x = rand() % getBaseGame()->getBaseGrid()->getWidth();
-        y = rand() % getBaseGame()->getBaseGrid()->getHeight();
-        return getBaseGame()->onEntityTurnCompleted(TOKEN_REMOVE, x, y);
+        x = rand() % getGame()->getGrid()->getWidth();
+        y = rand() % getGame()->getGrid()->getHeight();
+        return getGame()->onEntityTurnCompleted(TOKEN_REMOVE, x, y);
 
     case 6:
     case 7:
         x = -1;
         y = -1;
-        return getBaseGame()->onEntityTurnCompleted(ROTATE_CLOCKWISE, x, y);
+        return getGame()->onEntityTurnCompleted(ROTATE_CLOCKWISE, x, y);
 
     case 8:
     case 9:
         x = -1;
         y = -1;
-        return getBaseGame()->onEntityTurnCompleted(ROTATE_COUNTERCLOCKWISE, x, y);
+        return getGame()->onEntityTurnCompleted(ROTATE_COUNTERCLOCKWISE, x, y);
     }
     return false;
 }

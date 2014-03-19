@@ -27,6 +27,7 @@ Game::Game()
     playTurnIndex = 0;
     currentPlayer = 0;
     game_end = false;
+    displayingHelp = false;
 }
 Game::~Game()
 {
@@ -47,7 +48,11 @@ Entity *Game::getCurrentPlayer()
 {
     return this->players[currentPlayer];
 }
-BaseGrid *Game::getBaseGrid()
+DisplayGrid *Game::getDisplayGrid()
+{
+    return this->displayGrid;
+}
+Grid *Game::getGrid()
 {
     return this->grid;
 }
@@ -78,11 +83,16 @@ void Game::loop()
 
     if(!interrupted)
     {
-        for(int i = 0; i < getGameSettings()->getNumAlign(); i++)
+
+        for(int n = 0; n < getWinnerChecker()->getNumWinner(); n++)
         {
-            TokenAlignement al = getWinnerChecker()->getWinAlignement(currentPlayer)[i];
-            this->tokenLiner->displayAlignement(al);
-            Logger::log << "Winner align is " << al.x1 << "," << al.y1 << " -> " << al.x2 << "," << al.y2 << " (type " << al.orientation << ")" << std::endl;
+            currentPlayer = getWinnerChecker()->getWinnerId(n);
+            for(int i = 0; i < getGameSettings()->getNumAlign(); i++)
+            {
+                TokenAlignement al = getWinnerChecker()->getWinAlignement(currentPlayer)[i];
+                this->tokenLiner->displayAlignement(al);
+                Logger::log << "Winner align is " << al.x1 << "," << al.y1 << " -> " << al.x2 << "," << al.y2 << " (type " << al.orientation << ")" << std::endl;
+            }
         }
 
         Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
@@ -103,7 +113,9 @@ void Game::loop()
 
 void Game::init()
 {
-    this->grid = new Grid(this->manager, WIN_GAME_GRID, this);
+    this->grid = new Grid(getGameSettings()->getBoardWidth(), getGameSettings()->getBoardHeight());
+
+    this->displayGrid = new DisplayGrid(this->manager, WIN_GAME_GRID, this);
     this->gravityProvider = new DefaultGravityProvider(this->grid);
     this->winnerChecker = new WinnerChecker(this, true);
     this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
@@ -128,7 +140,7 @@ void Game::init()
         }
     }
 
-    this->grid->init();
+    this->displayGrid->init();
     getCurrentPlayer()->init();
     invokeEntityTurn(0);
 }
@@ -137,10 +149,12 @@ void Game::deinit()
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
         delete this->players[i];
 
-    delete this->grid;
+    delete this->displayGrid;
     delete this->gravityProvider;
     delete this->winnerChecker;
     delete this->tokenLiner;
+
+    delete this->grid;
 }
 
 void Game::update()
@@ -160,8 +174,11 @@ void Game::update()
 
     doKeyboardActions(ch);
 
-    this->grid->update(ch);
-    getCurrentPlayer()->update(ch);
+    if(!displayingHelp)
+    {
+        this->displayGrid->update(ch);
+        getCurrentPlayer()->update(ch);
+    }
 }
 
 void Game::render()
@@ -182,9 +199,13 @@ void Game::render()
 
     getWindowManager()->refreshWindow(WIN_GAME_TURN);
 
-    getCurrentPlayer()->render();
 
-    this->grid->render();
+    if(!displayingHelp)
+    {
+        getCurrentPlayer()->render();
+
+        this->displayGrid->render();
+    }
 
 }
 
@@ -194,6 +215,8 @@ void Game::doKeyboardActions(chtype ch)
         interrupted = true;
     if(ch == KEY_F(9))
         getGameSettings()->animate = !getGameSettings()->animate;
+    if(ch == 'h')
+        displayHelp();
 }
 
 void Game::invokeEntityTurn(int n)
@@ -210,19 +233,19 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     oss << "[" << currentPlayer + 1 << "] ";
     if(action == TOKEN_PLACE)
     {
-        if(!getBaseGrid()->placeToken(currentPlayer + 1, x))
+        if(!getDisplayGrid()->placeToken(currentPlayer + 1, x))
             return false;
         oss << "++ @ " << x;
     }
     else if(action == TOKEN_REMOVE)
     {
-        if(!getBaseGrid()->removeToken(x, y))
+        if(!getDisplayGrid()->removeToken(x, y))
             return false;
         oss << "-- @ " << x << "," << y;
     }
     else
     {
-        getBaseGrid()->rotate(action);
+        getDisplayGrid()->rotate(action);
         oss << "Rt @ ";
         if(action == ROTATE_CLOCKWISE)
         {
@@ -234,11 +257,19 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         }
     }
     appendToPlayTurns(oss.str().c_str());
-    if(getWinnerChecker()->hasWinner())
+    if(getWinnerChecker()->hasWinner() || konamiStep == 10)
     {
         oss.str("");
-        currentPlayer = getWinnerChecker()->getWinnerId();
-        oss << "[" << currentPlayer + 1 << "] WIN !";
+        if(getWinnerChecker()->getNumWinner() != getGameSettings()->getNumPlayers())
+        {
+            if(konamiStep != 10)
+                currentPlayer = getWinnerChecker()->getWinnerId(0);
+            oss << "[" << currentPlayer + 1 << "] WIN !";
+        }
+        else
+        {
+            oss << "EGALITE !";
+        }
         appendToPlayTurns(oss.str().c_str());
 
         Logger::log << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
@@ -287,6 +318,13 @@ void Game::logKeyboard(chtype ch)
         return;
     Logger::log << ch << " :: ";
     unsigned long longVal = static_cast<unsigned long>(ch);
+    if(konamiStep != 10)
+    {
+        if(konami[konamiStep] == longVal)
+            konamiStep++;
+        else
+            konamiStep = 0;
+    }
 
     if(265 <= longVal && longVal <= 276)
     {
@@ -320,6 +358,44 @@ void Game::logKeyboard(chtype ch)
     Logger::log << std::endl;
 }
 
+void Game::displayHelp()
+{
+    displayingHelp = !displayingHelp;
+    if(!displayingHelp)
+        return;
+
+
+    Window *win = getWindowManager()->getWindow(WIN_HELP);
+    if(win == NULL)
+        return;
+
+    win->clear();
+    win->printAt(0, 0, "Donc là c'est l'aide...");
+
+    int i = 2;
+    win->printAt(0, i++, "Touches d'actions");
+    win->printAt(0, i++, "- P: Placer un jeton");
+    win->printAt(0, i++, "- D: Supprimer un jeton");
+    win->printAt(0, i++, "- R: Rotation antihoraire");
+    win->printAt(0, i++, "- T: Rotation horaire");
+
+    i = 2;
+    win->printAt(34, i++, "Déplacer le plateau");
+    win->printAt(34, i++, "- O: Haut");
+    win->printAt(34, i++, "- L: Bas");
+    win->printAt(34, i++, "- K: Gauche");
+    win->printAt(34, i++, "- M: Droite");
+
+
+    win->printAt(0, -1, "Appuyez sur [H] pour fermer l'aide");
+
+    win->refresh();
+
+
+    overlay(getWindowManager()->getWindow(WIN_GAME_GRID)->getHandle(), win->getHandle());
+    refresh();
+}
+
 /***********/
 /* PUBLICS */
 /***********/
@@ -339,15 +415,15 @@ void Game::start()
 
     Logger::log << "COLS: " << COLS << ", LINES: " << LINES << std::endl;
 
-    int maxWidth = (int)(((6 * COLS / 8.) - 2 - 2) / CELL_WIDTH) - 1;
-    int maxHeight = (int)(((LINES - 6) - 1 - 2) / CELL_HEIGHT) - 1;
+    int maxWidth = (int)(((COLS  - 19) - 2 - 2) / CELL_WIDTH) - 1;
+    int maxHeight = (int)(((LINES - 5) - 1 - 2) / CELL_HEIGHT) - 1;
     int maxSize = maxWidth;
     if(maxSize > maxHeight)
         maxSize = maxHeight;
 
     int dispLine = -1;
 
-    win->printAt(0, ++dispLine, "Avec la taille de votre fenêtre, vous pouvez utiliser au maximum");
+    win->printAt(0, ++dispLine, "Avec ce terminal, vous pouvez utiliser au maximum");
     win->printAt(0, ++dispLine, "une grille de taille");
 
     win->AttribOn(COLOR_PAIR(30));
@@ -355,8 +431,8 @@ void Game::start()
     win->AttribOff(COLOR_PAIR(30));
 
     win->printAt(24, dispLine, ".Vous pouvez utiliser une grille");
-    win->printAt(0, ++dispLine, "plus grande, mais l'affichage souffre de quelques problèmes");
-    win->printAt(0, ++dispLine, "pour les grandes grilles...");
+    win->printAt(0, ++dispLine, "plus  grande, mais  l'affichage  souffre  de  quelques");
+    win->printAt(0, ++dispLine, "problèmes pour les grandes grilles...");
 
     dispLine++;
     win->refresh();

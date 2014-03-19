@@ -1,9 +1,20 @@
 # JeuDeNim
 ## Un mélange entre Puissance 4 et le Morpion
 
+### Touches
+P: placer un jeton
+R: rotation antihoraire
+T: rotation horaire
+D: Supprimer un jeton
+
+O,K,L,M: Déplacer le plateau
+
+En ligne de commande, -debug active les informations de debogage dans stderr
+```./bin/JeuDeNim -debug 2>debug.txt```
+
 ### Sites web utilisés:
 * http://tldp.org/HOWTO/text/NCURSES-Programming-HOWTO
-*
+* http://pubs.opengroup.org/onlinepubs/7990989775/xcurses/curses.h.html
         
 ## License
 

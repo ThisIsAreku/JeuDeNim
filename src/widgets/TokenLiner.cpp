@@ -40,7 +40,7 @@ void TokenLiner::displayAlignement(TokenAlignement align)
     Logger::log << "X: " << align.x1 << " -> " << align.x2 << " (" << inc_x << ")" << std::endl;
     Logger::log << "Y: " << align.y1 << " -> " << align.y2 << " (" << inc_y << ")" << std::endl;
 
-    while(t_x != align.x2 && t_y != align.y2)
+    while(t_x != align.x2 || t_y != align.y2)
     {
         win->AttribOn(COLOR_PAIR(align.playerId + 5));
         win->printAt(t_x * CELL_WIDTH + 3, t_y * CELL_HEIGHT + 2, token);

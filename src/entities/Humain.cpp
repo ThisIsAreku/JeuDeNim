@@ -4,10 +4,10 @@
 
 #include "Logger.h"
 
-Humain::Humain(BaseGame *game, int entityIndex) : Entity(game, entityIndex)
+Humain::Humain(Game *game, int entityIndex) : Entity(game, entityIndex)
 {
 
-    this->cursor = new CellCursor(game->getWindowManager(), WIN_GAME_GRID, game->getBaseGrid(), entityIndex + 4);
+    this->cursor = new CellCursor(game->getWindowManager(), WIN_GAME_GRID, game->getGrid(), entityIndex + 4);
     this->cursor->setCellSelectedListener(std::bind((&Humain::onCursorSelect), this, std::placeholders::_1, std::placeholders::_2));
     this->cursor->setVisible(false);
 }
@@ -21,8 +21,6 @@ Humain::~Humain()
 int Humain::turn()
 {
     Logger::log << "Entity-Humain: turn (nothing to do)" << std::endl;
-    //this->cursor->setCursorPosition(0, 0);
-    //this->cursor->setVisible(!getBaseGame()->getBaseGrid()->isDoingSteppedGravity());
     return 0;
 }
 
@@ -52,24 +50,24 @@ UpdateState Humain::update(int ch)
         {
         case 'r':
             turnAction = ROTATE_CLOCKWISE;
-            getBaseGame()->onEntityTurnCompleted(turnAction, -1, -1);
+            getGame()->onEntityTurnCompleted(turnAction, -1, -1);
             break;
         case 't':
             turnAction = ROTATE_COUNTERCLOCKWISE;
-            getBaseGame()->onEntityTurnCompleted(turnAction, -1, -1);
+            getGame()->onEntityTurnCompleted(turnAction, -1, -1);
             break;
         case 'p':
-            if(getBaseGame()->getBaseGrid()->isFull())
+            if(getGame()->getGrid()->isFull())
             {
                 cdtOk = false;
                 break;
             }
             turnAction = TOKEN_PLACE;
-            this->cursor->setCursorSize(1, getBaseGame()->getBaseGrid()->getHeight());
+            this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
             this->cursor->setVisible(true);
             break;
         case 'd':
-            if(getBaseGame()->getBaseGrid()->isEmpty())
+            if(getGame()->getGrid()->isEmpty())
             {
                 cdtOk = false;
                 break;
@@ -98,7 +96,7 @@ const char *Humain::getId()
 
 bool Humain::onCursorSelect(int x, int y)
 {
-    return getBaseGame()->onEntityTurnCompleted(turnAction, x, y);
+    return getGame()->onEntityTurnCompleted(turnAction, x, y);
 }
 int Humain::getEntityType()
 {

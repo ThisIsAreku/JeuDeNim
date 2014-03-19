@@ -1,6 +1,6 @@
 #include "providers/GravityProvider.h"
 
-GravityProvider::GravityProvider(BaseGrid *grid)
+GravityProvider::GravityProvider(Grid *grid)
 {
     this->grid = grid;
 }
@@ -8,7 +8,7 @@ GravityProvider::~GravityProvider()
 {
 }
 
-BaseGrid *GravityProvider::getBaseGrid()
+Grid *GravityProvider::getGrid()
 {
     return this->grid;
 }

@@ -53,17 +53,15 @@ void WindowManager::initWindows()
     if(releasing || !initialized)
         return;
 
-    double cols = (double)(COLS / 8.);
-    int lines = LINES - 6;
-    int w_2 = (6 * cols + 1);
-    if(w_2 > cols)
-        w_2--;
+    double cols = COLS - 19;
+    int lines = LINES - 5;
 
-    Logger::log << cols << ", " << lines << " (" << w_2 << ")" << std::endl;
+    createWindow(WIN_GAME_GRID,     cols,   lines,  0,              1);
+    createWindow(WIN_SCOREBOARD,    18,       lines,  cols + 1,   1);
+    createWindow(WIN_GAME_TURN,     COLS,   4,      0,              lines + 1);
 
-    createWindow(WIN_GAME_GRID,     6 * cols,   lines,  0,              1);
-    createWindow(WIN_SCOREBOARD,    2 * cols,       lines,  w_2,   1);
-    createWindow(WIN_GAME_TURN,     COLS,   5,      0,              lines + 1);
+
+    createWindow(WIN_HELP,     cols,   lines,  0,              1);
 }
 void WindowManager::initNcurses()
 {
@@ -86,6 +84,7 @@ void WindowManager::releaseNcurses()
     deleteWindow(WIN_GAME_GRID);
     deleteWindow(WIN_SCOREBOARD);
     deleteWindow(WIN_GAME_TURN);
+    deleteWindow(50);
     endwin();
     initialized = false;
 }

@@ -52,8 +52,22 @@ bool Window::printAt(int x, int y, const char *str)
 {
     if(handle == NULL)
         return false;
-    x++; //skip border
-    y++; //again
+    if(x < 0)
+    {
+        x = getWidth() + (x - 1);
+    }
+    else
+    {
+        x++; //skip border
+    }
+    if(y < 0)
+    {
+        y = getHeight() + (y - 1);
+    }
+    else
+    {
+        y++; //skip border
+    }
     applyShift(x, y);
     if(contains(x, y))
         return false;
@@ -196,6 +210,10 @@ int Window::getY()
 int Window::getId()
 {
     return this->id;
+}
+WINDOW *Window::getHandle()
+{
+    return this->handle;
 }
 
 

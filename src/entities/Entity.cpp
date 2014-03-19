@@ -2,7 +2,7 @@
 
 
 #include "Logger.h"
-Entity::Entity(BaseGame *game, int entityIndex)
+Entity::Entity(Game *game, int entityIndex)
 {
     this->game = game;
     this->entityIndex = entityIndex;
@@ -11,7 +11,7 @@ Entity::~Entity()
 {
 
 }
-BaseGame *Entity::getBaseGame()
+Game *Entity::getGame()
 {
     return this->game;
 }
