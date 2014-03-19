@@ -88,7 +88,7 @@ void WinnerChecker::checkColumnAlign(int x)
 
     int win = -1;
     int alc = 0;
-    int fx, fy;
+    int fx(0), fy(0);
     for (int y = 0; y < game->getGrid()->getHeight(); ++y)
     {
         searchAlign(x, y, win, alc, fx, fy);
@@ -118,7 +118,7 @@ void WinnerChecker::checkDiagonal1Align(int x, int y) // l->r
 {
     int win = -1;
     int alc = 0;
-    int fx, fy;
+    int fx(0), fy(0);
     Logger::log << "checkDiagonal1Align: " << x << ", " << y << std::endl;
     while((x < game->getGrid()->getWidth() && y < game->getGrid()->getWidth()) && (x >= 0 && y >= 0))
     {
@@ -129,7 +129,7 @@ void WinnerChecker::checkDiagonal2Align(int x, int y) // r->l
 {
     int win = -1;
     int alc = 0;
-    int fx, fy;
+    int fx(0), fy(0);
     Logger::log << "checkDiagonal2Align: " << x << ", " << y << std::endl;
     while((x < game->getGrid()->getWidth() && y < game->getGrid()->getWidth()) && (x >= 0 && y >= 0))
     {
@@ -145,7 +145,7 @@ void WinnerChecker::checkRowAlign(int y)
 
     int win = -1;
     int alc = 0;
-    int fx, fy;
+    int fx(0), fy(0);
     for (int x = 0; x < game->getGrid()->getWidth(); ++x)
     {
         searchAlign(x, y, win, alc, fx, fy);
