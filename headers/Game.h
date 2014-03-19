@@ -7,6 +7,10 @@
 #include "display/Renderable.h"
 
 #include "widgets/Grid.h"
+#include "widgets/TokenLiner.h"
+
+#include <iostream>
+#include <fstream>
 
 class Game : public BaseGame
 {
@@ -15,6 +19,8 @@ class Game : public BaseGame
     GameSettings *gameSettings;
     GravityProvider *gravityProvider;
     WinnerChecker *winnerChecker;
+
+    TokenLiner *tokenLiner;
 
     int playTurnIndex;
 
@@ -53,7 +59,6 @@ public:
     void invokeEntityTurn(int);
 
     void playerWin();
-
 
     bool onEntityTurnCompleted(EntityTurnAction, int, int);
 

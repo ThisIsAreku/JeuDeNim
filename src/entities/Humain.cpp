@@ -2,6 +2,8 @@
 #include "entities/EntityListener.h"
 
 
+#include "Logger.h"
+
 Humain::Humain(BaseGame *game, int entityIndex) : Entity(game, entityIndex)
 {
 
@@ -18,7 +20,7 @@ Humain::~Humain()
 
 int Humain::turn()
 {
-    std::cerr << "Entity-Humain: turn (nothing to do)" << std::endl;
+    Logger::log << "Entity-Humain: turn (nothing to do)" << std::endl;
     //this->cursor->setCursorPosition(0, 0);
     //this->cursor->setVisible(!getBaseGame()->getBaseGrid()->isDoingSteppedGravity());
     return 0;

@@ -2,6 +2,8 @@
 
 #include "widgets/Menu.h"
 
+#include "Logger.h"
+
 
 Menu::Menu(WindowManager *manager, int winId, int (BaseGame::*callback)(int)) : Renderable(manager, winId)
 {

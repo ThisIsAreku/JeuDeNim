@@ -13,6 +13,9 @@ GameSettings::GameSettings()
     commited = false;
 
     animate = true;
+
+    for(int i = 0; i < 4; i++)
+        playerTypes[i] = 0;
 }
 
 GameSettings *GameSettings::setNumPlayers(int numPlayers)
@@ -66,6 +69,10 @@ int GameSettings::getAlignSize()
 {
     return alignSize;
 }
+int *GameSettings::getPlayerTypes()
+{
+    return playerTypes;
+}
 
 void GameSettings::commit()
 {
@@ -79,6 +86,16 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     askForProperty(win, baseLine++, "Entrez la largeur de la grille: ", boardWidth, alignSize, 40);
     askForProperty(win, baseLine++, "Entrez la longueur de la grille: ", boardHeight, alignSize, 40);
     askForProperty(win, baseLine++, "Entrez le nombre de joueurs (2-4): ", numPlayers, 2, 4);
+    win->printAt(0, baseLine++, "Types de joueurs disponibles: ");
+    win->printAt(0, baseLine++, "0: Humain, 1: Débile, 2: IA");
+    win->printAt(0, baseLine++, "(IA n'est pas encore implémenté)");
+
+    char msg[19] = "Type du joueur X: ";
+    for(int i = 0; i < numPlayers; i++)
+    {
+        msg[15] = '0' + (i + 1);
+        askForProperty(win, baseLine++, msg, playerTypes[i], 0, 1);
+    }
     return this;
 }
 
@@ -86,6 +103,9 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
 void GameSettings::askForProperty(Window *win, int line, const char *title, int &prop, int min, int max)
 {
     win->printAt(0, line, title);
+    char str[10];
+    sprintf(str, "%d", prop);
+    win->printAt(strlen(title), line, str);
     win->refresh();
     do
     {

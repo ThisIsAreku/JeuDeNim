@@ -3,6 +3,8 @@
 #include "widgets/CellCursor.h"
 
 
+
+#include "Logger.h"
 CellCursor::CellCursor(WindowManager *manager, int winId, BaseGrid *grid, int color) : Renderable(manager, winId)
 {
     this->color = color;

@@ -13,6 +13,8 @@ class GameSettings
     int numAlign;
     int alignSize;
 
+    int playerTypes[4];
+
     bool commited;
 
     void askForProperty(Window *, int, const char * , int &, int, int);
@@ -34,6 +36,8 @@ public:
 
     int getNumAlign();
     int getAlignSize();
+
+    int *getPlayerTypes();
 
     bool animate;
 

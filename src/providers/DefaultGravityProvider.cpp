@@ -1,6 +1,8 @@
 #include <iostream>
 #include "providers/DefaultGravityProvider.h"
 
+#include "Logger.h"
+
 DefaultGravityProvider::DefaultGravityProvider(BaseGrid *grid) : GravityProvider(grid)
 {
 }

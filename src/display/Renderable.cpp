@@ -15,20 +15,3 @@ Window *Renderable::getWindow()
         return NULL;
     return this->manager->getWindow(winId);
 }
-
-void Renderable::log(const char *c)
-{
-    if(this->manager == NULL)
-        return;
-    while(!this->manager->append(WIN_SCOREBOARD, c))
-        this->manager->clearWindow(WIN_SCOREBOARD);
-    this->manager->refreshWindow(WIN_SCOREBOARD);
-}
-void Renderable::log(int n)
-{
-    if(this->manager == NULL)
-        return;
-    while(!this->manager->appendInt(WIN_SCOREBOARD, n))
-        this->manager->clearWindow(WIN_SCOREBOARD);
-    this->manager->refreshWindow(WIN_SCOREBOARD);
-}

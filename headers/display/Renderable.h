@@ -15,8 +15,6 @@ protected:
     Renderable(WindowManager *, int);
 
     Window *getWindow();
-    void log(const char *);
-    void log(int);
 public:
     virtual ~Renderable() = 0;
 

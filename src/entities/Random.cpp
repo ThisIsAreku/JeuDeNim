@@ -4,6 +4,8 @@
 #include <ctime>
 
 
+#include "Logger.h"
+
 Random::Random(BaseGame *game, int entityIndex) : Entity(game, entityIndex)
 {
     srand(time(NULL));
@@ -15,7 +17,7 @@ Random::~Random()
 bool Random::doChoice()
 {
     int choice = rand() % 10;
-    std::cerr << "Entity-Random " << getEntityIndex() << ": try choice : " << choice << std::endl;
+    Logger::log << "Entity-Random " << getEntityIndex() << ": try choice : " << choice << std::endl;
     int x, y;
     switch(choice)
     {
@@ -70,7 +72,7 @@ void Random::render()
 
 const char *Random::getId()
 {
-    return "RANDOM";
+    return "Stupid Monkey";
 }
 int Random::getEntityType()
 {

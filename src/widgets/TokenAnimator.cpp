@@ -2,6 +2,8 @@
 #include "widgets/TokenAnimator.h"
 #include "constants.h"
 
+#include "Logger.h"
+
 TokenAnimator::TokenAnimator(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(manager, winId)
 {
     this->baseGame = baseGame;

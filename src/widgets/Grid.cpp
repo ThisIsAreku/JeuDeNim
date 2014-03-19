@@ -4,6 +4,8 @@
 
 #include "WinnerChecker.h"
 
+#include "Logger.h"
+
 Grid::Grid(WindowManager *manager, int winId, BaseGame *baseGame) : Renderable(manager, winId)
 {
     this->baseGame = baseGame;
@@ -271,7 +273,7 @@ int Grid::getGridAt(int x, int y)
     }
     else
     {
-        std::cerr << "getGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
+        Logger::log << "getGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
     }
     return -1;
 }
@@ -288,7 +290,7 @@ bool Grid::setGridAt(int x, int y, int v)
     }
     else
     {
-        std::cerr << "setGridAt: [" << x << "," << y << "] cell is not empty" << std::endl;
+        Logger::log << "setGridAt: [" << x << "," << y << "] cell is not empty" << std::endl;
     }
     this->last_x = this->last_y = -1;
     return false;
@@ -306,7 +308,7 @@ bool Grid::forceSetGridAt(int x, int y, int v)
     }
     else
     {
-        std::cerr << "forceSetGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
+        Logger::log << "forceSetGridAt: [" << x << "," << y << "] is out of bound" << std::endl;
     }
     this->last_x = this->last_y = -1;
     return false;
@@ -411,7 +413,7 @@ int Grid::getShiftY()
 
 void Grid::setShiftX(int x)
 {
-    std::cerr << (x + getWidth()) * CELL_WIDTH << " <= " << getWindow()->getWidth() - 3 * CELL_WIDTH << std::endl;
+    Logger::log << (x + getWidth()) * CELL_WIDTH << " <= " << getWindow()->getWidth() - 3 * CELL_WIDTH << std::endl;
     if(x > 0)
         return;
     if((x + getWidth()) * CELL_WIDTH <= getWindow()->getWidth() - 3 * CELL_WIDTH)
@@ -422,7 +424,7 @@ void Grid::setShiftX(int x)
 
 void Grid::setShiftY(int y)
 {
-    std::cerr << (y + getHeight()) * CELL_HEIGHT << " <= " << getWindow()->getHeight() - 3 * CELL_HEIGHT << std::endl;
+    Logger::log << (y + getHeight()) * CELL_HEIGHT << " <= " << getWindow()->getHeight() - 3 * CELL_HEIGHT << std::endl;
     if(y > 0)
         return;
     if((y + getHeight()) * CELL_HEIGHT <= getWindow()->getHeight() - 3 * CELL_HEIGHT)

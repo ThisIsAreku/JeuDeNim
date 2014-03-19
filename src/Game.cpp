@@ -6,10 +6,20 @@
 
 #include "widgets/CellCursor.h"
 #include "entities/Random.h"
+#include "entities/Humain.h"
 #include "providers/DefaultGravityProvider.h"
+
+
+
+#include "Logger.h"
+
+// definition of Logger::log
+Logger::Logger Logger::log;
 
 Game::Game()
 {
+    Logger::log << "Game start" << std::endl;
+
     this->manager = new WindowManager();
     this->gameSettings = new GameSettings();
 
@@ -20,6 +30,7 @@ Game::Game()
 }
 Game::~Game()
 {
+
     if(this->players != NULL)
         delete [] this->players;
 
@@ -64,19 +75,29 @@ void Game::loop()
 
         render();
     }
-    deinit();
 
     if(!interrupted)
     {
+        for(int i = 0; i < getGameSettings()->getNumAlign(); i++)
+        {
+            TokenAlignement al = getWinnerChecker()->getWinAlignement(currentPlayer)[i];
+            this->tokenLiner->displayAlignement(al);
+            Logger::log << "Winner align is " << al.x1 << "," << al.y1 << " -> " << al.x2 << "," << al.y2 << " (type " << al.orientation << ")" << std::endl;
+        }
+
         Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
         if(win == NULL)
             return;
 
+        win->clear();
         win->printAt(0, 0, "Partie terminée");
         win->printAt(0, 1, "Appuyez sur [ESPACE] pour quitter");
         win->refresh();
         while(getch() != 32) { };
     }
+
+
+    deinit();
 
 }
 
@@ -84,12 +105,28 @@ void Game::init()
 {
     this->grid = new Grid(this->manager, WIN_GAME_GRID, this);
     this->gravityProvider = new DefaultGravityProvider(this->grid);
-    this->winnerChecker = new WinnerChecker(this);
+    this->winnerChecker = new WinnerChecker(this, true);
+    this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
 
     this->players = new Entity*[getGameSettings()->getNumPlayers()];
 
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
-        this->players[i] = new Random(this, i + 1);
+    {
+        switch(getGameSettings()->getPlayerTypes()[i])
+        {
+        case ENTITY_HUMAIN:
+            this->players[i] = new Humain(this, i + 1);
+            break;
+        case ENTITY_DUMBASS:
+            this->players[i] = new Random(this, i + 1);
+            break;
+        case ENTITY_AI:
+            //this->players[i] = new Random(this, i + 1);
+            break;
+        default:
+            exit(-1);
+        }
+    }
 
     this->grid->init();
     getCurrentPlayer()->init();
@@ -103,6 +140,7 @@ void Game::deinit()
     delete this->grid;
     delete this->gravityProvider;
     delete this->winnerChecker;
+    delete this->tokenLiner;
 }
 
 void Game::update()
@@ -128,11 +166,19 @@ void Game::update()
 
 void Game::render()
 {
-    getWindowManager()->print(WIN_GAME_TURN, 0, 0, "Animations: ");
+    getWindowManager()->print(WIN_GAME_TURN, 0, 0, "(F9) Animations: ");
     if(getGameSettings()->animate)
-        getWindowManager()->print(WIN_GAME_TURN, 12, 0, "ON");
+        getWindowManager()->print(WIN_GAME_TURN, 17, 0, "ON ");
     else
-        getWindowManager()->print(WIN_GAME_TURN, 12, 0, "OFF");
+        getWindowManager()->print(WIN_GAME_TURN, 17, 0, "OFF");
+
+
+    getWindowManager()->print(WIN_GAME_TURN, 0, 1, "Joueur actuel: ");
+    getWindowManager()->printInt(WIN_GAME_TURN, 15, 1, currentPlayer + 1);
+    const char *playerId = getCurrentPlayer()->getId();
+    getWindowManager()->print(WIN_GAME_TURN, 16, 1, " (");
+    getWindowManager()->print(WIN_GAME_TURN, 18, 1, playerId);
+    getWindowManager()->print(WIN_GAME_TURN, 18 + strlen(playerId), 1, ")                  ");
 
     getWindowManager()->refreshWindow(WIN_GAME_TURN);
 
@@ -152,7 +198,7 @@ void Game::doKeyboardActions(chtype ch)
 
 void Game::invokeEntityTurn(int n)
 {
-    std::cerr << "Game: currentPlayer = " << n << std::endl;
+    Logger::log << "Game: currentPlayer = " << n << std::endl;
     currentPlayer = n;
     getCurrentPlayer()->turn();
 }
@@ -177,7 +223,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     else
     {
         getBaseGrid()->rotate(action);
-        oss << "R @ ";
+        oss << "Rt @ ";
         if(action == ROTATE_CLOCKWISE)
         {
             oss << "Left";
@@ -188,13 +234,14 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         }
     }
     appendToPlayTurns(oss.str().c_str());
-    if(getWinnerChecker()->getWinnerId() != -1)
+    if(getWinnerChecker()->hasWinner())
     {
         oss.str("");
         currentPlayer = getWinnerChecker()->getWinnerId();
         oss << "[" << currentPlayer + 1 << "] WIN !";
         appendToPlayTurns(oss.str().c_str());
-        std::cerr << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
+
+        Logger::log << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
         game_end = true;
     }
     else
@@ -238,39 +285,39 @@ void Game::logKeyboard(chtype ch)
 {
     if((int)ch == -1)
         return;
-    std::cerr << ch << " :: ";
+    Logger::log << ch << " :: ";
     unsigned long longVal = static_cast<unsigned long>(ch);
 
     if(265 <= longVal && longVal <= 276)
     {
-        std::cerr << "[F" << (longVal - 264) << "]";
+        Logger::log << "[F" << (longVal - 264) << "]";
     }
     else
         switch(longVal)
         {
         case 32:
-            std::cerr << "[SPACE]";
+            Logger::log << "[SPACE]";
             break;
         case 10:
-            std::cerr << "[ENTER]";
+            Logger::log << "[ENTER]";
             break;
 
         case 258:
-            std::cerr << "[DOWN]";
+            Logger::log << "[DOWN]";
             break;
         case 259:
-            std::cerr << "[UP]";
+            Logger::log << "[UP]";
             break;
         case 260:
-            std::cerr << "[LEFT]";
+            Logger::log << "[LEFT]";
             break;
         case 261:
-            std::cerr << "[RIGHT]";
+            Logger::log << "[RIGHT]";
             break;
         default:
-            std::cerr << static_cast<char>(ch & A_CHARTEXT);
+            Logger::log << static_cast<char>(ch & A_CHARTEXT);
         }
-    std::cerr << std::endl;
+    Logger::log << std::endl;
 }
 
 /***********/
@@ -282,7 +329,7 @@ void Game::start()
     {
         this->manager->leaveCurseMode();
         std::cout << "Non, là c'est vraiment trop petit !" << std::endl << "La taille compte un peu, quand même..." << std::endl;
-        exit(-1);
+        return;
     }
     this->manager->initialize("JeuDeNim v0.1");
 
@@ -290,7 +337,7 @@ void Game::start()
     if(win == NULL)
         return;
 
-    std::cerr << "COLS: " << COLS << ", LINES: " << LINES << std::endl;
+    Logger::log << "COLS: " << COLS << ", LINES: " << LINES << std::endl;
 
     int maxWidth = (int)(((6 * COLS / 8.) - 2 - 2) / CELL_WIDTH) - 1;
     int maxHeight = (int)(((LINES - 6) - 1 - 2) / CELL_HEIGHT) - 1;
@@ -317,6 +364,9 @@ void Game::start()
     getGameSettings()
     ->input(win, ++dispLine)
     ->commit();
+
+    win->clear();
+    win->refresh();
 
     interrupted = false;
     loop();

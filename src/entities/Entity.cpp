@@ -1,5 +1,7 @@
 #include "entities/Entity.h"
 
+
+#include "Logger.h"
 Entity::Entity(BaseGame *game, int entityIndex)
 {
     this->game = game;

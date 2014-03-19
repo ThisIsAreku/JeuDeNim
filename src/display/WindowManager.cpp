@@ -1,5 +1,7 @@
 #include "display/WindowManager.h"
 
+
+#include "Logger.h"
 WindowManager::WindowManager()
 {
     this->win = new Window*[WIN_COUNT];
@@ -57,7 +59,7 @@ void WindowManager::initWindows()
     if(w_2 > cols)
         w_2--;
 
-    std::cerr << cols << ", " << lines << " (" << w_2 << ")" << std::endl;
+    Logger::log << cols << ", " << lines << " (" << w_2 << ")" << std::endl;
 
     createWindow(WIN_GAME_GRID,     6 * cols,   lines,  0,              1);
     createWindow(WIN_SCOREBOARD,    2 * cols,       lines,  w_2,   1);
@@ -69,7 +71,7 @@ void WindowManager::initNcurses()
         return;
     if(!initscr())
     {
-        std::cerr << "Erreur lors de l'initialisation de NCurses" << std::endl;
+        Logger::log << "Erreur lors de l'initialisation de NCurses" << std::endl;
         exit(1);
     }
     cbreak();
