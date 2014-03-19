@@ -13,7 +13,7 @@ class Humain : public Entity
 
     bool onCursorSelect(int, int);
 public:
-    Humain(BaseGame *, int);
+    Humain(Game *, int);
     virtual ~Humain();
 
     int turn();

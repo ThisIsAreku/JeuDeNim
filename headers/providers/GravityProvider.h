@@ -1,16 +1,16 @@
 #ifndef _GRAVITY_PROVIDER_H_
 #define _GRAVITY_PROVIDER_H_
 
-#include "BaseGrid.h"
+#include "Grid.h"
 #include <functional>   // std::bind
 
 class GravityProvider
 {
-    BaseGrid *grid;
+    Grid *grid;
 protected:
-    BaseGrid *getBaseGrid();
+    Grid *getGrid();
 public:
-    GravityProvider(BaseGrid *);
+    GravityProvider(Grid *);
     virtual ~GravityProvider();
 
     virtual void doGravity(std::function<void(int, int, int, int)>) = 0;

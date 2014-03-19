@@ -8,7 +8,7 @@ class Random : public Entity
 {
     bool doChoice();
 public:
-    Random(BaseGame *, int);
+    Random(Game *, int);
     virtual ~Random();
 
     int turn();

@@ -1,20 +1,33 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "BaseGame.h"
-#include <list>
+#include "Game.h"
 
-#include "display/Renderable.h"
+#include "config/GameSettings.h"
 
-#include "widgets/Grid.h"
+#include "display/WindowManager.h"
+
+#include "widgets/DisplayGrid.h"
+class DisplayGrid;
 #include "widgets/TokenLiner.h"
+class TokenLiner;
+
+#include "entities/Entity.h"
+class Entity;
+
+#include "providers/GravityProvider.h"
+
+#include "WinnerChecker.h"
+class WinnerChecker;
+#include "Grid.h"
 
 #include <iostream>
 #include <fstream>
 
-class Game : public BaseGame
+class Game
 {
     Grid *grid;
+    DisplayGrid *displayGrid;
     WindowManager *manager;
     GameSettings *gameSettings;
     GravityProvider *gravityProvider;
@@ -29,6 +42,11 @@ class Game : public BaseGame
 
     bool interrupted;
     bool game_end;
+
+    bool displayingHelp;
+
+    unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
+    int konamiStep = 0;
 
     void loop();
 
@@ -49,7 +67,8 @@ public:
     void start();
     WindowManager *getWindowManager();
     Entity *getCurrentPlayer();
-    BaseGrid *getBaseGrid();
+    DisplayGrid *getDisplayGrid();
+    Grid *getGrid();
     GameSettings *getGameSettings();
     GravityProvider *getGravityProvider();
     WinnerChecker *getWinnerChecker();
@@ -59,6 +78,8 @@ public:
     void invokeEntityTurn(int);
 
     void playerWin();
+
+    void displayHelp();
 
     bool onEntityTurnCompleted(EntityTurnAction, int, int);
 

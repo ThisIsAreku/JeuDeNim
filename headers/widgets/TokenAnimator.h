@@ -1,15 +1,15 @@
 #ifndef _TOKEN_ANIMATOR_H_
 #define _TOKEN_ANIMATOR_H_
 
-#include "BaseGrid.h"
 #include "display/Renderable.h"
+class Renderable;
 
 class TokenAnimator : public Renderable
 {
-    BaseGame *baseGame;
+    Game *game;
     double modifier;
 public:
-    TokenAnimator(WindowManager *, int, BaseGame *);
+    TokenAnimator(WindowManager *, int, Game *);
     void animateToken(int, int, int, int);
 
     void setModifier(double);

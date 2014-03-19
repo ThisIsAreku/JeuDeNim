@@ -1,16 +1,15 @@
 #ifndef _WINNER_CHECKER_H_
 #define _WINNER_CHECKER_H_
 
-class BaseGame;
+class Game;
 
-#include "BaseGame.h"
+#include "Game.h"
 
 #include "structs/TokenAlignement.h"
 
 class WinnerChecker
 {
-    BaseGame *baseGame;
-    int **t;
+    Game *game;
 
     bool useGraphics;
 
@@ -38,13 +37,14 @@ class WinnerChecker
 
     void updateFlags();
 public:
-    WinnerChecker(BaseGame *, bool);
+    WinnerChecker(Game *, bool);
     ~WinnerChecker();
     void onPlaceToken(int, int);
     void onRemoveToken(int, int);
     void onRotate();
 
-    int getWinnerId();
+    int getWinnerId(int);
+    int getNumWinner();
     TokenAlignement *getWinAlignement(int);
 
     bool hasWinner();

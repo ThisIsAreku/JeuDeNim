@@ -7,7 +7,7 @@
 class AI : public Entity
 {
 public:
-    AI(BaseGame *, int);
+    AI(Game *, int);
     virtual ~AI();
 
     int turn();

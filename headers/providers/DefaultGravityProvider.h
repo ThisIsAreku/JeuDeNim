@@ -7,7 +7,7 @@ class DefaultGravityProvider : public GravityProvider
 {
     int findNewTokenY(int, int, int);
 public:
-    DefaultGravityProvider(BaseGrid *grid);
+    DefaultGravityProvider(Grid *grid);
 
     void doGravity(std::function<void(int, int, int, int)>);
     void doColumnGravity(int, std::function<void(int, int, int, int)>);

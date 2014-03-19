@@ -1,20 +1,20 @@
 #ifndef _ENTITIY_H_
 #define _ENTITIY_H_
 
-class BaseGame; // forward declaration
+class Game; // forward declaration
 
-#include "BaseGame.h"
+#include "Game.h"
 
 #include "structs/UpdateState.h"
 
 class Entity
 {
-    BaseGame *game;
+    Game *game;
     int entityIndex;
 
 protected:
-    Entity(BaseGame *, int);
-    BaseGame *getBaseGame();
+    Entity(Game *, int);
+    Game *getGame();
 
 public:
     virtual ~Entity() = 0;

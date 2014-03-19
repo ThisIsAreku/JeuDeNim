@@ -51,6 +51,7 @@ public:
     int getX();
     int getY();
     int getId();
+    WINDOW *getHandle();
 
     int getShiftX();
     int getShiftY();

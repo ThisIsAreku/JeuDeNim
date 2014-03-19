@@ -2,7 +2,7 @@
 #define _RENDERABLE_H_
 
 #include "display/WindowManager.h"
-#include "BaseGame.h"
+class Game;
 
 #include "structs/UpdateState.h"
 
@@ -23,5 +23,7 @@ public:
     virtual void render() = 0;
 
 };
+
+#include "Game.h"
 
 #endif

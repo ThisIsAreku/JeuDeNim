@@ -4,7 +4,7 @@
 #include <functional>   // std::bind
 
 #include "display/Renderable.h"
-#include "BaseGrid.h"
+#include "Grid.h"
 
 class CellCursor : public Renderable
 {
@@ -24,14 +24,14 @@ class CellCursor : public Renderable
 
     bool visible;
 
-    BaseGrid *grid;
+    Grid *grid;
 
     void drawBox(int x, int y);
     void drawBox();
 
     void constraintCursor();
 public:
-    CellCursor(WindowManager *, int, BaseGrid *, int);
+    CellCursor(WindowManager *, int, Grid *, int);
     virtual ~CellCursor();
 
     void setCellSelectedListener(std::function<bool(int, int)>);
