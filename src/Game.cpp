@@ -159,6 +159,10 @@ void Game::deinit()
 
 void Game::update()
 {
+    if(turn_end){
+        turn_end = false;
+        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
+    }
     if(getCurrentPlayer()->getEntityType() != ENTITY_HUMAIN)
         timeout(50);
     else
@@ -273,10 +277,12 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         appendToPlayTurns(oss.str().c_str());
 
         Logger::log << "onEntityTurnCompleted: win for " << currentPlayer + 1 << std::endl;
+        if(konamiStep == 10)
+            Logger::log << "Win by Konami !" << std::endl;
         game_end = true;
+    }else{
+        turn_end = true;
     }
-    else
-        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
     return true;
 
 }

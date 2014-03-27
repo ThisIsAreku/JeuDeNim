@@ -42,6 +42,7 @@ class Game
 
     bool interrupted;
     bool game_end;
+    bool turn_end;
 
     bool displayingHelp;
 

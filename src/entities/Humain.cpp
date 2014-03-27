@@ -21,6 +21,9 @@ Humain::~Humain()
 int Humain::turn()
 {
     Logger::log << "Entity-Humain: turn (nothing to do)" << std::endl;
+    turnAction = TOKEN_PLACE;
+    this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
+    this->cursor->setVisible(true);
     return 0;
 }
 
@@ -31,17 +34,6 @@ void Humain::init()
 }
 UpdateState Humain::update(int ch)
 {
-    if(this->cursor->isVisible())
-    {
-        UpdateState r = this->cursor->update(ch);
-        if(r == REMOVE)
-        {
-            this->cursor->setVisible(false);
-            return SUCCESS;
-        }
-        return r;
-    }
-
     bool cdtOk = true;
     do
     {
@@ -56,7 +48,7 @@ UpdateState Humain::update(int ch)
             turnAction = ROTATE_COUNTERCLOCKWISE;
             getGame()->onEntityTurnCompleted(turnAction, -1, -1);
             break;
-        case 'p':
+        /*case 'p':
             if(getGame()->getGrid()->isFull())
             {
                 cdtOk = false;
@@ -65,7 +57,7 @@ UpdateState Humain::update(int ch)
             turnAction = TOKEN_PLACE;
             this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
             this->cursor->setVisible(true);
-            break;
+            break;*/
         case 'd':
             if(getGame()->getGrid()->isEmpty())
             {
@@ -76,7 +68,16 @@ UpdateState Humain::update(int ch)
             this->cursor->setCursorSize(1, 1);
             this->cursor->setVisible(true);
             break;
+        default:
+            UpdateState r = this->cursor->update(ch);
+            if(r == REMOVE)
+            {
+                this->cursor->setVisible(false);
+                return SUCCESS;
+            }
+            return r;
         }
+
     }
     while(!cdtOk);
 
