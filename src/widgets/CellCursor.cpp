@@ -53,11 +53,10 @@ void CellCursor::setCursorPosition(int x, int y)
 
 void CellCursor::setCursorSize(int w, int h)
 {
-    cursor_width = w;
-    cursor_height = h;
-
+    // reset cursor before showing
     if(visible)
     {
+        Logger::log << "visible" << std::endl;
         Window *win = getWindow();
         if(win == NULL)
             return;
@@ -66,6 +65,9 @@ void CellCursor::setCursorSize(int w, int h)
         drawBox(x, y);
         win->refresh();
     }
+
+    cursor_width = w;
+    cursor_height = h;
 
     constraintCursor();
 }
