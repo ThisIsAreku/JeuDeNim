@@ -56,6 +56,17 @@ void CellCursor::setCursorSize(int w, int h)
     cursor_width = w;
     cursor_height = h;
 
+    if(visible)
+    {
+        Window *win = getWindow();
+        if(win == NULL)
+            return;
+
+        win->AttribResetOff();
+        drawBox(x, y);
+        win->refresh();
+    }
+
     constraintCursor();
 }
 
