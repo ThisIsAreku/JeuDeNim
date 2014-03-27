@@ -20,10 +20,16 @@ Humain::~Humain()
 
 int Humain::turn()
 {
-    Logger::log << "Entity-Humain: turn (nothing to do)" << std::endl;
-    turnAction = TOKEN_PLACE;
-    this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
-    this->cursor->setVisible(true);
+    Logger::log << "Entity-Humain: turn" << std::endl;
+    if(!getGame()->getGrid()->isFull()){
+        turnAction = TOKEN_PLACE;
+        this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
+        this->cursor->setVisible(true);
+    }else{
+        turnAction = TOKEN_REMOVE;
+        this->cursor->setCursorSize(1, 1);
+        this->cursor->setVisible(true);
+    }
     return 0;
 }
 
@@ -34,52 +40,45 @@ void Humain::init()
 }
 UpdateState Humain::update(int ch)
 {
-    bool cdtOk = true;
-    do
+    switch(ch)
     {
-        cdtOk = true;
-        switch(ch)
+    case 'r':
+        turnAction = ROTATE_CLOCKWISE;
+        getGame()->onEntityTurnCompleted(turnAction, -1, -1);
+        break;
+    case 't':
+        turnAction = ROTATE_COUNTERCLOCKWISE;
+        getGame()->onEntityTurnCompleted(turnAction, -1, -1);
+        break;
+    /*case 'p':
+        if(getGame()->getGrid()->isFull())
         {
-        case 'r':
-            turnAction = ROTATE_CLOCKWISE;
-            getGame()->onEntityTurnCompleted(turnAction, -1, -1);
+            cdtOk = false;
             break;
-        case 't':
-            turnAction = ROTATE_COUNTERCLOCKWISE;
-            getGame()->onEntityTurnCompleted(turnAction, -1, -1);
-            break;
-        /*case 'p':
-            if(getGame()->getGrid()->isFull())
-            {
-                cdtOk = false;
-                break;
-            }
-            turnAction = TOKEN_PLACE;
-            this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
-            this->cursor->setVisible(true);
-            break;*/
-        case 'd':
-            if(getGame()->getGrid()->isEmpty())
-            {
-                cdtOk = false;
-                break;
-            }
-            turnAction = TOKEN_REMOVE;
-            this->cursor->setCursorSize(1, 1);
-            this->cursor->setVisible(true);
-            break;
-        default:
-            UpdateState r = this->cursor->update(ch);
-            if(r == REMOVE)
-            {
-                this->cursor->setVisible(false);
-                return SUCCESS;
-            }
-            return r;
         }
-
+        turnAction = TOKEN_PLACE;
+        this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
+        this->cursor->setVisible(true);
+        break;*/
+    case 'd':
+        Logger::log << "Doing delete" << std::endl;
+        if(getGame()->getGrid()->isEmpty())
+        {
+            return FAILURE;
+        }
+        turnAction = TOKEN_REMOVE;
+        this->cursor->setCursorSize(1, 1);
+        this->cursor->setVisible(true);
+        break;
+    default:
+        UpdateState r = this->cursor->update(ch);
+        if(r == REMOVE)
+        {
+            this->cursor->setVisible(false);
+            return SUCCESS;
+        }
+        return r;
     }
-    while(!cdtOk);
 
     return SUCCESS;
 }

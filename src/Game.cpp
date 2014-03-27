@@ -26,7 +26,7 @@ Game::Game()
     this->players = NULL;
     playTurnIndex = 0;
     currentPlayer = 0;
-    game_end = false;
+    game_end = turn_end = false;
     displayingHelp = false;
 }
 Game::~Game()
@@ -227,6 +227,7 @@ void Game::invokeEntityTurn(int n)
 {
     Logger::log << "Game: currentPlayer = " << n << std::endl;
     currentPlayer = n;
+    turn_end = false;
     getCurrentPlayer()->turn();
 }
 
