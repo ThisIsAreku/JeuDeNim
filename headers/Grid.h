@@ -35,6 +35,9 @@ public:
     bool isFull();
 
 
+    void logGridDebug();
+
+
 };
 
 #endif

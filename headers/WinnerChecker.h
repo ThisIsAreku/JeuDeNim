@@ -11,6 +11,12 @@ class WinnerChecker
 {
     Game *game;
 
+    int ***diagonalDebug;
+    int diagonalDebugStep;
+    int diagonalDebugW;
+    int diagonalDebugH;
+    void logDiagonalDebug();
+
     bool useGraphics;
 
     bool *winner;

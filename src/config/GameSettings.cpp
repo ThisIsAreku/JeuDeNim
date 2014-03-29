@@ -48,6 +48,12 @@ GameSettings *GameSettings::setAlignSize(int alignSize)
         this->alignSize = alignSize;
     return this;
 }
+GameSettings *GameSettings::setPlayerType(int playerId, int playerType)
+{
+    if(!this->commited)
+        this->playerTypes[playerId] = playerType;
+    return this;
+}
 
 int GameSettings::getNumPlayers()
 {

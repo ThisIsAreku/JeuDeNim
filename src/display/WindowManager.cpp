@@ -27,8 +27,11 @@ void WindowManager::createWindow(int winId, int w, int h, int x, int y)
 {
     if(winId >= WIN_COUNT || releasing || !initialized)
         return;
-    if(this->win[winId] != NULL)
+    if(this->win[winId] != NULL){
+        Logger::log << "WindowManager: Window#" << winId << " already created" << std::endl;
         return;
+    }
+    Logger::log << "WindowManager: creating Window#" << winId << std::endl;
     this->win[winId] = new Window(winId, w, h, x, y);
 }
 void WindowManager::deleteWindow(int winId)
@@ -44,8 +47,10 @@ Window *WindowManager::getWindow(int winId)
 {
     if(winId >= WIN_COUNT || releasing)
         return NULL;
-    if(this->win[winId] == NULL)
+    if(this->win[winId] == NULL){
+        Logger::log << "WindowManager: requested Window#" << winId << " is null, creating.." << std::endl;
         initWindows();
+    }
     return this->win[winId];
 }
 void WindowManager::initWindows()
@@ -81,10 +86,14 @@ void WindowManager::initNcurses()
 void WindowManager::releaseNcurses()
 {
     releasing = true;
-    deleteWindow(WIN_GAME_GRID);
+    /*deleteWindow(WIN_GAME_GRID);
     deleteWindow(WIN_SCOREBOARD);
     deleteWindow(WIN_GAME_TURN);
-    deleteWindow(50);
+    deleteWindow(WIN_HELP);*/
+    for (int i = 0; i < WIN_COUNT; ++i)
+    {
+        deleteWindow(i);
+    }
     endwin();
     initialized = false;
 }

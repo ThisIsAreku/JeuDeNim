@@ -31,6 +31,18 @@ Grid::~Grid()
     delete [] this->matrice;
 }
 
+void Grid::logGridDebug(){
+    for (int i = 0; i < initWidth; ++i)
+    {
+        for (int j = 0; j < initHeight; ++j)
+        {
+            Logger::log << this->matrice[i][j] << " ";
+        }
+        Logger::log << std::endl;
+    }
+}
+
+
 void Grid::convertCoords(int &x, int &y)
 {
     int x2(0);

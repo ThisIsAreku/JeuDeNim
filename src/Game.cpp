@@ -28,15 +28,18 @@ Game::Game()
     currentPlayer = 0;
     game_end = turn_end = false;
     displayingHelp = false;
+    random_testing = false;
 }
 Game::~Game()
 {
-
-    if(this->players != NULL)
-        delete [] this->players;
-
     delete this->gameSettings;
     delete this->manager;
+}
+bool Game::isRandomTesting(){
+    return this->random_testing;
+}
+void Game::setRandomTesting(bool rnd){
+    this->random_testing = rnd;
 }
 
 WindowManager *Game::getWindowManager()
@@ -103,7 +106,12 @@ void Game::loop()
         win->printAt(0, 0, "Partie terminée");
         win->printAt(0, 1, "Appuyez sur [ESPACE] pour quitter");
         win->refresh();
-        while(getch() != 32) { };
+        if(isRandomTesting()){
+            timeout(5000);
+            getch();
+        }
+        else
+            while(getch() != 32) { };
     }
 
 
@@ -148,6 +156,7 @@ void Game::deinit()
 {
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
         delete this->players[i];
+    delete [] this->players;
 
     delete this->displayGrid;
     delete this->gravityProvider;
@@ -410,11 +419,11 @@ void Game::start()
 {
     if(COLS < 80 || LINES < 24)
     {
-        this->manager->leaveCurseMode();
+        getWindowManager()->leaveCurseMode();
         std::cout << "Non, là c'est vraiment trop petit !" << std::endl << "La taille compte un peu, quand même..." << std::endl;
         return;
     }
-    this->manager->initialize("JeuDeNim v0.1");
+    getWindowManager()->initialize("JeuDeNim v0.1");
 
     Window *win = getWindowManager()->getWindow(WIN_GAME_GRID);
     if(win == NULL)
@@ -444,13 +453,31 @@ void Game::start()
     dispLine++;
     win->refresh();
 
-    getGameSettings()
-    ->input(win, ++dispLine)
-    ->commit();
+    if(!isRandomTesting()){
+
+        getGameSettings()
+        ->input(win, ++dispLine)
+        ->commit();
+
+    }else{
+
+        getGameSettings()
+        ->setPlayerType(0, ENTITY_DUMBASS)
+        ->setPlayerType(1, ENTITY_DUMBASS)
+        ->commit();
+    }
 
     win->clear();
     win->refresh();
 
     interrupted = false;
-    loop();
+    while(!interrupted){
+        playTurnIndex = 0;
+        currentPlayer = 0;
+        game_end = turn_end = false;
+        loop();
+        if(!isRandomTesting())
+            break;
+    }
+
 }

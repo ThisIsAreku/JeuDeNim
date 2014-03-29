@@ -44,6 +44,8 @@ class Game
     bool game_end;
     bool turn_end;
 
+    bool random_testing;
+
     bool displayingHelp;
 
     unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
@@ -83,6 +85,11 @@ public:
     void displayHelp();
 
     bool onEntityTurnCompleted(EntityTurnAction, int, int);
+
+    bool isRandomTesting();
+    void setRandomTesting(bool);
+
+    void reset();
 
 };
 

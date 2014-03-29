@@ -29,6 +29,8 @@ public:
     GameSettings *setNumAlign(int);
     GameSettings *setAlignSize(int);
 
+    GameSettings *setPlayerType(int, int);
+
     int getNumPlayers();
 
     int getBoardWidth();

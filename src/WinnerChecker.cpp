@@ -4,15 +4,15 @@
 
 #include "Logger.h"
 
-WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
+WinnerChecker::WinnerChecker(Game *_game, bool _useGraphics)
 {
-    this->useGraphics = useGraphics;
-    this->game = game;
-    this->totalCells = game->getGrid()->getWidth() * game->getGrid()->getHeight();
-    this->filledCells = 0;
+    useGraphics = _useGraphics;
+    game = _game;
+    totalCells = game->getGrid()->getWidth() * game->getGrid()->getHeight();
+    filledCells = 0;
     //nombre minimal de jetons pour un alignement
-    this->minCells = (game->getGameSettings()->getAlignSize() * game->getGameSettings()->getNumAlign()) - (game->getGameSettings()->getNumAlign() - 1);
-    this->winner = new bool[game->getGameSettings()->getNumPlayers()];
+    minCells = (game->getGameSettings()->getAlignSize() * game->getGameSettings()->getNumAlign()) - (game->getGameSettings()->getNumAlign() - 1);
+    winner = new bool[game->getGameSettings()->getNumPlayers()];
     resetWinner();
 
     winAlignementsCount = new int[game->getGameSettings()->getNumPlayers()];
@@ -23,10 +23,16 @@ WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
         for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
             winAlignements[i] = new TokenAlignement[game->getGameSettings()->getAlignSize()];
     }
+
+    diagonalDebug = NULL;
+    diagonalDebugStep = 0;
+    diagonalDebugW = 0;
 }
 WinnerChecker::~WinnerChecker()
 {
     delete [] this->winner;
+    delete [] winAlignementsCount;
+
     if(useGraphics)
     {
         for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
@@ -34,6 +40,22 @@ WinnerChecker::~WinnerChecker()
             delete [] winAlignements[i];
         }
         delete [] winAlignements;
+    }
+
+
+
+    if(Logger::log.isDebugEnabled()){
+        if(diagonalDebug != NULL){
+            for (int d = 0; d < 2; ++d)
+            {
+                for (int i = 0; i < diagonalDebugW; ++i)
+                {
+                    delete [] diagonalDebug[d][i];
+                }
+                delete [] diagonalDebug[d];
+            }
+            delete [] diagonalDebug;
+        }
     }
 }
 
@@ -62,8 +84,10 @@ void WinnerChecker::updateFlags()
     winnerFlag = false;
     for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
     {
-        if(winAlignementsCount[i] == game->getGameSettings()->getNumAlign())
+        Logger::log << "winAlignementsCount for " << i << " : " << winAlignementsCount[i] << std::endl;
+        if(winAlignementsCount[i] >= game->getGameSettings()->getNumAlign())
         {
+            Logger::log << i << " win" << std::endl;
             this->winner[i] = true;
             nbrWinner++;
             winnerFlag = true;
@@ -95,6 +119,24 @@ void WinnerChecker::checkColumnAlign(int x)
     }
     //Logger::log << "checkColumnAlign: " << alc << std::endl;
 }
+void WinnerChecker::logDiagonalDebug()
+{
+    if(diagonalDebug == NULL)
+        return;
+    Logger::log << "== Diagonals Debug ==" << std::endl;
+    for (int d = 0; d <= diagonalDebugStep; ++d)
+    {
+        Logger::log << "Step " << d << std::endl;
+        for (int i = 0; i < game->getGrid()->getWidth(); ++i)
+        {
+            for (int j = 0; j < game->getGrid()->getHeight(); ++j)
+            {
+                Logger::log << diagonalDebug[d][i][j] << " ";
+            }
+            Logger::log << std::endl;
+        }
+    }
+}
 void WinnerChecker::checkDiagonalAlign()
 {
     if(hasWinner())
@@ -102,36 +144,72 @@ void WinnerChecker::checkDiagonalAlign()
     if(this->filledCells < this->minCells)
         return;
 
-    for (int v = 0; v < game->getGrid()->getWidth(); ++v)
-    {
+    /*if(Logger::log.isDebugEnabled()){
+        diagonalDebug = new int**[2];
+        diagonalDebugW = game->getGrid()->getWidth();
+        diagonalDebugH = game->getGrid()->getHeight();
+        for (int d = 0; d < 2; ++d)
+        {
+            diagonalDebug[d] = new int*[diagonalDebugW];
+            for (int i = 0; i < diagonalDebugW; ++i)
+            {
+                diagonalDebug[d][i] = new int[diagonalDebugH];
+                for (int j = 0; j < diagonalDebugH; ++j)
+                {
+                    diagonalDebug[d][i][j] = 0;
+                }
+            }
+        }
+    }*/
+
+    Logger::log << "Diagonal on width" << std::endl;
+    diagonalDebugStep = 0;
+    unsigned int x = game->getGrid()->getWidth()-1;
+    for (int v = 0; v < game->getGrid()->getWidth(); ++v){
         checkDiagonal1Align(v, 0);
         checkDiagonal2Align(v, 0);
     }
-    for (int v = 0; v < game->getGrid()->getHeight(); ++v)
-    {
+
+    for (int v = 1; v < game->getGrid()->getHeight(); ++v){
         checkDiagonal1Align(0, v);
-        checkDiagonal2Align(0, v);
+        checkDiagonal2Align(x, v);
     }
+
+    /*if(Logger::log.isDebugEnabled()){
+        logDiagonalDebug();
+        for (int d = 0; d <= diagonalDebugStep; ++d)
+        {
+            for (int i = 0; i < game->getGrid()->getWidth(); ++i)
+            {
+                delete [] diagonalDebug[d][i];
+            }
+            delete [] diagonalDebug[d];
+        }
+        delete [] diagonalDebug;
+        diagonalDebug = NULL;
+        Logger::log << "Grid is" << std::endl;
+        game->getGrid()->logGridDebug();
+    }*/
     //Logger::log << "checkColumnAlign: " << alc << std::endl;
 }
-void WinnerChecker::checkDiagonal1Align(int x, int y) // l->r
+void WinnerChecker::checkDiagonal1Align(int x, int y) // tl->br
 {
     int win = -1;
     int alc = 0;
     int fx(0), fy(0);
     Logger::log << "checkDiagonal1Align: " << x << ", " << y << std::endl;
-    while((x < game->getGrid()->getWidth() && y < game->getGrid()->getWidth()) && (x >= 0 && y >= 0))
+    while((x < game->getGrid()->getWidth() && y < game->getGrid()->getHeight()) && (x >= 0 && y >= 0))
     {
         searchAlign(x++, y++, win, alc, fx, fy);
     }
 }
-void WinnerChecker::checkDiagonal2Align(int x, int y) // r->l
+void WinnerChecker::checkDiagonal2Align(int x, int y) // tr->bl
 {
     int win = -1;
     int alc = 0;
     int fx(0), fy(0);
     Logger::log << "checkDiagonal2Align: " << x << ", " << y << std::endl;
-    while((x < game->getGrid()->getWidth() && y < game->getGrid()->getWidth()) && (x >= 0 && y >= 0))
+    while((x < game->getGrid()->getWidth() && y < game->getGrid()->getHeight()) && (x >= 0 && y >= 0))
     {
         searchAlign(x--, y++, win, alc, fx, fy);
     }
@@ -159,6 +237,13 @@ void WinnerChecker::searchAlign(int x, int y, int &win, int &alc, int &fx, int &
     if(ccell == -1)
         return;
 
+    if(Logger::log.isDebugEnabled()){
+        if(diagonalDebug != NULL){
+            diagonalDebug[diagonalDebugStep][x][y]++;
+            logDiagonalDebug();
+        }
+    }
+
     if(win != ccell || ccell <= 0)
     {
         win = ccell;
@@ -181,8 +266,11 @@ void WinnerChecker::searchAlign(int x, int y, int &win, int &alc, int &fx, int &
 
 void WinnerChecker::onPlaceToken(int x, int y)
 {
-    Logger::log << "WinnerChecker::onPlaceToken: " << x << "," << y << std::endl;
     this->filledCells++;
+    if(this->filledCells < this->minCells)
+        return;
+
+    Logger::log << "WinnerChecker::onPlaceToken: " << x << "," << y << std::endl;
 
     /*resetWinAlignementsCount();
 
@@ -194,8 +282,11 @@ void WinnerChecker::onPlaceToken(int x, int y)
 }
 void WinnerChecker::onRemoveToken(int x, int y)
 {
-    Logger::log << "WinnerChecker::onRemoveToken: " << x << "," << y << std::endl;
     this->filledCells--;
+    if(this->filledCells < this->minCells)
+        return;
+
+    Logger::log << "WinnerChecker::onRemoveToken: " << x << "," << y << std::endl;
 
     /*resetWinAlignementsCount();
 
@@ -210,6 +301,9 @@ void WinnerChecker::onRemoveToken(int x, int y)
 }
 void WinnerChecker::onRotate()
 {
+    if(this->filledCells < this->minCells)
+        return;
+
     Logger::log << "WinnerChecker::onRotate" <<  std::endl;
 
     resetWinAlignementsCount();
