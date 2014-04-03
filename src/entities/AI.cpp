@@ -6,7 +6,7 @@
 
 AI::AI(Game *game, int entityIndex) : Entity(game, entityIndex)
 {
-    exit(-1);
+    tree = new NaryTree;
 }
 AI::~AI()
 {

@@ -21,11 +21,14 @@ Humain::~Humain()
 int Humain::turn()
 {
     Logger::log << "Entity-Humain: turn" << std::endl;
-    if(!getGame()->getGrid()->isFull()){
+    if(!getGame()->getGrid()->isFull())
+    {
         turnAction = TOKEN_PLACE;
         this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
         this->cursor->setVisible(true);
-    }else{
+    }
+    else
+    {
         turnAction = TOKEN_REMOVE;
         this->cursor->setCursorSize(1, 1);
         this->cursor->setVisible(true);
@@ -50,16 +53,16 @@ UpdateState Humain::update(int ch)
         turnAction = ROTATE_COUNTERCLOCKWISE;
         getGame()->onEntityTurnCompleted(turnAction, -1, -1);
         break;
-    /*case 'p':
-        if(getGame()->getGrid()->isFull())
-        {
-            cdtOk = false;
-            break;
-        }
-        turnAction = TOKEN_PLACE;
-        this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
-        this->cursor->setVisible(true);
-        break;*/
+        /*case 'p':
+            if(getGame()->getGrid()->isFull())
+            {
+                cdtOk = false;
+                break;
+            }
+            turnAction = TOKEN_PLACE;
+            this->cursor->setCursorSize(1, getGame()->getGrid()->getHeight());
+            this->cursor->setVisible(true);
+            break;*/
     case 'd':
         Logger::log << "Doing delete" << std::endl;
         if(getGame()->getGrid()->isEmpty())

@@ -11,7 +11,7 @@ class WinnerChecker
 {
     Game *game;
 
-    int ***diagonalDebug;
+    int ** *diagonalDebug;
     int diagonalDebugStep;
     int diagonalDebugW;
     int diagonalDebugH;

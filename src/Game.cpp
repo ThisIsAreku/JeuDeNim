@@ -7,6 +7,7 @@
 #include "widgets/CellCursor.h"
 #include "entities/Random.h"
 #include "entities/Humain.h"
+#include "entities/AI.h"
 #include "providers/DefaultGravityProvider.h"
 
 
@@ -35,10 +36,12 @@ Game::~Game()
     delete this->gameSettings;
     delete this->manager;
 }
-bool Game::isRandomTesting(){
+bool Game::isRandomTesting()
+{
     return this->random_testing;
 }
-void Game::setRandomTesting(bool rnd){
+void Game::setRandomTesting(bool rnd)
+{
     this->random_testing = rnd;
 }
 
@@ -106,9 +109,11 @@ void Game::loop()
         win->printAt(0, 0, "Partie terminée");
         win->printAt(0, 1, "Appuyez sur [ESPACE] pour quitter");
         win->refresh();
-        if(isRandomTesting()){
-            timeout(5000);
+        if(isRandomTesting())
+        {
+            timeout(500);
             getch();
+            timeout(0);
         }
         else
             while(getch() != 32) { };
@@ -141,7 +146,7 @@ void Game::init()
             this->players[i] = new Random(this, i + 1);
             break;
         case ENTITY_AI:
-            //this->players[i] = new Random(this, i + 1);
+            this->players[i] = new AI(this, i + 1);
             break;
         default:
             exit(-1);
@@ -168,7 +173,8 @@ void Game::deinit()
 
 void Game::update()
 {
-    if(turn_end){
+    if(turn_end)
+    {
         turn_end = false;
         invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
     }
@@ -290,7 +296,9 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
         if(konamiStep == 10)
             Logger::log << "Win by Konami !" << std::endl;
         game_end = true;
-    }else{
+    }
+    else
+    {
         turn_end = true;
     }
     return true;
@@ -453,15 +461,19 @@ void Game::start()
     dispLine++;
     win->refresh();
 
-    if(!isRandomTesting()){
+    if(!isRandomTesting())
+    {
 
         getGameSettings()
         ->input(win, ++dispLine)
         ->commit();
 
-    }else{
+    }
+    else
+    {
 
         getGameSettings()
+        ->setNumAlign(3)
         ->setPlayerType(0, ENTITY_DUMBASS)
         ->setPlayerType(1, ENTITY_DUMBASS)
         ->commit();
@@ -471,7 +483,8 @@ void Game::start()
     win->refresh();
 
     interrupted = false;
-    while(!interrupted){
+    while(!interrupted)
+    {
         playTurnIndex = 0;
         currentPlayer = 0;
         game_end = turn_end = false;

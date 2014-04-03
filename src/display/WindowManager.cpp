@@ -27,7 +27,8 @@ void WindowManager::createWindow(int winId, int w, int h, int x, int y)
 {
     if(winId >= WIN_COUNT || releasing || !initialized)
         return;
-    if(this->win[winId] != NULL){
+    if(this->win[winId] != NULL)
+    {
         Logger::log << "WindowManager: Window#" << winId << " already created" << std::endl;
         return;
     }
@@ -47,7 +48,8 @@ Window *WindowManager::getWindow(int winId)
 {
     if(winId >= WIN_COUNT || releasing)
         return NULL;
-    if(this->win[winId] == NULL){
+    if(this->win[winId] == NULL)
+    {
         Logger::log << "WindowManager: requested Window#" << winId << " is null, creating.." << std::endl;
         initWindows();
     }

@@ -31,7 +31,8 @@ Grid::~Grid()
     delete [] this->matrice;
 }
 
-void Grid::logGridDebug(){
+void Grid::logGridDebug()
+{
     for (int i = 0; i < initWidth; ++i)
     {
         for (int j = 0; j < initHeight; ++j)

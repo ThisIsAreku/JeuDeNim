@@ -4,8 +4,11 @@
 #include "entities/Entity.h"
 #include "entities/EntityListener.h"
 
+#include "ai/NaryTree.h"
+
 class AI : public Entity
 {
+    NaryTree *tree;
 public:
     AI(Game *, int);
     virtual ~AI();

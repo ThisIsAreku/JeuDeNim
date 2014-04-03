@@ -44,8 +44,10 @@ WinnerChecker::~WinnerChecker()
 
 
 
-    if(Logger::log.isDebugEnabled()){
-        if(diagonalDebug != NULL){
+    if(Logger::log.isDebugEnabled())
+    {
+        if(diagonalDebug != NULL)
+        {
             for (int d = 0; d < 2; ++d)
             {
                 for (int i = 0; i < diagonalDebugW; ++i)
@@ -164,13 +166,15 @@ void WinnerChecker::checkDiagonalAlign()
 
     Logger::log << "Diagonal on width" << std::endl;
     diagonalDebugStep = 0;
-    unsigned int x = game->getGrid()->getWidth()-1;
-    for (int v = 0; v < game->getGrid()->getWidth(); ++v){
+    unsigned int x = game->getGrid()->getWidth() - 1;
+    for (int v = 0; v < game->getGrid()->getWidth(); ++v)
+    {
         checkDiagonal1Align(v, 0);
         checkDiagonal2Align(v, 0);
     }
 
-    for (int v = 1; v < game->getGrid()->getHeight(); ++v){
+    for (int v = 1; v < game->getGrid()->getHeight(); ++v)
+    {
         checkDiagonal1Align(0, v);
         checkDiagonal2Align(x, v);
     }
@@ -197,7 +201,7 @@ void WinnerChecker::checkDiagonal1Align(int x, int y) // tl->br
     int win = -1;
     int alc = 0;
     int fx(0), fy(0);
-    Logger::log << "checkDiagonal1Align: " << x << ", " << y << std::endl;
+    //Logger::log << "checkDiagonal1Align: " << x << ", " << y << std::endl;
     while((x < game->getGrid()->getWidth() && y < game->getGrid()->getHeight()) && (x >= 0 && y >= 0))
     {
         searchAlign(x++, y++, win, alc, fx, fy);
@@ -208,7 +212,7 @@ void WinnerChecker::checkDiagonal2Align(int x, int y) // tr->bl
     int win = -1;
     int alc = 0;
     int fx(0), fy(0);
-    Logger::log << "checkDiagonal2Align: " << x << ", " << y << std::endl;
+    //Logger::log << "checkDiagonal2Align: " << x << ", " << y << std::endl;
     while((x < game->getGrid()->getWidth() && y < game->getGrid()->getHeight()) && (x >= 0 && y >= 0))
     {
         searchAlign(x--, y++, win, alc, fx, fy);
@@ -237,8 +241,10 @@ void WinnerChecker::searchAlign(int x, int y, int &win, int &alc, int &fx, int &
     if(ccell == -1)
         return;
 
-    if(Logger::log.isDebugEnabled()){
-        if(diagonalDebug != NULL){
+    if(Logger::log.isDebugEnabled())
+    {
+        if(diagonalDebug != NULL)
+        {
             diagonalDebug[diagonalDebugStep][x][y]++;
             logDiagonalDebug();
         }

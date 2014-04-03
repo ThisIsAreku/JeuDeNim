@@ -100,7 +100,7 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     for(int i = 0; i < numPlayers; i++)
     {
         msg[15] = '0' + (i + 1);
-        askForProperty(win, baseLine++, msg, playerTypes[i], 0, 1);
+        askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
     }
     return this;
 }
