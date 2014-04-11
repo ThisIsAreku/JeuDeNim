@@ -10,29 +10,21 @@ class Game;
 class WinnerChecker
 {
     Game *game;
-
-    int ** *diagonalDebug;
-    int diagonalDebugStep;
-    int diagonalDebugW;
-    int diagonalDebugH;
-    void logDiagonalDebug();
+    const Grid *grid;
 
     bool useGraphics;
 
     bool *winner;
     int *winAlignementsCount;
+    int *alignementsSizes;
     TokenAlignement **winAlignements;
 
     bool winnerFlag;
     bool drawFlag;
-
-    int totalCells;
-    int filledCells;
     int minCells;
 
     void resetWinner();
     void resetWinner(int);
-    void resetWinAlignementsCount();
 
     void checkDiagonalAlign();
     void checkDiagonal1Align(int, int);
@@ -42,19 +34,27 @@ class WinnerChecker
     void searchAlign(int, int, int &, int &, int &, int &);
 
     void updateFlags();
+
+
 public:
     WinnerChecker(Game *, bool);
     ~WinnerChecker();
-    void onPlaceToken(int, int);
-    void onRemoveToken(int, int);
-    void onRotate();
 
-    int getWinnerId(int);
-    int getNumWinner();
+    void setGridToCheck(const Grid *);
+
+    void searchWinner(const Grid *grid = NULL, bool forceCheck = false);
+    void resetWinAlignementsCount();
+
+    int getWinnerId(int) const;
+    int getNumWinner() const;
+    int getMaxAlignSize(int) const;
     TokenAlignement *getWinAlignement(int);
 
-    bool hasWinner();
-    bool hasDraw();
+    bool isWinner(int) const;
+
+    bool hasWinner() const;
+    bool hasDraw() const;
+
 };
 
 #endif

@@ -66,10 +66,6 @@ GameSettings *Game::getGameSettings()
 {
     return this->gameSettings;
 }
-GravityProvider *Game::getGravityProvider()
-{
-    return this->gravityProvider;
-}
 WinnerChecker *Game::getWinnerChecker()
 {
     return this->winnerChecker;
@@ -78,13 +74,17 @@ WinnerChecker *Game::getWinnerChecker()
 
 void Game::loop()
 {
+    tick = 0;
     init();
     render();
     while(!interrupted && !game_end)
     {
+        tick++;
         update();
 
         render();
+        if(tick % 10 == 0)
+            Logger::log << "Tick " << tick << std::endl;
     }
 
     if(!interrupted)
@@ -129,7 +129,6 @@ void Game::init()
     this->grid = new Grid(getGameSettings()->getBoardWidth(), getGameSettings()->getBoardHeight());
 
     this->displayGrid = new DisplayGrid(this->manager, WIN_GAME_GRID, this);
-    this->gravityProvider = new DefaultGravityProvider(this->grid);
     this->winnerChecker = new WinnerChecker(this, true);
     this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
 
@@ -146,15 +145,15 @@ void Game::init()
             this->players[i] = new Random(this, i + 1);
             break;
         case ENTITY_AI:
-            this->players[i] = new AI(this, i + 1);
+            this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i]);
             break;
         default:
             exit(-1);
         }
+        this->players[i]->init();
     }
 
     this->displayGrid->init();
-    getCurrentPlayer()->init();
     invokeEntityTurn(0);
 }
 void Game::deinit()
@@ -164,7 +163,6 @@ void Game::deinit()
     delete [] this->players;
 
     delete this->displayGrid;
-    delete this->gravityProvider;
     delete this->winnerChecker;
     delete this->tokenLiner;
 
@@ -173,11 +171,6 @@ void Game::deinit()
 
 void Game::update()
 {
-    if(turn_end)
-    {
-        turn_end = false;
-        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
-    }
     if(getCurrentPlayer()->getEntityType() != ENTITY_HUMAIN)
         timeout(50);
     else
@@ -197,6 +190,10 @@ void Game::update()
     {
         this->displayGrid->update(ch);
         getCurrentPlayer()->update(ch);
+    }
+    if(turn_end)
+    {
+        invokeEntityTurn(++currentPlayer % getGameSettings()->getNumPlayers());
     }
 }
 
@@ -249,6 +246,7 @@ void Game::invokeEntityTurn(int n)
 
 bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
 {
+    Logger::log << "Game: onEntityTurnCompleted for " << currentPlayer << " (" << action << ", " << x << ", " << y << ")" << std::endl;
     std::ostringstream oss;
     oss << "[" << currentPlayer + 1 << "] ";
     if(action == TOKEN_PLACE)
@@ -276,6 +274,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
             oss << "Right";
         }
     }
+    getWinnerChecker()->searchWinner(getGrid());
     appendToPlayTurns(oss.str().c_str());
     if(getWinnerChecker()->hasWinner() || konamiStep == 10)
     {

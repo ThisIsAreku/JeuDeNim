@@ -5,15 +5,18 @@
 
 class DefaultGravityProvider : public GravityProvider
 {
-    int findNewTokenY(int, int, int);
+    int findNewTokenY(const int &, const int &, int) const; 
+    int *lowerCellForColumn;
 public:
     DefaultGravityProvider(Grid *grid);
+    ~DefaultGravityProvider();
 
     void doGravity(std::function<void(int, int, int, int)>);
-    void doColumnGravity(int, std::function<void(int, int, int, int)>);
+    void doColumnGravity(const int &, std::function<void(int, int, int, int)>);
+    int getFirstEmptyCell(const int&) const;
 
-    int findFirstEmptyCell(int);
-
+    void changeColumnFirstEmptyCell(const int&, const int&);
+    void seekAllFirstEmptyCell();
 
 };
 

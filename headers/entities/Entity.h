@@ -14,12 +14,12 @@ class Entity
 
 protected:
     Entity(Game *, int);
-    Game *getGame();
+    Game *getGame() const;
 
 public:
     virtual ~Entity() = 0;
 
-    int getEntityIndex();
+    int getEntityIndex() const;
 
     virtual int turn() = 0;
 

@@ -8,7 +8,7 @@ GravityProvider::~GravityProvider()
 {
 }
 
-Grid *GravityProvider::getGrid()
+Grid *GravityProvider::getGrid() const
 {
     return this->grid;
 }

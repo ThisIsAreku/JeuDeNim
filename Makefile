@@ -1,6 +1,6 @@
 # Makefile
 # Copyright 2013 Alexandre Boucey <alexandre.boucey@alumni.univ-avignon.fr>
-CXXFLAGS+=-std=c++0x -W -Wall -Wextra -O3
+CXXFLAGS+=-std=c++0x -W -Wall -Wextra
 LDFLAGS=-lncurses -ltinfo
 NCURSES= $(shell find /usr/lib -name "libncurses.so" -print -quit 2>/dev/null)
 EXEC=JeuDeNim
@@ -9,9 +9,10 @@ SRC= $(shell find src/ -name "*.cpp")
 HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.h")
 OBJ= $(SRC:src/%.cpp=obj/%.o)
 
+all: CXXFLAGS+= -O2
 all: init compile
 
-debug: CXXFLAGS+= -g
+debug: CXXFLAGS+= -g -pg
 debug: init compile
 
 build: $(OBJ)

@@ -14,6 +14,7 @@ class GameSettings
     int alignSize;
 
     int playerTypes[4];
+    int aiLevel[4];
 
     bool commited;
 
@@ -31,15 +32,16 @@ public:
 
     GameSettings *setPlayerType(int, int);
 
-    int getNumPlayers();
+    int getNumPlayers() const;
 
-    int getBoardWidth();
-    int getBoardHeight();
+    int getBoardWidth() const;
+    int getBoardHeight() const;
 
-    int getNumAlign();
-    int getAlignSize();
+    int getNumAlign() const;
+    int getAlignSize() const;
 
     int *getPlayerTypes();
+    int *getAILevels();
 
     bool animate;
 

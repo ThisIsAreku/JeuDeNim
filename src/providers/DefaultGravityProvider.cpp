@@ -2,9 +2,17 @@
 #include "providers/DefaultGravityProvider.h"
 
 #include "Logger.h"
+#include "Helpers.h"
 
 DefaultGravityProvider::DefaultGravityProvider(Grid *grid) : GravityProvider(grid)
 {
+    int maxVal = Helpers::__max(grid->getWidth(), grid->getHeight());
+    lowerCellForColumn = new int[maxVal];
+    std::fill(this->lowerCellForColumn, this->lowerCellForColumn + maxVal, grid->getHeight() - 1);
+}
+DefaultGravityProvider::~DefaultGravityProvider()
+{
+    delete [] lowerCellForColumn;
 }
 
 void DefaultGravityProvider::doGravity(std::function<void(int, int, int, int)> callback)
@@ -13,9 +21,10 @@ void DefaultGravityProvider::doGravity(std::function<void(int, int, int, int)> c
     {
         doColumnGravity(i, callback);
     }
+    seekAllFirstEmptyCell();
 }
 
-int DefaultGravityProvider::findNewTokenY(int x, int y, int max = -1)
+int DefaultGravityProvider::findNewTokenY(const int &x, const int &y, int max = -1) const
 {
     if(y >= getGrid()->getHeight() - 1)
         return y;
@@ -33,18 +42,14 @@ int DefaultGravityProvider::findNewTokenY(int x, int y, int max = -1)
     return rv;
 }
 
-int DefaultGravityProvider::findFirstEmptyCell(int x)
+int DefaultGravityProvider::getFirstEmptyCell(const int& x) const
 {
-    for(int i = 0; i < getGrid()->getHeight(); ++i)
-    {
-        if(getGrid()->getGridAt(x, i) > 0)
-            return i - 1;
-    }
-    return getGrid()->getHeight() - 1;
+    return this->lowerCellForColumn[x];
 }
 
 
-void DefaultGravityProvider::doColumnGravity(int x, std::function<void(int, int, int, int)> callback)
+
+void DefaultGravityProvider::doColumnGravity(const int &x, std::function<void(int, int, int, int)> callback)
 {
     int player, newY;
     int lower = getGrid()->getHeight();
@@ -60,6 +65,26 @@ void DefaultGravityProvider::doColumnGravity(int x, std::function<void(int, int,
                 getGrid()->moveGridAt(x, j, x, newY);
                 if(callback != NULL)
                     callback(player, x, j, newY);
+            }
+        }
+    }
+}
+
+void DefaultGravityProvider::changeColumnFirstEmptyCell(const int& x, const int& v)
+{
+    lowerCellForColumn[x] += v;
+}
+void DefaultGravityProvider::seekAllFirstEmptyCell()
+{
+    std::fill(this->lowerCellForColumn, this->lowerCellForColumn + Helpers::__max(getGrid()->getWidth(), getGrid()->getHeight()), getGrid()->getHeight() - 1);
+    for (int x = 0; x < getGrid()->getWidth(); ++x)
+    {
+        for(int i = 0; i < getGrid()->getHeight(); ++i)
+        {
+            if(getGrid()->getGridAt(x, i) > 0)
+            {  
+                this->lowerCellForColumn[x] = i - 1;
+                break;
             }
         }
     }

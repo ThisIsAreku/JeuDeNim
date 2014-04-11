@@ -224,13 +224,11 @@ void DisplayGrid::render()
 
 bool DisplayGrid::placeToken(int player, int col)
 {
-    int y = this->game->getGravityProvider()->findFirstEmptyCell(col);
+    int y = this->game->getGrid()->getGravityProvider()->getFirstEmptyCell(col);
     if(y > -1)
     {
         this->game->getGrid()->setGridAt(col, y, player);
         this->tokenAnimator->animateToken(player, col, 0, y);
-
-        this->game->getWinnerChecker()->onPlaceToken(col, y);
         return true;
     }
     return false;
@@ -241,10 +239,8 @@ bool DisplayGrid::removeToken(int x, int y)
     if(this->game->getGrid()->getGridAt(x, y) > 0)
     {
         this->game->getGrid()->forceSetGridAt(x, y, 0);
-        this->game->getGravityProvider()->doColumnGravity(x, std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
+        this->game->getGrid()->getGravityProvider()->doColumnGravity(x, std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-
-        this->game->getWinnerChecker()->onRemoveToken(x, y);
         return true;
     }
     //
@@ -262,12 +258,9 @@ void DisplayGrid::rotate(EntityTurnAction r)
     redrawAll(game->getGameSettings()->animate);
 
     this->tokenAnimator->setModifier(2.0);
-    this->game->getGravityProvider()->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
+    this->game->getGrid()->getGravityProvider()->doGravity(std::bind((&TokenAnimator::animateToken), this->tokenAnimator,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     this->tokenAnimator->setModifier(1.0);
-
-
-    this->game->getWinnerChecker()->onRotate();
 }
 
 int DisplayGrid::getShiftX()

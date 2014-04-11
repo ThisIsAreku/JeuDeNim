@@ -27,6 +27,8 @@ void WindowManager::createWindow(int winId, int w, int h, int x, int y)
 {
     if(winId >= WIN_COUNT || releasing || !initialized)
         return;
+    if(this->win[winId] != 0)
+        return;
     if(this->win[winId] != NULL)
     {
         Logger::log << "WindowManager: Window#" << winId << " already created" << std::endl;
@@ -50,7 +52,7 @@ Window *WindowManager::getWindow(int winId)
         return NULL;
     if(this->win[winId] == NULL)
     {
-        Logger::log << "WindowManager: requested Window#" << winId << " is null, creating.." << std::endl;
+        Logger::log << "WindowManager: requested Window#" << winId << " is null, creating all windows.." << std::endl;
         initWindows();
     }
     return this->win[winId];
@@ -63,12 +65,11 @@ void WindowManager::initWindows()
     double cols = COLS - 19;
     int lines = LINES - 5;
 
-    createWindow(WIN_GAME_GRID,     cols,   lines,  0,              1);
-    createWindow(WIN_SCOREBOARD,    18,       lines,  cols + 1,   1);
-    createWindow(WIN_GAME_TURN,     COLS,   4,      0,              lines + 1);
+    createWindow(WIN_GAME_GRID,     cols,   lines,  0,          1);
+    createWindow(WIN_SCOREBOARD,    18,     lines,  cols + 1,   1);
+    createWindow(WIN_GAME_TURN,     COLS,   4,      0,          lines + 1);
 
-
-    createWindow(WIN_HELP,     cols,   lines,  0,              1);
+    createWindow(WIN_HELP,          cols,   lines,  0,          1);
 }
 void WindowManager::initNcurses()
 {
@@ -148,6 +149,7 @@ void WindowManager::initialize(const char *title)
 {
     if(initialized)
         return;
+    Logger::log << "initialize.." << std::endl;
 
     initWindows();
     initColors();

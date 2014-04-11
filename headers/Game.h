@@ -48,6 +48,8 @@ class Game
 
     bool displayingHelp;
 
+    unsigned long tick;
+
     unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
     int konamiStep = 0;
 
@@ -73,7 +75,6 @@ public:
     DisplayGrid *getDisplayGrid();
     Grid *getGrid();
     GameSettings *getGameSettings();
-    GravityProvider *getGravityProvider();
     WinnerChecker *getWinnerChecker();
 
     void doKeyboardActions(chtype);

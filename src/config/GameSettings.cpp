@@ -1,4 +1,5 @@
 #include "config/GameSettings.h"
+#include "constants.h"
 
 GameSettings::GameSettings()
 {
@@ -16,6 +17,8 @@ GameSettings::GameSettings()
 
     for(int i = 0; i < 4; i++)
         playerTypes[i] = 0;
+    for(int i = 0; i < 4; i++)
+        aiLevel[i] = 1;
 }
 
 GameSettings *GameSettings::setNumPlayers(int numPlayers)
@@ -55,29 +58,33 @@ GameSettings *GameSettings::setPlayerType(int playerId, int playerType)
     return this;
 }
 
-int GameSettings::getNumPlayers()
+int GameSettings::getNumPlayers() const
 {
     return numPlayers;
 }
-int GameSettings::getBoardWidth()
+int GameSettings::getBoardWidth() const
 {
     return boardWidth;
 }
-int GameSettings::getBoardHeight()
+int GameSettings::getBoardHeight() const
 {
     return boardHeight;
 }
-int GameSettings::getNumAlign()
+int GameSettings::getNumAlign() const
 {
     return numAlign;
 }
-int GameSettings::getAlignSize()
+int GameSettings::getAlignSize() const
 {
     return alignSize;
 }
 int *GameSettings::getPlayerTypes()
 {
     return playerTypes;
+}
+int *GameSettings::getAILevels()
+{
+    return aiLevel;
 }
 
 void GameSettings::commit()
@@ -97,10 +104,14 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     win->printAt(0, baseLine++, "(IA n'est pas encore implémenté)");
 
     char msg[19] = "Type du joueur X: ";
+    char msg_lvl[43] = "Difficulté (0: Ghââ!?.., 9: hardcore): ";
     for(int i = 0; i < numPlayers; i++)
     {
         msg[15] = '0' + (i + 1);
         askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
+        if(playerTypes[i] == ENTITY_AI)
+            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 9);
+
     }
     return this;
 }
