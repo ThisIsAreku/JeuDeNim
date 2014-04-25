@@ -15,13 +15,6 @@ class DisplayGrid : public Renderable
 
     bool shiftEnabled;
 
-    int last_x;
-    int last_y;
-
-    int **matrice;
-
-    int currentRotationValue;
-
     TokenAnimator *tokenAnimator;
 
     void drawRuler();
@@ -42,7 +35,7 @@ public:
     bool placeToken(int, int);
     bool removeToken(int, int);
     void moveToken(int, int, int, int);
-    void rotate(EntityTurnAction r);
+    void rotate(Rotation r);
 
     void init();
     UpdateState update(chtype);

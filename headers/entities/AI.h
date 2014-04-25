@@ -10,18 +10,6 @@
 
 #include "Grid.h"
 
-enum IAComputationResultCode
-{
-    RESULT_CONTINUE,
-    RESULT_STOP,
-    RESULT_FAILURE
-};
-struct IAComputationResult
-{
-    IAComputationResultCode resultCode;
-    int resultIndex;
-    IAComputationResult(IAComputationResultCode _resultCode, int _resultIndex) : resultCode(_resultCode), resultIndex(_resultIndex) {};
-};
 struct IATurnChoice
 {
     EntityTurnAction action = TOKEN_PLACE;
@@ -48,19 +36,21 @@ class AI : public Entity
     int EVAL_MAX = 10000000;
     int EVAL_MIN = -10000000;
 
+    int cellChoiceC;
+
+    long totalEvalOps;
+    long currentEvalOps;
+
+    bool doRemove = false;
+    bool doRotate = true;
+
     WinnerChecker *winnerChecker;
 
     void startAIComputation();
 
+    int alphabeta(Grid, int, int, int, int);
 
-    int OtherTurn(Grid, int, int); //min
-    int AITurn(Grid, int);        //max
-
-    int eval(const Grid &, const int &) const;
-
-    IAComputationResultCode computeTokenPlace(Grid &grid, int &x, int &y, const int &entityIndex);
-    IAComputationResultCode computeTokenRemove(Grid &grid, int &x, int &y, const int &entityIndex);
-    IAComputationResultCode computeRotate(Grid &grid, int &x, int &y, const int &entityIndex);
+    int eval(Grid &, const int &);
 
 public:
     AI(Game *, int, int);
@@ -74,6 +64,8 @@ public:
 
     const char *getId();
     int getEntityType();
+
+    int getOperationPercent() const;
 
 };
 

@@ -46,12 +46,12 @@ UpdateState Humain::update(int ch)
     switch(ch)
     {
     case 'r':
-        turnAction = ROTATE_CLOCKWISE;
-        getGame()->onEntityTurnCompleted(turnAction, -1, -1);
+        turnAction = ROTATE;
+        getGame()->onEntityTurnCompleted(turnAction, ROTATE_CLOCKWISE, -1);
         break;
     case 't':
-        turnAction = ROTATE_COUNTERCLOCKWISE;
-        getGame()->onEntityTurnCompleted(turnAction, -1, -1);
+        turnAction = ROTATE;
+        getGame()->onEntityTurnCompleted(turnAction, ROTATE_COUNTERCLOCKWISE, -1);
         break;
         /*case 'p':
             if(getGame()->getGrid()->isFull())

@@ -1,6 +1,8 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
+#include <fstream>
+
 #include "structs/EntityTurnAction.h"
 #include "providers/GravityProvider.h"
 class GravityProvider;
@@ -9,6 +11,8 @@ class Grid
 {
 
     GravityProvider *gravityProvider;
+
+    bool modified;
 
     int currentRotationValue;
 
@@ -41,18 +45,25 @@ public:
     bool isFull() const;
     int getFilledCells() const;
     int getTotalCells() const;
-    int getCellsForPlayer(const int&) const;
+    int getCellsForPlayer(const int &) const;
+    int getRotation() const;
 
 
-    void debugGrid();
+    void debugGrid() const;
 
     void clone(Grid &b);
+
+    bool isModified() const;
+    void resetModified();
 
 
     GravityProvider *getGravityProvider();
     Grid &operator =(Grid);
 
+    friend std::ostream &operator <<(std::ostream &, Grid &);
+    friend std::istream &operator >>(std::istream &, Grid &);
 
 };
+
 
 #endif

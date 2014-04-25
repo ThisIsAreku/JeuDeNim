@@ -2,6 +2,11 @@
 #include <sstream>
 #include <thread>
 
+#ifdef __linux__
+#include <sys/stat.h>
+#else
+#endif
+
 #include "Game.h"
 
 #include "widgets/CellCursor.h"
@@ -9,7 +14,6 @@
 #include "entities/Humain.h"
 #include "entities/AI.h"
 #include "providers/DefaultGravityProvider.h"
-
 
 
 #include "Logger.h"
@@ -30,11 +34,26 @@ Game::Game()
     game_end = turn_end = false;
     displayingHelp = false;
     random_testing = false;
+
+#ifdef __linux__
+    char *tmp = getenv("HOME");
+    saveFilePath = new char[strlen(tmp) + 12];
+
+    strncpy(saveFilePath, tmp, strlen(tmp));
+    strncpy(saveFilePath + strlen(tmp), "/.jeudenim/", 12);
+
+    mkdir(saveFilePath, 0777);
+#else
+    saveFilePath = new char[3];
+    strncpy(saveFilePath, "./", 3);
+#endif
+    Logger::log << "Save file path is : " << saveFilePath << std::endl;
 }
 Game::~Game()
 {
     delete this->gameSettings;
     delete this->manager;
+    delete [] saveFilePath;
 }
 bool Game::isRandomTesting()
 {
@@ -225,14 +244,30 @@ void Game::render()
 
 }
 
+void Game::renderOps()
+{
+    if(getCurrentPlayer()->getOperationPercent() == 0)
+        getWindowManager()->print(WIN_GAME_TURN, -5, 1, "   ");
+
+    getWindowManager()->printInt(WIN_GAME_TURN, -5, 1, getCurrentPlayer()->getOperationPercent());
+    getWindowManager()->refreshWindow(WIN_GAME_TURN);
+}
+
 void Game::doKeyboardActions(chtype ch)
 {
     if(ch == KEY_F(12))
         interrupted = true;
-    if(ch == KEY_F(9))
-        getGameSettings()->animate = !getGameSettings()->animate;
     if(ch == 'h')
         displayHelp();
+
+    if(displayingHelp)
+        return;
+    if(ch == KEY_F(9))
+        getGameSettings()->animate = !getGameSettings()->animate;
+    if(ch == KEY_F(6))
+        saveState(0);
+    if(ch == KEY_F(7))
+        restoreState(0);
 }
 
 void Game::invokeEntityTurn(int n)
@@ -263,9 +298,10 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     }
     else
     {
-        getDisplayGrid()->rotate(action);
+        Rotation rotate = (Rotation) x;
+        getDisplayGrid()->rotate(rotate);
         oss << "Rt @ ";
-        if(action == ROTATE_CLOCKWISE)
+        if(rotate == ROTATE_CLOCKWISE)
         {
             oss << "Left";
         }
@@ -408,6 +444,8 @@ void Game::displayHelp()
     win->printAt(34, i++, "- L: Bas");
     win->printAt(34, i++, "- K: Gauche");
     win->printAt(34, i++, "- M: Droite");
+    i++;
+    win->printAt(0, i, "Appuyez sur F6 pour sauvegarder, F7 pour charger");
 
 
     win->printAt(0, -1, "Appuyez sur [H] pour fermer l'aide");
@@ -417,6 +455,80 @@ void Game::displayHelp()
 
     overlay(getWindowManager()->getWindow(WIN_GAME_GRID)->getHandle(), win->getHandle());
     refresh();
+}
+
+
+void Game::saveState(int slotId)
+{
+    if(slotId < 0 || slotId > 9)
+        return;
+    char *thisSaveFile = new char[strlen(saveFilePath) + strlen(saveFileName) + 1];
+
+    strcpy(thisSaveFile, saveFilePath);
+    strcpy(thisSaveFile + strlen(saveFilePath), saveFileName);
+
+    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + slotId;
+    Logger::log << "Saving to " << thisSaveFile << std::endl;
+
+    std::ofstream saveFile(thisSaveFile, std::ofstream::out | std::ofstream::trunc);
+    if(saveFile)
+    {
+
+        saveFile << currentPlayer << std::endl << *getGameSettings() << *getGrid();
+        saveFile << "ALL YOUR BASE ARE BELONG TO US";
+    }
+    delete [] thisSaveFile;
+}
+
+void Game::restoreState(int slotId)
+{
+    if(slotId < 0 || slotId > 9)
+        return;
+    char *thisSaveFile = new char[strlen(saveFilePath) + strlen(saveFileName) + 1];
+
+    strcpy(thisSaveFile, saveFilePath);
+    strcpy(thisSaveFile + strlen(saveFilePath), saveFileName);
+
+    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + slotId;
+    Logger::log << "Loading from " << thisSaveFile << std::endl;
+
+    std::ifstream saveFile(thisSaveFile, std::ofstream::in);
+    if(saveFile)
+    {
+        for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
+            delete this->players[i];
+        delete [] this->players;
+
+        saveFile >> currentPlayer >> *getGameSettings() >> *getGrid();
+
+        this->players = new Entity*[getGameSettings()->getNumPlayers()];
+
+        for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
+        {
+            switch(getGameSettings()->getPlayerTypes()[i])
+            {
+            case ENTITY_HUMAIN:
+                this->players[i] = new Humain(this, i + 1);
+                break;
+            case ENTITY_DUMBASS:
+                this->players[i] = new Random(this, i + 1);
+                break;
+            case ENTITY_AI:
+                this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i]);
+                break;
+            default:
+                exit(-1);
+            }
+            this->players[i]->init();
+        }
+
+        getWindowManager()->getWindow(WIN_GAME_GRID)->clear();
+        getWindowManager()->getWindow(WIN_SCOREBOARD)->clear();
+        playTurnIndex = 0;
+        getDisplayGrid()->init();
+        invokeEntityTurn(currentPlayer);
+    }
+    delete [] thisSaveFile;
 }
 
 /***********/

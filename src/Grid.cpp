@@ -11,6 +11,7 @@ Grid::Grid(int initWidth, int initHeight)
 
     this->currentRotationValue = 0;
     this->filledCells = 0;
+    this->modified = false;
 
     allocate();
 
@@ -26,6 +27,7 @@ Grid::Grid(Grid &grid)
 
     this->currentRotationValue = grid.currentRotationValue;
     this->filledCells = grid.filledCells;
+    this->modified = grid.modified;
 
     allocate();
 
@@ -43,8 +45,9 @@ Grid::~Grid()
     delete [] countCellsByPlayers;
 }
 
-void Grid::debugGrid()
+void Grid::debugGrid() const
 {
+    Logger::log << std::endl;
     for (int i = 0; i < initWidth; ++i)
     {
         for (int j = 0; j < initHeight; ++j)
@@ -62,6 +65,7 @@ void Grid::clone(Grid &grid)
 
     this->currentRotationValue = grid.currentRotationValue;
     this->filledCells = grid.filledCells;
+    this->modified = grid.modified;
 
     std::copy(grid.matriceData, grid.matriceData + totalCells, this->matriceData);
     std::copy(grid.countCellsByPlayers, grid.countCellsByPlayers + 4, this->countCellsByPlayers);
@@ -145,10 +149,12 @@ bool Grid::setGridAt(int x, int y, int v)
     {
         this->filledCells++;
         this->countCellsByPlayers[v - 1]++;
+        //Logger::log << "setGridAt: [" << x << "," << y << "] ";
 
         getGravityProvider()->changeColumnFirstEmptyCell(x, -1);
         convertCoords(x, y);
         this->matrice[x][y] = v;
+        modified = true;
         return true;
     }
     else
@@ -181,6 +187,7 @@ bool Grid::forceSetGridAt(int x, int y, int v)
 
         convertCoords(x, y);
         this->matrice[x][y] = v;
+        modified = true;
         return true;
     }
     else
@@ -194,11 +201,13 @@ void Grid::moveGridAt(int src_x, int src_y, int dst_x, int dst_y)
 {
     if(src_x != dst_x)
         return;
-    if((0 <= src_x && src_x < getWidth()) && (0 <= src_y && src_y < getHeight()) && (0 <= dst_y && dst_y < getHeight())){
+    if((0 <= src_x && src_x < getWidth()) && (0 <= src_y && src_y < getHeight()) && (0 <= dst_y && dst_y < getHeight()))
+    {
         convertCoords(src_x, src_y);
         convertCoords(dst_x, dst_y);
         this->matrice[dst_x][dst_y] = this->matrice[src_x][src_y];
         this->matrice[src_x][src_y] = 0;
+        modified = true;
     }
 }
 
@@ -209,6 +218,17 @@ void Grid::rotate(int rotation)
         currentRotationValue = 0;
     else if(currentRotationValue < 0)
         currentRotationValue = 3;
+
+    modified = true;
+}
+
+bool Grid::isModified() const
+{
+    return this->modified;
+}
+void Grid::resetModified()
+{
+    this->modified = false;
 }
 
 int Grid::getWidth() const
@@ -240,7 +260,59 @@ int Grid::getTotalCells() const
 {
     return this->totalCells;
 }
-int Grid::getCellsForPlayer(const int& p) const
+int Grid::getCellsForPlayer(const int &p) const
 {
     return this->countCellsByPlayers[p];
+}
+int Grid::getRotation() const
+{
+    return this->currentRotationValue;
+}
+
+std::ostream &operator <<(std::ostream &a, Grid &b)
+{
+    a << b.initWidth << " " << b.initHeight << std::endl << b.currentRotationValue << " " << b.filledCells << std::endl;
+    for (int i = 0; i < b.totalCells; ++i)
+    {
+        a << b.matriceData[i] << " ";
+    }
+    a << std::endl;
+    for (int i = 0; i < 4; ++i)
+    {
+        a << b.countCellsByPlayers[i] << " ";
+    }
+    a << std::endl;
+    return a;
+}
+
+std::istream &operator >>(std::istream &a, Grid &b)
+{
+    delete [] b.matrice;
+    delete [] b.matriceData;
+
+    a >> b.initWidth >> b.initHeight >> b.currentRotationValue >> b.filledCells;
+
+    b.totalCells = b.initWidth * b.initHeight;
+    b.matrice = new int*[b.initWidth];
+    b.matriceData = new int[b.totalCells];
+
+    for (int i = 0; i < b.initWidth; ++i)
+    {
+        b.matrice[i] = b.matriceData + (i * b.initHeight);
+    }
+
+    for (int i = 0; i < b.totalCells; ++i)
+    {
+        a >> b.matriceData[i];
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        a >> b.countCellsByPlayers[i];
+    }
+
+
+    b.getGravityProvider()->seekAllFirstEmptyCell();
+
+    return a;
 }

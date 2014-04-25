@@ -2,6 +2,7 @@
 #include "entities/EntityListener.h"
 
 #include <ctime>
+#include <cmath>
 #include "Logger.h"
 
 AI::AI(Game *game, int entityIndex, int level) : Entity(game, entityIndex)
@@ -15,6 +16,11 @@ AI::~AI()
     delete this->winnerChecker;
 }
 
+int AI::getOperationPercent() const
+{
+    return (currentEvalOps * 100) / totalEvalOps;
+}
+
 void AI::startAIComputation()
 {
     using namespace std::placeholders;
@@ -23,64 +29,50 @@ void AI::startAIComputation()
     Grid grid(*getGame()->getGrid());
 
     // cols + delete + rotate
-    int numPossibles = getGame()->getGrid()->getWidth() + getGame()->getGrid()->getTotalCells() + 2;
+    int numPossibles = getGame()->getGrid()->getWidth()/* + getGame()->getGrid()->getTotalCells() + 2*/;
+    totalEvalOps = numPossibles;
+    /*for(int i = difficulty; i > 0; --i)
+        totalEvalOps += pow(numPossibles, i);*/
 
-    int cellChoiceC = -1;
+    currentEvalOps = 0;
+    Logger::log << "totalEvalOps: " << totalEvalOps << std::endl;
+
+    cellChoiceC = 0;
     int cellFinalChoiceC = 0;
     IATurnChoice *cellChoice = new IATurnChoice[numPossibles];
     IATurnChoice *cellFinalChoice = new IATurnChoice[numPossibles];
 
     int evalMax = EVAL_MIN;
+    getGame()->renderOps();
 
-    int x = -1;
-    int y = -1;
-
-    IAComputationResultCode result = computeTokenPlace(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
+    for (int i = 0; i < grid.getWidth(); ++i)
     {
-        cellChoiceC += 1;
-        cellChoice[cellChoiceC].set(TOKEN_PLACE, 0, x, y);
-        if(result == RESULT_CONTINUE)
+        currentEvalOps++;
+        getGame()->renderOps();
+
+        int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
+        if(placePos == -1)
+            continue;
+
+        grid.setGridAt(i, placePos, getEntityIndex());
+        r_eval = alphabeta(grid, difficulty, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+        if(r_eval > evalMax)
         {
-            r_eval = OtherTurn(grid, difficulty, nextEntityIndex);
-            cellChoice[cellChoiceC].score = r_eval;
-            evalMax = Helpers::__max(r_eval, evalMax);
-            grid.clone(*getGame()->getGrid());
+            cellChoiceC = 0;
+            evalMax = r_eval;
         }
-        else
-        {
-            cellChoice[cellChoiceC].valid = false; // coup impossible
-        }
-        result = computeTokenPlace(grid, x, y, getEntityIndex());
+        if(r_eval == evalMax)
+            cellChoice[cellChoiceC++].set(TOKEN_PLACE, r_eval, i, placePos);
+
+        grid.clone(*getGame()->getGrid());
     }
+    getGame()->renderOps();
 
-
-    x = 0;
-    y = 0;
-
-    result = computeTokenRemove(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
-    {
-        cellChoiceC += 1;
-        cellChoice[cellChoiceC].set(TOKEN_REMOVE, 0, x, y);
-        if(result == RESULT_CONTINUE)
-        {
-            r_eval = OtherTurn(grid, difficulty, nextEntityIndex);
-            cellChoice[cellChoiceC].score = r_eval; // on minimise ce coup
-            evalMax = Helpers::__max(r_eval, evalMax);
-            grid.clone(*getGame()->getGrid());
-        }
-        else
-        {
-            cellChoice[cellChoiceC].valid = false; // coup impossible
-        }
-        result = computeTokenRemove(grid, x, y, getEntityIndex());
-    }
 
     Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") --------------- all turn calculated ------------" << std::endl;
 
     // partie aléatoire
-    for (int i = 0; i <= cellChoiceC; ++i) // <= car resultIndex = max-1
+    for (int i = 0; i < cellChoiceC; ++i) // <= car resultIndex = max-1
     {
         if(!cellChoice[i].valid)
             continue;
@@ -108,179 +100,67 @@ void AI::startAIComputation()
         Logger::log << "First : ";
     }
     Logger::log << turn_choice.score << " (" << turn_choice.action << ") @ " << turn_choice.x << "," << turn_choice.y << std::endl;
+    Logger::log << "totalEvalOps: " << totalEvalOps << ", iterated " << currentEvalOps << std::endl;
 
     delete [] cellChoice;
     delete [] cellFinalChoice;
 }
 
-int AI::OtherTurn(Grid parent_grid, int prof, int otherEntityIndex)
+int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, int beta)
 {
-    //MIN(AIturn)
     int r_eval = eval(parent_grid, prof);
     if(prof == 0 || this->winnerChecker->hasWinner())
         return r_eval;
 
-    int evalMin = EVAL_MAX;
-    int nextEntityIndex = (otherEntityIndex % getGame()->getGameSettings()->getNumPlayers()) + 1;
-
+    int nextEntityIndex = (thisEntityIndex % getGame()->getGameSettings()->getNumPlayers()) + 1;
+    int best = (thisEntityIndex == getEntityIndex()) ? EVAL_MIN : EVAL_MAX;
+    int value;
     Grid grid(parent_grid);
 
-    int x = -1;
-    int y = -1;
-
-    IAComputationResultCode result = computeTokenPlace(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
+    for (int i = 0; i < grid.getWidth(); ++i)
     {
-        if(result == RESULT_CONTINUE)
+        int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
+        if(placePos == -1)
+            continue;
+
+        grid.setGridAt(i, placePos, thisEntityIndex);
+
+        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, beta);
+
+        if(thisEntityIndex == getEntityIndex()) // noeud MAX
         {
-            if(nextEntityIndex == getEntityIndex())
-                r_eval = AITurn(grid, prof - 1);
-            else
-                r_eval = OtherTurn(grid, prof - 1, nextEntityIndex);
+            best = Helpers::__max(best, value);
+            if(best >= beta) // coupure beta
+                return best;
 
-            evalMin = Helpers::__min(evalMin, r_eval);
-            grid.clone(parent_grid);
+            alpha = Helpers::__max(alpha, best);
         }
-        result = computeTokenPlace(grid, x, y, getEntityIndex());
-    }
-
-
-    x = 0;
-    y = 0;
-
-    result = computeTokenRemove(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
-    {
-        if(result == RESULT_CONTINUE)
+        else // noeud min
         {
-            if(nextEntityIndex == getEntityIndex())
-                r_eval = AITurn(grid, prof - 1);
-            else
-                r_eval = OtherTurn(grid, prof - 1, nextEntityIndex);
+            best = Helpers::__min(best, value);
+            if(alpha >= best) // coupure alpha
+                return best;
 
-            evalMin = Helpers::__min(evalMin, r_eval);
-            grid.clone(parent_grid);
+            beta = Helpers::__min(beta, best);
         }
-        result = computeTokenRemove(grid, x, y, getEntityIndex());
-    }
 
-    return evalMin;
+
+        grid.clone(parent_grid);
+    }
+    return best;
 }
 
-int AI::AITurn(Grid parent_grid, int prof)
-{
-    //MAX
-    int r_eval = eval(parent_grid, prof);
-    if(prof == 0 || this->winnerChecker->hasWinner())
-        return r_eval;
-
-    int evalMax = EVAL_MIN;
-
-    Grid grid(parent_grid);
-
-    int x = -1;
-    int y = -1;
-
-    IAComputationResultCode result = computeTokenPlace(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
-    {
-        if(result == RESULT_CONTINUE)
-        {
-            evalMax = Helpers::__max(evalMax, OtherTurn(grid, prof - 1, nextEntityIndex));
-            grid.clone(parent_grid);
-        }
-        result = computeTokenPlace(grid, x, y, getEntityIndex());
-    }
-
-
-    x = 0;
-    y = 0;
-
-    result = computeTokenRemove(grid, x, y, getEntityIndex());
-    while(result != RESULT_STOP)
-    {
-        if(result == RESULT_CONTINUE)
-        {
-            evalMax = Helpers::__max(evalMax, OtherTurn(grid, prof - 1, nextEntityIndex));
-            grid.clone(parent_grid);
-        }
-        result = computeTokenRemove(grid, x, y, getEntityIndex());
-    }
-
-    return evalMax;
-}
-
-int AI::eval(const Grid &grid, const int &prof) const
+int AI::eval(Grid &grid, const int &prof)
 {
     this->winnerChecker->searchWinner(&grid, true);
 
     if(this->winnerChecker->hasWinner())
     {
         if(this->winnerChecker->hasDraw())
-        {
             return 0;
-        }
-        else if(!this->winnerChecker->isWinner(getEntityIndex() - 1))
-        {
-            return EVAL_MIN + grid.getFilledCells();
-        }
-        else
-        {
-            return EVAL_MAX - grid.getFilledCells();
-        }
+        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX : EVAL_MIN;
     }
-    int score = 0;
-    int pscore;
-    int multiplier;
-    for (int i = 0; i < getGame()->getGameSettings()->getNumPlayers(); ++i)
-    {
-        multiplier = (i == getEntityIndex() - 1) ? 1 : -1;
-
-        pscore = this->winnerChecker->getMaxAlignSize(i);
-        if(pscore <= 1)
-            pscore = 0;
-
-        score += ((pscore * 50) + grid.getCellsForPlayer(i)) * multiplier;
-    }
-    return score;
-}
-
-
-IAComputationResultCode AI::computeTokenPlace(Grid &grid, int &x, int &y, const int &entityIndex)
-{
-    ++x;
-    if(x >= grid.getWidth())
-        return RESULT_STOP;
-
-    int placePos = grid.getGravityProvider()->getFirstEmptyCell(x);
-    if(placePos == -1)
-        return RESULT_FAILURE;
-
-    grid.setGridAt(x, placePos, entityIndex);
-    return RESULT_CONTINUE;
-
-}
-IAComputationResultCode AI::computeTokenRemove(Grid &grid, int &x, int &y, const int &entityIndex)
-{
-    if(++x >= grid.getWidth()){
-        x = 0;
-        if(++y >= grid.getHeight()){
-            return RESULT_STOP;
-        }
-    }
-
-    if(grid.getGridAt(x, y) <= 0)
-        return RESULT_FAILURE;
-
-    grid.forceSetGridAt(x, y, 0);
-    grid.getGravityProvider()->doColumnGravity(x, NULL);
-    return RESULT_CONTINUE;
-}
-IAComputationResultCode AI::computeRotate(Grid &grid, int &x, int &y, const int &entityIndex)
-{
-    if(x >= 2)
-        return RESULT_STOP;
-    return RESULT_STOP; //goto fail
+    return 0;
 }
 
 

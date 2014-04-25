@@ -209,7 +209,7 @@ void WinnerChecker::setGridToCheck(const Grid *grid)
     this->grid = grid;
 }
 
-void WinnerChecker::searchWinner(const Grid *grid, bool forceCheck)
+void WinnerChecker::searchWinner(Grid *grid, bool forceCheck)
 {
     //Logger::log << "WinnerChecker::searchWinner" <<  std::endl;
     if(grid != NULL)
@@ -217,9 +217,10 @@ void WinnerChecker::searchWinner(const Grid *grid, bool forceCheck)
 
     if(!forceCheck && (grid->getFilledCells() < this->minCells))
     {
-        //Logger::log << "WinnerChecker::searchWinner not enought cells (" <<  grid->getFilledCells() << ")" << std::endl;
+        Logger::log << "WinnerChecker::searchWinner skipped" << std::endl;
         return;
     }
+    //grid->debugGrid();
 
 
     //Logger::log << "WinnerChecker::searchWinner start" <<  std::endl;
@@ -240,6 +241,14 @@ void WinnerChecker::searchWinner(const Grid *grid, bool forceCheck)
     checkDiagonalAlign();
 
     updateFlags();
+
+    grid->resetModified();
+}
+
+bool WinnerChecker::fastWinCheck(Grid *grid, bool forceCheck)
+{
+    searchWinner(grid, forceCheck);
+    return winnerFlag;
 }
 
 int WinnerChecker::getWinnerId(int id) const
@@ -267,11 +276,15 @@ int WinnerChecker::getMaxAlignSize(int playerId) const
 {
     return this->alignementsSizes[playerId];
 }
-TokenAlignement *WinnerChecker::getWinAlignement(int playerId)
+TokenAlignement *WinnerChecker::getWinAlignement(int playerId) const
 {
     if(!useGraphics)
         return NULL;
     return this->winAlignements[playerId];
+}
+int WinnerChecker::getNumWinAlignements(int playerId) const
+{
+    return this->winAlignementsCount[playerId];
 }
 bool WinnerChecker::hasWinner() const
 {

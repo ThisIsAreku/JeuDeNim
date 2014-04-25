@@ -42,7 +42,7 @@ int DefaultGravityProvider::findNewTokenY(const int &x, const int &y, int max = 
     return rv;
 }
 
-int DefaultGravityProvider::getFirstEmptyCell(const int& x) const
+int DefaultGravityProvider::getFirstEmptyCell(const int &x) const
 {
     return this->lowerCellForColumn[x];
 }
@@ -70,7 +70,7 @@ void DefaultGravityProvider::doColumnGravity(const int &x, std::function<void(in
     }
 }
 
-void DefaultGravityProvider::changeColumnFirstEmptyCell(const int& x, const int& v)
+void DefaultGravityProvider::changeColumnFirstEmptyCell(const int &x, const int &v)
 {
     lowerCellForColumn[x] += v;
 }
@@ -82,7 +82,7 @@ void DefaultGravityProvider::seekAllFirstEmptyCell()
         for(int i = 0; i < getGrid()->getHeight(); ++i)
         {
             if(getGrid()->getGridAt(x, i) > 0)
-            {  
+            {
                 this->lowerCellForColumn[x] = i - 1;
                 break;
             }

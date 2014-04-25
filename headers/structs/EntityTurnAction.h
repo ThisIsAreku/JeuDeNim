@@ -5,8 +5,12 @@ enum EntityTurnAction
 {
     TOKEN_PLACE,
     TOKEN_REMOVE,
-    ROTATE_CLOCKWISE,
-    ROTATE_COUNTERCLOCKWISE,
+    ROTATE
+};
+enum Rotation
+{
+    ROTATE_CLOCKWISE = 1,
+    ROTATE_COUNTERCLOCKWISE = -1
 };
 
 #endif

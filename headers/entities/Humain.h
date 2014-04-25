@@ -24,6 +24,11 @@ public:
 
     const char *getId();
     int getEntityType();
+
+    int getOperationPercent() const
+    {
+        return 0;
+    };
 };
 
 #endif

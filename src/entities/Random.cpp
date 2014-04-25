@@ -37,15 +37,15 @@ bool Random::doChoice()
 
     case 6:
     case 7:
-        x = -1;
+        x = ROTATE_CLOCKWISE;
         y = -1;
-        return getGame()->onEntityTurnCompleted(ROTATE_CLOCKWISE, x, y);
+        return getGame()->onEntityTurnCompleted(ROTATE, x, y);
 
     case 8:
     case 9:
-        x = -1;
+        x = ROTATE_COUNTERCLOCKWISE;
         y = -1;
-        return getGame()->onEntityTurnCompleted(ROTATE_COUNTERCLOCKWISE, x, y);
+        return getGame()->onEntityTurnCompleted(ROTATE, x, y);
     }
     return false;
 }

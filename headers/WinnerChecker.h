@@ -42,13 +42,15 @@ public:
 
     void setGridToCheck(const Grid *);
 
-    void searchWinner(const Grid *grid = NULL, bool forceCheck = false);
+    void searchWinner(Grid *grid = NULL, bool forceCheck = false);
+    bool fastWinCheck(Grid *grid = NULL, bool forceCheck = false);
     void resetWinAlignementsCount();
 
     int getWinnerId(int) const;
     int getNumWinner() const;
     int getMaxAlignSize(int) const;
-    TokenAlignement *getWinAlignement(int);
+    TokenAlignement *getWinAlignement(int) const;
+    int getNumWinAlignements(int) const;
 
     bool isWinner(int) const;
 

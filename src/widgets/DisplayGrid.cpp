@@ -112,7 +112,7 @@ void DisplayGrid::drawBaseGrid()
         }
     }
     win->AttribOn(COLOR_PAIR(30));
-    switch(currentRotationValue)
+    switch(this->game->getGrid()->getRotation())
     {
     case 0:
         win->setChar(1, 0, ACS_DIAMOND);
@@ -169,9 +169,6 @@ void DisplayGrid::drawTokens()
 
 void DisplayGrid::init()
 {
-    this->last_x = this->last_y = -1;
-    currentRotationValue = 0;
-
     Window *win = getWindow();
     if(win == NULL)
         return;
@@ -216,9 +213,7 @@ void DisplayGrid::render()
         return;
 
     drawTokens();
-    /*char r[3] = {'r', ':', '0'};
-    r[2] += currentRotationValue;
-    win->printAt(win->getWidth() - 10, 0, r);*/
+
     win->refresh();
 }
 
@@ -248,7 +243,7 @@ bool DisplayGrid::removeToken(int x, int y)
 }
 
 
-void DisplayGrid::rotate(EntityTurnAction r)
+void DisplayGrid::rotate(Rotation r)
 {
     if(r == ROTATE_CLOCKWISE)
         this->game->getGrid()->rotate(1);

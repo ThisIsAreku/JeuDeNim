@@ -1,6 +1,8 @@
 #ifndef _GAME_SETTINGS_H_
 #define _GAME_SETTINGS_H_
 
+#include <fstream>
+
 #include "display/Window.h"
 
 class GameSettings
@@ -31,6 +33,7 @@ public:
     GameSettings *setAlignSize(int);
 
     GameSettings *setPlayerType(int, int);
+    GameSettings *setAILevel(int, int);
 
     int getNumPlayers() const;
 
@@ -48,6 +51,9 @@ public:
 
     GameSettings *input(Window *, int);
     void commit();
+
+    friend std::ostream &operator <<(std::ostream &, GameSettings &);
+    friend std::istream &operator >>(std::istream &, GameSettings &);
 };
 
 #endif

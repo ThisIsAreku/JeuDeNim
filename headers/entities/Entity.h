@@ -29,6 +29,8 @@ public:
 
     virtual const char *getId() = 0;
     virtual int getEntityType() = 0;
+
+    virtual int getOperationPercent() const = 0;
 };
 
 #endif

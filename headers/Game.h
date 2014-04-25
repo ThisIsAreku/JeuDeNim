@@ -53,6 +53,9 @@ class Game
     unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
     int konamiStep = 0;
 
+    char saveFileName[7] = "SAVE_0";
+    char *saveFilePath;
+
     void loop();
 
     void init();
@@ -81,6 +84,8 @@ public:
 
     void invokeEntityTurn(int);
 
+    void renderOps();
+
     void playerWin();
 
     void displayHelp();
@@ -89,6 +94,9 @@ public:
 
     bool isRandomTesting();
     void setRandomTesting(bool);
+
+    void saveState(int);
+    void restoreState(int);
 
     void reset();
 

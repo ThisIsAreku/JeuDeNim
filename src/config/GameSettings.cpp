@@ -57,6 +57,12 @@ GameSettings *GameSettings::setPlayerType(int playerId, int playerType)
         this->playerTypes[playerId] = playerType;
     return this;
 }
+GameSettings *GameSettings::setAILevel(int playerId, int aiLevel)
+{
+    if(!this->commited)
+        this->aiLevel[playerId] = aiLevel;
+    return this;
+}
 
 int GameSettings::getNumPlayers() const
 {
@@ -136,4 +142,40 @@ void GameSettings::askForProperty(Window *win, int line, const char *title, int 
         }
     }
     while(prop < min || max < prop);
+}
+
+
+
+std::ostream &operator <<(std::ostream &a, GameSettings &b)
+{
+    a << b.alignSize << " " << b.numAlign << std::endl
+      << b.boardWidth << " " << b.boardHeight << std::endl;
+
+    a << b.numPlayers << std::endl;
+    for (int i = 0; i < b.numPlayers; ++i)
+    {
+        a << b.playerTypes[i] << " ";
+    }
+    a << std::endl;
+    for (int i = 0; i < b.numPlayers; ++i)
+    {
+        a << b.aiLevel[i] << " ";
+    }
+    a << std::endl;
+    return a;
+}
+
+std::istream &operator >>(std::istream &a, GameSettings &b)
+{
+    a >> b.alignSize >> b.numAlign >> b.boardWidth >> b.boardHeight >> b.numPlayers;
+    for (int i = 0; i < b.numPlayers; ++i)
+    {
+        a >> b.playerTypes[i];
+    }
+    for (int i = 0; i < b.numPlayers; ++i)
+    {
+        a >> b.aiLevel[i];
+    }
+    b.commit();
+    return a;
 }
