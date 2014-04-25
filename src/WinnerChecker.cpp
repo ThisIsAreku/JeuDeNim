@@ -16,7 +16,8 @@ WinnerChecker::WinnerChecker(Game *_game, bool _useGraphics)
     resetWinner();
 
     winAlignementsCount = new int[game->getGameSettings()->getNumPlayers()];
-    alignementsSizes = new int[game->getGameSettings()->getNumPlayers()];
+    alignementsCount = new int[game->getGameSettings()->getNumPlayers()];
+    maxAlignementsSizes = new int[game->getGameSettings()->getNumPlayers()];
 
     if(useGraphics)
     {
@@ -29,7 +30,8 @@ WinnerChecker::~WinnerChecker()
 {
     delete [] this->winner;
     delete [] winAlignementsCount;
-    delete [] alignementsSizes;
+    delete [] alignementsCount;
+    delete [] maxAlignementsSizes;
 
     if(useGraphics)
     {
@@ -43,8 +45,9 @@ WinnerChecker::~WinnerChecker()
 
 void WinnerChecker::resetWinAlignementsCount()
 {
-    std::fill(alignementsSizes, alignementsSizes + game->getGameSettings()->getNumPlayers(), 0);
+    std::fill(maxAlignementsSizes, maxAlignementsSizes + game->getGameSettings()->getNumPlayers(), 0);
     std::fill(winAlignementsCount, winAlignementsCount + game->getGameSettings()->getNumPlayers(), 0);
+    std::fill(alignementsCount, alignementsCount + game->getGameSettings()->getNumPlayers(), 0);
 }
 
 void WinnerChecker::resetWinner()
@@ -174,17 +177,25 @@ void WinnerChecker::searchAlign(int x, int y, int &win, int &alc, int &fx, int &
         fy = y;
         if(win > 0)
         {
-            //Logger::log << "win: " << win << ", alc: " << alc << ", this->alignementsSizes[win - 1]: " << this->alignementsSizes[win - 1] << std::endl;
-            if(this->alignementsSizes[win - 1] < alc)
-                this->alignementsSizes[win - 1] = alc;
+            //Logger::log << "win: " << win << ", alc: " << alc << ", this->maxAlignementsSizes[win - 1]: " << this->maxAlignementsSizes[win - 1] << std::endl;
+            if(alc > 1)
+            {
+                if(this->maxAlignementsSizes[win - 1] < alc)
+                    this->maxAlignementsSizes[win - 1] = alc;
+                alignementsCount[win - 1]++;
+            }
         }
     }
     else
     {
         alc++;
-        //Logger::log << "win: " << win << ", alc: " << alc << ", this->alignementsSizes[win - 1]: " << this->alignementsSizes[win - 1] << std::endl;
-        if(this->alignementsSizes[win - 1] < alc)
-            this->alignementsSizes[win - 1] = alc;
+        //Logger::log << "win: " << win << ", alc: " << alc << ", this->maxAlignementsSizes[win - 1]: " << this->maxAlignementsSizes[win - 1] << std::endl;
+        if(alc > 1)
+        {
+            if(this->maxAlignementsSizes[win - 1] < alc)
+                this->maxAlignementsSizes[win - 1] = alc;
+            alignementsCount[win - 1]++;
+        }
         if(alc == game->getGameSettings()->getAlignSize())
         {
             //Logger::log << "Align found for " << win << std::endl;
@@ -274,7 +285,11 @@ int WinnerChecker::getNumWinner() const
 }
 int WinnerChecker::getMaxAlignSize(int playerId) const
 {
-    return this->alignementsSizes[playerId];
+    return this->maxAlignementsSizes[playerId];
+}
+int WinnerChecker::getNumAlign(int playerId) const
+{
+    return this->alignementsCount[playerId];
 }
 TokenAlignement *WinnerChecker::getWinAlignement(int playerId) const
 {

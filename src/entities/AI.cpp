@@ -158,9 +158,20 @@ int AI::eval(Grid &grid, const int &prof)
     {
         if(this->winnerChecker->hasDraw())
             return 0;
-        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX : EVAL_MIN;
+        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX-prof : EVAL_MIN+prof;
     }
-    return 0;
+    int score = 0;
+    int multiplier;
+    for (int i = 0; i < getGame()->getGameSettings()->getNumPlayers(); ++i)
+    {
+        multiplier = (getEntityIndex() - 1 == i) ? 1 : -1;
+        int algn = this->winnerChecker->getMaxAlignSize(i);
+        if(algn <= 1)
+            algn = 0;
+
+        score += ((algn * 10) + this->winnerChecker->getNumAlign(i)) * multiplier;
+    }
+    return score;
 }
 
 

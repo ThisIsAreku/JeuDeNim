@@ -16,8 +16,10 @@ class WinnerChecker
 
     bool *winner;
     int *winAlignementsCount;
-    int *alignementsSizes;
     TokenAlignement **winAlignements;
+
+    int *alignementsCount;
+    int *maxAlignementsSizes;
 
     bool winnerFlag;
     bool drawFlag;
@@ -49,6 +51,7 @@ public:
     int getWinnerId(int) const;
     int getNumWinner() const;
     int getMaxAlignSize(int) const;
+    int getNumAlign(int) const;
     TokenAlignement *getWinAlignement(int) const;
     int getNumWinAlignements(int) const;
 
