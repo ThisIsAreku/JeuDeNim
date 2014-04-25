@@ -18,7 +18,7 @@ GameSettings::GameSettings()
     for(int i = 0; i < 4; i++)
         playerTypes[i] = 0;
     for(int i = 0; i < 4; i++)
-        aiLevel[i] = 1;
+        aiLevel[i] = 2;
 }
 
 GameSettings *GameSettings::setNumPlayers(int numPlayers)
