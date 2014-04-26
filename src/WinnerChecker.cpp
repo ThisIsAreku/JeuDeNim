@@ -4,11 +4,11 @@
 
 #include "Logger.h"
 
-WinnerChecker::WinnerChecker(Game *_game, bool _useGraphics)
+WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
 {
-    useGraphics = _useGraphics;
-    game = _game;
-    grid = _game->getGrid();
+    this->useGraphics = useGraphics;
+    this->game = game;
+    grid = game->getGrid();
 
     //nombre minimal de jetons pour un alignement
     minCells = (game->getGameSettings()->getAlignSize() * game->getGameSettings()->getNumAlign()) - (game->getGameSettings()->getNumAlign() - 1);
@@ -110,7 +110,7 @@ void WinnerChecker::checkDiagonalAlign()
         return;
 
     //Logger::log << "checkDiagonalAlign: Width" << std::endl;
-    unsigned int x = grid->getWidth() - 1;
+    int x = grid->getWidth() - 1;
     for (int v = 0; v < grid->getWidth(); ++v)
     {
         checkDiagonal1Align(v, 0);

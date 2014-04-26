@@ -194,12 +194,12 @@ void Game::update()
         timeout(50);
     else
         timeout(-1);
-    chtype ch = getch();
+    chtype ch = static_cast<chtype>(getch());
     logKeyboard(ch);
 
     if(getCurrentPlayer()->getEntityType() == ENTITY_HUMAIN)
     {
-        if((int)ch == -1)
+        if(static_cast<int>(ch) == -1)
             return;
     }
 
@@ -230,7 +230,7 @@ void Game::render()
     const char *playerId = getCurrentPlayer()->getId();
     getWindowManager()->print(WIN_GAME_TURN, 16, 1, " (");
     getWindowManager()->print(WIN_GAME_TURN, 18, 1, playerId);
-    getWindowManager()->print(WIN_GAME_TURN, 18 + strlen(playerId), 1, ")                  ");
+    getWindowManager()->print(WIN_GAME_TURN, 18 + static_cast<int>(strlen(playerId)), 1, ")                  ");
 
     getWindowManager()->refreshWindow(WIN_GAME_TURN);
 
@@ -246,10 +246,33 @@ void Game::render()
 
 void Game::renderOps()
 {
-    if(getCurrentPlayer()->getOperationPercent() == 0)
-        getWindowManager()->print(WIN_GAME_TURN, -5, 1, "   ");
+    double p = getCurrentPlayer()->getOperationPercent();
+    if(p == 100)
+    {
+        getWindowManager()->print(WIN_GAME_TURN, -7, 1, "       ");
+        getWindowManager()->print(WIN_GAME_TURN, -18, 0, "                   ");
+        getWindowManager()->refreshWindow(WIN_GAME_TURN);
+        return;
+    }
+    if(p == 0)
+    {
+        getWindowManager()->print(WIN_GAME_TURN, -18, 0, "Calcul en cours...");
+    }
 
-    getWindowManager()->printInt(WIN_GAME_TURN, -5, 1, getCurrentPlayer()->getOperationPercent());
+    int i = 0;
+    if(p < 10)
+        i =1;
+    else if(p < 100)
+        i =2;
+    else if(p == 100)
+        i =3;
+
+    char str[6];
+    sprintf(str, "%.2f", p);
+    getWindowManager()->print(WIN_GAME_TURN, -4-i, 1, str);
+    getWindowManager()->print(WIN_GAME_TURN, -1, 1, "%%");
+
+
     getWindowManager()->refreshWindow(WIN_GAME_TURN);
 }
 
@@ -292,13 +315,15 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     }
     else if(action == TOKEN_REMOVE)
     {
+        if(getGrid()->getGridAt(x, y) != currentPlayer+1)
+            return false;
         if(!getDisplayGrid()->removeToken(x, y))
             return false;
         oss << "-- @ " << x << "," << y;
     }
     else
     {
-        Rotation rotate = (Rotation) x;
+        Rotation rotate = static_cast<Rotation>(x);
         getDisplayGrid()->rotate(rotate);
         oss << "Rt @ ";
         if(rotate == ROTATE_CLOCKWISE)
@@ -373,7 +398,7 @@ void Game::appendToPlayTurns(const char *s)
 
 void Game::logKeyboard(chtype ch)
 {
-    if((int)ch == -1)
+    if(static_cast<int>(ch) == -1)
         return;
     Logger::log << ch << " :: ";
     unsigned long longVal = static_cast<unsigned long>(ch);
@@ -467,7 +492,7 @@ void Game::saveState(int slotId)
     strcpy(thisSaveFile, saveFilePath);
     strcpy(thisSaveFile + strlen(saveFilePath), saveFileName);
 
-    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + slotId;
+    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + static_cast<char>(slotId);
     Logger::log << "Saving to " << thisSaveFile << std::endl;
 
     std::ofstream saveFile(thisSaveFile, std::ofstream::out | std::ofstream::trunc);
@@ -489,7 +514,7 @@ void Game::restoreState(int slotId)
     strcpy(thisSaveFile, saveFilePath);
     strcpy(thisSaveFile + strlen(saveFilePath), saveFileName);
 
-    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + slotId;
+    thisSaveFile[strlen(thisSaveFile) - 1] = '0' + static_cast<char>(slotId);
     Logger::log << "Loading from " << thisSaveFile << std::endl;
 
     std::ifstream saveFile(thisSaveFile, std::ofstream::in);
@@ -536,6 +561,7 @@ void Game::restoreState(int slotId)
 /***********/
 void Game::start()
 {
+    konamiStep = 0;
     if(COLS < 80 || LINES < 24)
     {
         getWindowManager()->leaveCurseMode();
@@ -550,8 +576,8 @@ void Game::start()
 
     Logger::log << "COLS: " << COLS << ", LINES: " << LINES << std::endl;
 
-    int maxWidth = (int)(((COLS  - 19) - 2 - 2) / CELL_WIDTH) - 1;
-    int maxHeight = (int)(((LINES - 5) - 1 - 2) / CELL_HEIGHT) - 1;
+    int maxWidth = static_cast<int>((((COLS  - 19) - 2 - 2) / CELL_WIDTH) - 1);
+    int maxHeight = static_cast<int>((((LINES - 5) - 1 - 2) / CELL_HEIGHT) - 1);
     int maxSize = maxWidth;
     if(maxSize > maxHeight)
         maxSize = maxHeight;

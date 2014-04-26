@@ -1,5 +1,4 @@
 #include "entities/Humain.h"
-#include "entities/EntityListener.h"
 
 
 #include "Logger.h"
@@ -41,7 +40,7 @@ void Humain::init()
     this->cursor->init();
 
 }
-UpdateState Humain::update(int ch)
+UpdateState Humain::update(chtype ch)
 {
     switch(ch)
     {

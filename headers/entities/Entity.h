@@ -24,13 +24,13 @@ public:
     virtual int turn() = 0;
 
     virtual void init() = 0;
-    virtual UpdateState update(int) = 0;
+    virtual UpdateState update(chtype) = 0;
     virtual void render() = 0;
 
     virtual const char *getId() = 0;
     virtual int getEntityType() = 0;
 
-    virtual int getOperationPercent() const = 0;
+    virtual double getOperationPercent() const = 0;
 };
 
 #endif

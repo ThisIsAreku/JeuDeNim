@@ -62,7 +62,7 @@ void WindowManager::initWindows()
     if(releasing || !initialized)
         return;
 
-    double cols = COLS - 19;
+    int cols = COLS - 19;
     int lines = LINES - 5;
 
     createWindow(WIN_GAME_GRID,     cols,   lines,  0,          1);
@@ -104,8 +104,7 @@ void WindowManager::initColors()
 {
     if(!has_colors())
     {
-        const std::string no_colors("Pas de couleurs :(");
-        mvprintw(0, COLS - no_colors.length(), no_colors.c_str());
+        mvprintw(0, COLS - 19, "Pas de couleurs :(");
     }
     refresh();
     start_color();
@@ -132,7 +131,7 @@ void WindowManager::initColors()
 
 void WindowManager::ntoc(const int &n, char *str)
 {
-    str[0] = '0' + n;
+    str[0] = '0' + static_cast<char>(n);
     str[1] = '\0';
 }
 void WindowManager::safe_ntoc(const int &, char *)
@@ -154,7 +153,7 @@ void WindowManager::initialize(const char *title)
     initWindows();
     initColors();
 
-    mvprintw(0, (COLS / 2) - (strlen(title) / 2), title);
+    mvprintw(0, (COLS / 2) - (static_cast<int>(strlen(title)) / 2), title);
     initialized = true;
 }
 

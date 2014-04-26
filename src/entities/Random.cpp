@@ -1,5 +1,4 @@
 #include "entities/Random.h"
-#include "entities/EntityListener.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -8,7 +7,7 @@
 
 Random::Random(Game *game, int entityIndex) : Entity(game, entityIndex)
 {
-    srand(time(NULL));
+    srand(static_cast<unsigned int>(time(NULL)));
 }
 Random::~Random()
 {
@@ -59,7 +58,7 @@ int Random::turn()
 void Random::init()
 {
 }
-UpdateState Random::update(int)
+UpdateState Random::update(chtype)
 {
     while(!doChoice());
 

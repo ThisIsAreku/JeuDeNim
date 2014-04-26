@@ -45,13 +45,13 @@ void DisplayGrid::drawRuler()
     char s[10];
     for(int i = 1 + getShiftX() * -1; i <= getWidth(); i++)
     {
-        sprintf(s, "%d", (int)(i));
+        sprintf(s, "%d", static_cast<int>(i));
         win->printAt_unshifted(++inc * CELL_WIDTH, 0, s);
     }
     inc = 0;
     for(int j = 1 + getShiftY() * -1; j <= getHeight(); j++)
     {
-        sprintf(s, "%d", (int)(j));
+        sprintf(s, "%d", static_cast<int>(j));
         win->printAt_unshifted(0, ++inc * CELL_HEIGHT, s);
     }
 }
@@ -153,7 +153,7 @@ void DisplayGrid::drawTokens()
             val = this->game->getGrid()->getGridAt(i, j);
             if(val > 0)
             {
-                s[1] = '0' + val;
+                s[1] = '0' + static_cast<char>(val);
                 win->AttribOn(COLOR_PAIR(val));
             }
             else

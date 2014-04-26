@@ -50,10 +50,10 @@ class Game
 
     unsigned long tick;
 
-    unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
-    int konamiStep = 0;
+    const unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
+    int konamiStep;
 
-    char saveFileName[7] = "SAVE_0";
+    const char saveFileName[7] = "SAVE_0";
     char *saveFilePath;
 
     void loop();
@@ -70,7 +70,7 @@ public:
     Game();
     virtual ~Game();
 
-    static long getTime();
+    //static long getTime();
 
     void start();
     WindowManager *getWindowManager();

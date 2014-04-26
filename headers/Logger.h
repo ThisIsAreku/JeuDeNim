@@ -33,7 +33,7 @@ public:
         if(debug)
             std::cerr << v;
         return *this;
-    };
+    }
     std::ostream &operator<<(std::ostream & (*f)(std::ostream &)) const
     {
         if(debug)

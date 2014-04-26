@@ -2,7 +2,6 @@
 #define _RANDOM_H_
 
 #include "entities/Entity.h"
-#include "entities/EntityListener.h"
 
 class Random : public Entity
 {
@@ -14,15 +13,15 @@ public:
     int turn();
 
     void init();
-    UpdateState update(int);
+    UpdateState update(chtype);
     void render();
 
     const char *getId();
     int getEntityType();
 
-    int getOperationPercent() const
+    double getOperationPercent() const
     {
-        return 0;
+        return .0;
     };
 };
 

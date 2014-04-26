@@ -18,7 +18,7 @@ GameSettings::GameSettings()
     for(int i = 0; i < 4; i++)
         playerTypes[i] = 0;
     for(int i = 0; i < 4; i++)
-        aiLevel[i] = 2;
+        aiLevel[i] = 3;
 }
 
 GameSettings *GameSettings::setNumPlayers(int numPlayers)
@@ -110,13 +110,13 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     win->printAt(0, baseLine++, "(IA n'est pas encore implémenté)");
 
     char msg[19] = "Type du joueur X: ";
-    char msg_lvl[43] = "Difficulté (0: Ghââ!?.., 9: hardcore): ";
+    char msg_lvl[44] = "Difficulté (0: Ghââ!?.., 15: hardcore): ";
     for(int i = 0; i < numPlayers; i++)
     {
-        msg[15] = '0' + (i + 1);
+        msg[15] = '0' + static_cast<char>(i + 1);
         askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
         if(playerTypes[i] == ENTITY_AI)
-            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 9);
+            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 15);
 
     }
     return this;
@@ -128,11 +128,11 @@ void GameSettings::askForProperty(Window *win, int line, const char *title, int 
     win->printAt(0, line, title);
     char str[10];
     sprintf(str, "%d", prop);
-    win->printAt(strlen(title), line, str);
+    win->printAt(static_cast<int>(strlen(title)), line, str);
     win->refresh();
     do
     {
-        win->readAnyAt(strlen(title), line, "%d", &prop);
+        win->readAnyAt(static_cast<int>(strlen(title)), line, "%d", &prop);
         if(prop < min || max < prop)
         {
             win->AttribOn(COLOR_PAIR(30));

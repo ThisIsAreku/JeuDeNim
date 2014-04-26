@@ -136,7 +136,7 @@ bool Window::append(const char *c)
 {
     if(handle == NULL)
         return false;
-    int len = strlen(c);
+    int len = static_cast<int>(strlen(c));
     if(pos_x + len > width - 2)
     {
         if(!newLine())

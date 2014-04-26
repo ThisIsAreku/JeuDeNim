@@ -16,8 +16,6 @@ void TokenAnimator::setModifier(double d)
 
 void TokenAnimator::animateToken(int color, int x, int src, int dst)
 {
-    if(!game->getGameSettings()->animate)
-        return;
 
     if(src == dst)
         return;
@@ -25,24 +23,33 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     Window *win = getWindow();
     if(win == NULL)
         return;
+    
+    char token[4];
+    token[0] = ' ';
+    token[1] = '0' + static_cast<char>(color);
+    token[2] = ' ';
+    token[3] = '\0';
 
-    int timing = 400 / (game->getGrid()->getHeight() * modifier);
+    if(!game->getGameSettings()->animate){ // affiche directement a dst 
+        win->AttribOn(COLOR_PAIR(color));
+        win->printAt(x * CELL_WIDTH + 3, dst * CELL_HEIGHT + 2, token);
+        win->AttribOff(COLOR_PAIR(color));
+        win->refresh();
+        return;
+    }
+
+    int timing = static_cast<int>(400 / (game->getGrid()->getHeight() * modifier));
 
     if(timing == 0)
         timing = 1;
     timeout(timing); // content !
 
     int prev = src;
-    char token[4];
-    token[0] = ' ';
-    token[1] = '0' + color;
-    token[2] = ' ';
-    token[3] = '\0';
     for(int j = src; j <= dst; ++j)
     {
-        chtype t = getch();
+        chtype t = static_cast<chtype>(getch());
         game->doKeyboardActions(t);
-        if((int)t != -1)
+        if(static_cast<int>(t) != -1)
             break;
         win->printAt(x * CELL_WIDTH + 3, prev * CELL_HEIGHT + 2, "   ");
         win->AttribOn(COLOR_PAIR(color));

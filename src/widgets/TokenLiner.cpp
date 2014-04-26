@@ -32,7 +32,7 @@ void TokenLiner::displayAlignement(TokenAlignement align)
     int t_y = align.y1;
     char token[4];
     token[0] = ' ';
-    token[1] = '0' + (align.playerId + 1);
+    token[1] = '0' + static_cast<char>(align.playerId + 1);
     token[2] = ' ';
     token[3] = '\0';
 

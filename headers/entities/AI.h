@@ -4,7 +4,6 @@
 #include <limits>   // std::numeric_limits
 
 #include "entities/Entity.h"
-#include "entities/EntityListener.h"
 #include "WinnerChecker.h"
 
 
@@ -41,9 +40,6 @@ class AI : public Entity
     long totalEvalOps;
     long currentEvalOps;
 
-    bool doRemove = false;
-    bool doRotate = true;
-
     WinnerChecker *winnerChecker;
 
     void startAIComputation();
@@ -59,13 +55,13 @@ public:
     int turn();
 
     void init();
-    UpdateState update(int);
+    UpdateState update(chtype);
     void render();
 
     const char *getId();
     int getEntityType();
 
-    int getOperationPercent() const;
+    double getOperationPercent() const;
 
 };
 

@@ -22,7 +22,7 @@ struct TokenAlignement
     bool operator ==(TokenAlignement b)
     {
         return (b.x1 == x1 && b.y1 == y1) && (b.x2 == x2 && b.y2 == y2) && (b.orientation == orientation || b.orientation == ANY);
-    };
+    }
     void set(int _playerId, int _x1, int _y1, int _x2, int _y2)
     {
         Logger::log << "TokenAlignement set(" << _playerId << ", " << _x1 << ", " << _y1 << ", " << _x2 << ", " << _y2 << ")" << std::endl;
@@ -80,7 +80,7 @@ struct TokenAlignement
                 x2 = _x2;
                 y2 = _y2;
         */
-    };
+    }
 };
 
 #endif
