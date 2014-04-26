@@ -9,7 +9,7 @@ SRC= $(shell find src/ -name "*.cpp")
 HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.h")
 OBJ= $(SRC:src/%.cpp=obj/%.o)
 
-all: CXXFLAGS+= -O2
+all: CXXFLAGS+= -O3
 all: init compile
 
 debug: CXXFLAGS+= -g -pg
