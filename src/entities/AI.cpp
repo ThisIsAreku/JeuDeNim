@@ -308,7 +308,10 @@ int AI::eval(Grid &grid, const int &prof)
 
 
 
-        score += (algn * 50 + this->winnerChecker->getNumAlign(i) * 2 + grid.getCellsForPlayer(i) + this->winnerChecker->getNumWinAlignements(i)) * multiplier;
+        score += (this->winnerChecker->getNumWinAlignements(i) * 100 +
+                    algn * 50 +
+                    this->winnerChecker->getNumAlign(i) * 2 +
+                    grid.getCellsForPlayer(i)) * multiplier;
     }
     return score;
 }
