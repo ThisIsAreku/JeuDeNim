@@ -218,21 +218,43 @@ void Game::update()
 
 void Game::render()
 {
-    getWindowManager()->print(WIN_GAME_TURN, 0, 0, "(F9) Animations: ");
+    Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
+    win->printAt(0, 0, "(F9) Animations: ");
+    win->AttribOn(COLOR_PAIR(30));
     if(getGameSettings()->animate)
-        getWindowManager()->print(WIN_GAME_TURN, 17, 0, "ON ");
+        win->printAt(17, 0, "ON ");
     else
-        getWindowManager()->print(WIN_GAME_TURN, 17, 0, "OFF");
+        win->printAt(17, 0, "OFF");
+    win->AttribOff(COLOR_PAIR(30));
 
 
-    getWindowManager()->print(WIN_GAME_TURN, 0, 1, "Joueur actuel: ");
+    win->printAt(0, 1, "Joueur actuel: ");
     getWindowManager()->printInt(WIN_GAME_TURN, 15, 1, currentPlayer + 1);
-    const char *playerId = getCurrentPlayer()->getId();
-    getWindowManager()->print(WIN_GAME_TURN, 16, 1, " (");
-    getWindowManager()->print(WIN_GAME_TURN, 18, 1, playerId);
-    getWindowManager()->print(WIN_GAME_TURN, 18 + static_cast<int>(strlen(playerId)), 1, ")                  ");
+    Entity *e = getCurrentPlayer();
+    win->printAt(16, 1, " (");
 
-    getWindowManager()->refreshWindow(WIN_GAME_TURN);
+    win->AttribOn(COLOR_PAIR(currentPlayer + 9));
+    win->printAt(18, 1, e->getId());
+    int len = static_cast<int>(strlen(e->getId()));
+    if(e->getEntityType() == ENTITY_AI)
+    {
+        AI *ai = static_cast<AI *>(e);
+        int level = ai->getDifficulty();
+        win->printAt(18 + len++, 1, "[");
+        getWindowManager()->printInt(WIN_GAME_TURN, 18 + len++, 1, level);
+        if(level > 9)
+            len++;
+        win->printAt(18 + len++, 1, "]");
+        if(ai->isAdaptative())
+        {
+            win->printAt(18 + len++, 1, "++");
+            len++;
+        }
+    }
+    win->AttribOff(COLOR_PAIR(currentPlayer + 9));
+    win->printAt(18 + len, 1, ")                      ");
+
+    win->refresh();
 
 
     if(!displayingHelp)
@@ -246,7 +268,11 @@ void Game::render()
 
 void Game::renderOps()
 {
-    double p = getCurrentPlayer()->getOperationPercent();
+    Entity *e = getCurrentPlayer();
+    if(e->getEntityType() != ENTITY_AI)
+        return;
+
+    double p = static_cast<AI *>(e)->getOperationPercent();
     if(p == 100)
     {
         getWindowManager()->print(WIN_GAME_TURN, -7, 1, "       ");

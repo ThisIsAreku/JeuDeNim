@@ -13,7 +13,7 @@ AI::AI(Game *game, int entityIndex, int level) : Entity(game, entityIndex)
         level = 2;
     }
     this->difficulty = level;
-    //Logger::log << EVAL_MIN << "," << EVAL_MAX << std::endl;
+    Logger::log << "(" << entityIndex << ") Tree power ACTIVATE!" << std::endl;
 }
 AI::~AI()
 {
@@ -23,6 +23,10 @@ AI::~AI()
 int AI::getDifficulty()
 {
     return this->difficulty;
+}
+bool AI::isAdaptative()
+{
+    return this->adaptative;
 }
 
 double AI::getOperationPercent() const
@@ -371,17 +375,22 @@ UpdateState AI::update(chtype)
     }
     else if(this->adaptative)
     {
-        if(turn_choice.score < 0)
+        if(turn_choice.score <= 0)
         {
+            Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Incrementing difficulty to ";
+
             this->difficulty++;
             if(this->difficulty > 15)
                 this->difficulty = 15;
+            Logger::log << difficulty << std::endl;
         }
-        else if(turn_choice.score > 0)
+        else
         {
+            Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Decrementing difficulty to ";
             this->difficulty--;
             if(this->difficulty <= 0)
                 this->difficulty = 1;
+            Logger::log << difficulty << std::endl;
         }
     }
     return SUCCESS;

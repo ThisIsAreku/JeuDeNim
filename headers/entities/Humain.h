@@ -23,11 +23,6 @@ public:
 
     const char *getId();
     int getEntityType();
-
-    double getOperationPercent() const
-    {
-        return .0;
-    };
 };
 
 #endif

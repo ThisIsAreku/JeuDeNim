@@ -60,6 +60,7 @@ public:
     void render();
 
     int getDifficulty();
+    bool isAdaptative();
 
     const char *getId();
     int getEntityType();

@@ -116,7 +116,7 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
         msg[15] = '0' + static_cast<char>(i + 1);
         askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
         if(playerTypes[i] == ENTITY_AI)
-            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 1, 15);
+            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 15);
 
     }
     return this;

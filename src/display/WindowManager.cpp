@@ -120,10 +120,10 @@ void WindowManager::initColors()
     init_pair(7, COLOR_GREEN, COLOR_WHITE);
     init_pair(8, COLOR_YELLOW, COLOR_WHITE);
 
-    init_pair(9, COLOR_BLUE, COLOR_BLACK);
-    init_pair(10, COLOR_RED, COLOR_BLACK);
-    init_pair(11, COLOR_GREEN, COLOR_BLACK);
-    init_pair(12, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(9, COLOR_BLUE, -1);
+    init_pair(10, COLOR_RED, -1);
+    init_pair(11, COLOR_GREEN, -1);
+    init_pair(12, COLOR_YELLOW, -1);
 
     init_pair(30, COLOR_BLACK, COLOR_WHITE);
     use_default_colors();
