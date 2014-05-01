@@ -261,15 +261,15 @@ void Game::renderOps()
 
     int i = 0;
     if(p < 10)
-        i =1;
+        i = 1;
     else if(p < 100)
-        i =2;
+        i = 2;
     else if(p == 100)
-        i =3;
+        i = 3;
 
     char str[6];
     sprintf(str, "%.2f", p);
-    getWindowManager()->print(WIN_GAME_TURN, -4-i, 1, str);
+    getWindowManager()->print(WIN_GAME_TURN, -4 - i, 1, str);
     getWindowManager()->print(WIN_GAME_TURN, -1, 1, "%%");
 
 
@@ -315,7 +315,7 @@ bool Game::onEntityTurnCompleted(EntityTurnAction action, int x, int y)
     }
     else if(action == TOKEN_REMOVE)
     {
-        if(getGrid()->getGridAt(x, y) != currentPlayer+1)
+        if(getGrid()->getGridAt(x, y) != currentPlayer + 1)
             return false;
         if(!getDisplayGrid()->removeToken(x, y))
             return false;

@@ -92,7 +92,7 @@ void AI::startAIComputation()
                 cellChoice[cellChoiceC++].set(TOKEN_REMOVE, r_eval, i, j);
 
 
-            grid.clone(*getGame()->getGrid());            
+            grid.clone(*getGame()->getGrid());
         }
     }
 
@@ -102,7 +102,7 @@ void AI::startAIComputation()
     // ROTATE_CLOCKWISE = 1
     // ROTATE_COUNTERCLOCKWISE = -1
 
-    for (int i = -1; i <= 1; i+=2)
+    for (int i = -1; i <= 1; i += 2)
     {
         grid.rotate(i);
         grid.getGravityProvider()->doGravity(NULL);
@@ -116,8 +116,8 @@ void AI::startAIComputation()
         if(r_eval == evalMax)
             cellChoice[cellChoiceC++].set(ROTATE, r_eval, i, -1);
 
-        grid.clone(*getGame()->getGrid()); 
-    } 
+        grid.clone(*getGame()->getGrid());
+    }
 
 
 
@@ -243,7 +243,7 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
             }
 
 
-            grid.clone(parent_grid);            
+            grid.clone(parent_grid);
         }
     }
 
@@ -253,7 +253,7 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
     // ROTATE_CLOCKWISE = 1
     // ROTATE_COUNTERCLOCKWISE = -1
 
-    for (int i = -1; i <= 1; i+=2)
+    for (int i = -1; i <= 1; i += 2)
     {
         grid.rotate(i);
         grid.getGravityProvider()->doGravity(NULL);
@@ -277,8 +277,8 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
             beta = Helpers::__min(beta, best);
         }
 
-        grid.clone(parent_grid); 
-    } 
+        grid.clone(parent_grid);
+    }
     return best;
 }
 
@@ -295,7 +295,7 @@ int AI::eval(Grid &grid, const int &prof)
     {
         if(this->winnerChecker->hasDraw())
             return 0;
-        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX-prof : EVAL_MIN+prof;
+        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX - prof : EVAL_MIN + prof;
     }
     int score = 0;
     int multiplier;
@@ -309,9 +309,9 @@ int AI::eval(Grid &grid, const int &prof)
 
 
         score += (this->winnerChecker->getNumWinAlignements(i) * 100 +
-                    algn * 50 +
-                    this->winnerChecker->getNumAlign(i) * 2 +
-                    grid.getCellsForPlayer(i)) * multiplier;
+                  algn * 50 +
+                  this->winnerChecker->getNumAlign(i) * 2 +
+                  grid.getCellsForPlayer(i)) * multiplier;
     }
     return score;
 }

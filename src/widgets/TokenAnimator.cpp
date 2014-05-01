@@ -23,14 +23,15 @@ void TokenAnimator::animateToken(int color, int x, int src, int dst)
     Window *win = getWindow();
     if(win == NULL)
         return;
-    
+
     char token[4];
     token[0] = ' ';
     token[1] = '0' + static_cast<char>(color);
     token[2] = ' ';
     token[3] = '\0';
 
-    if(!game->getGameSettings()->animate){ // affiche directement a dst 
+    if(!game->getGameSettings()->animate)  // affiche directement a dst
+    {
         win->AttribOn(COLOR_PAIR(color));
         win->printAt(x * CELL_WIDTH + 3, dst * CELL_HEIGHT + 2, token);
         win->AttribOff(COLOR_PAIR(color));
