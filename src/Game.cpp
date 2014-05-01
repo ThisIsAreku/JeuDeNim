@@ -99,9 +99,10 @@ void Game::loop()
     while(!interrupted && !game_end)
     {
         tick++;
+        render();
+
         update();
 
-        render();
         if(tick % 10 == 0)
             Logger::log << "Tick " << tick << std::endl;
     }
@@ -143,14 +144,8 @@ void Game::loop()
 
 }
 
-void Game::init()
+void Game::createEntities()
 {
-    this->grid = new Grid(getGameSettings()->getBoardWidth(), getGameSettings()->getBoardHeight());
-
-    this->displayGrid = new DisplayGrid(this->manager, WIN_GAME_GRID, this);
-    this->winnerChecker = new WinnerChecker(this, true);
-    this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
-
     this->players = new Entity*[getGameSettings()->getNumPlayers()];
 
     for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
@@ -164,13 +159,27 @@ void Game::init()
             this->players[i] = new Random(this, i + 1);
             break;
         case ENTITY_AI:
-            this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i]);
+            this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i], false);
+            break;
+        case ENTITY_AI+1:
+            this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i], true);
             break;
         default:
             exit(-1);
         }
         this->players[i]->init();
     }
+}
+
+void Game::init()
+{
+    this->grid = new Grid(getGameSettings()->getBoardWidth(), getGameSettings()->getBoardHeight());
+
+    this->displayGrid = new DisplayGrid(this->manager, WIN_GAME_GRID, this);
+    this->winnerChecker = new WinnerChecker(this, true);
+    this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
+
+    createEntities();
 
     this->displayGrid->init();
     invokeEntityTurn(0);
@@ -220,12 +229,10 @@ void Game::render()
 {
     Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
     win->printAt(0, 0, "(F9) Animations: ");
-    win->AttribOn(COLOR_PAIR(30));
     if(getGameSettings()->animate)
         win->printAt(17, 0, "ON ");
     else
         win->printAt(17, 0, "OFF");
-    win->AttribOff(COLOR_PAIR(30));
 
 
     win->printAt(0, 1, "Joueur actuel: ");
@@ -552,26 +559,7 @@ void Game::restoreState(int slotId)
 
         saveFile >> currentPlayer >> *getGameSettings() >> *getGrid();
 
-        this->players = new Entity*[getGameSettings()->getNumPlayers()];
-
-        for(int i = 0; i < getGameSettings()->getNumPlayers(); ++i)
-        {
-            switch(getGameSettings()->getPlayerTypes()[i])
-            {
-            case ENTITY_HUMAIN:
-                this->players[i] = new Humain(this, i + 1);
-                break;
-            case ENTITY_DUMBASS:
-                this->players[i] = new Random(this, i + 1);
-                break;
-            case ENTITY_AI:
-                this->players[i] = new AI(this, i + 1, getGameSettings()->getAILevels()[i]);
-                break;
-            default:
-                exit(-1);
-            }
-            this->players[i]->init();
-        }
+        createEntities();
 
         getWindowManager()->getWindow(WIN_GAME_GRID)->clear();
         getWindowManager()->getWindow(WIN_SCOREBOARD)->clear();
@@ -610,16 +598,11 @@ void Game::start()
 
     int dispLine = -1;
 
-    win->printAt(0, ++dispLine, "Avec ce terminal, vous pouvez utiliser au maximum");
-    win->printAt(0, ++dispLine, "une grille de taille");
+    win->printAt(0, ++dispLine, "Taille conseillée de la grille: ");
 
     win->AttribOn(COLOR_PAIR(30));
-    getWindowManager()->printInt(WIN_GAME_GRID, 21, dispLine, maxSize);
+    getWindowManager()->printInt(WIN_GAME_GRID, 33, dispLine, maxSize);
     win->AttribOff(COLOR_PAIR(30));
-
-    win->printAt(24, dispLine, ".Vous pouvez utiliser une grille");
-    win->printAt(0, ++dispLine, "plus  grande, mais  l'affichage  souffre  de  quelques");
-    win->printAt(0, ++dispLine, "problèmes pour les grandes grilles...");
 
     dispLine++;
     win->refresh();
@@ -638,7 +621,8 @@ void Game::start()
         getGameSettings()
         ->setNumAlign(3)
         ->setPlayerType(0, ENTITY_DUMBASS)
-        ->setPlayerType(1, ENTITY_DUMBASS)
+        ->setPlayerType(1, ENTITY_AI + 1)
+        ->setAILevel(1, 5)
         ->commit();
     }
 

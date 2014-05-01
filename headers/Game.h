@@ -56,6 +56,8 @@ class Game
     const char saveFileName[7] = "SAVE_0";
     char *saveFilePath;
 
+    void createEntities();
+
     void loop();
 
     void init();

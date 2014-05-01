@@ -106,17 +106,17 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     askForProperty(win, baseLine++, "Entrez la longueur de la grille: ", boardHeight, alignSize, 40);
     askForProperty(win, baseLine++, "Entrez le nombre de joueurs (2-4): ", numPlayers, 2, 4);
     win->printAt(0, baseLine++, "Types de joueurs disponibles: ");
-    win->printAt(0, baseLine++, "0: Humain, 1: Débile, 2: IA");
+    win->printAt(0, baseLine++, "0: Humain, 1: Débile, 2: IA, 3: IA adaptative");
     win->printAt(0, baseLine++, "(IA n'est pas encore implémenté)");
 
     char msg[19] = "Type du joueur X: ";
-    char msg_lvl[59] = "Difficulté (1: Ghââ!?.., 15: hardcore, 0: adaptative): ";
+    char msg_lvl[59] = "Difficulté (1: Ghââ!?.., 15: hardcore): ";
     for(int i = 0; i < numPlayers; i++)
     {
         msg[15] = '0' + static_cast<char>(i + 1);
-        askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
-        if(playerTypes[i] == ENTITY_AI)
-            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 15);
+        askForProperty(win, baseLine++, msg, playerTypes[i], 0, 3);
+        if(playerTypes[i] == ENTITY_AI || playerTypes[i] == ENTITY_AI + 1)
+            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 1, 15);
 
     }
     return this;

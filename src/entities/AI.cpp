@@ -4,16 +4,13 @@
 #include <cmath>
 #include "Logger.h"
 
-AI::AI(Game *game, int entityIndex, int level) : Entity(game, entityIndex)
+AI::AI(Game *game, int entityIndex, int level, bool adaptative) : Entity(game, entityIndex)
 {
     this->winnerChecker = new WinnerChecker(game, false);
-    if(level == 0)
-    {
-        this->adaptative = true;
-        level = 2;
-    }
+    this->adaptative = adaptative;
     this->difficulty = level;
-    Logger::log << "(" << entityIndex << ") Tree power ACTIVATE!" << std::endl;
+    if(adaptative)
+        Logger::log << "(" << entityIndex << ") Tree power ACTIVATE!" << std::endl;
 }
 AI::~AI()
 {
@@ -335,6 +332,19 @@ int AI::eval(Grid &grid, const int &prof)
 int AI::turn()
 {
     Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: turn" << std::endl;
+    return 0;
+}
+
+void AI::init()
+{
+    nextEntityIndex = (getEntityIndex() % getGame()->getGameSettings()->getNumPlayers()) + 1;
+    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: init, nextEntityIndex: " << nextEntityIndex << std::endl;
+
+}
+
+UpdateState AI::update(chtype)
+{
+    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: update" << std::endl;
     clock_t begin = std::clock();
     srand(static_cast<unsigned int>(time(NULL)));
     if(getGame()->getGrid()->getCellsForPlayer(getEntityIndex() - 1) < 1)
@@ -350,28 +360,15 @@ int AI::turn()
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: computation end, took " << elapsed_secs << " sec" << std::endl;
-    return 0;
-}
-
-void AI::init()
-{
-    nextEntityIndex = (getEntityIndex() % getGame()->getGameSettings()->getNumPlayers()) + 1;
-    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: init, nextEntityIndex: " << nextEntityIndex << std::endl;
-
-}
-
-UpdateState AI::update(chtype)
-{
     if(!turn_choice.valid)
     {
         Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") AI failed, not valid. retry.." << std::endl;
-        turn();
         return FAILURE;
     }
     if(!getGame()->onEntityTurnCompleted(turn_choice.action, turn_choice.x, turn_choice.y))
     {
         Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") AI fail turn, retrying" << std::endl;
-        turn();
+        return FAILURE;
     }
     else if(this->adaptative)
     {

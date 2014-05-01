@@ -28,13 +28,13 @@ struct IATurnChoice
 
 class AI : public Entity
 {
-    int difficulty = 1;
-    bool adaptative = false;
+    int difficulty;
+    bool adaptative;
     int nextEntityIndex;
 
     IATurnChoice turn_choice;
-    const int EVAL_MAX = 1000000;
-    const int EVAL_MIN = -1000000;
+    static const int EVAL_MAX = 1000000;
+    static const int EVAL_MIN = -1000000;
 
     int cellChoiceC;
 
@@ -50,7 +50,7 @@ class AI : public Entity
     int eval(Grid &, const int &);
 
 public:
-    AI(Game *, int, int);
+    AI(Game *, int, int, bool);
     virtual ~AI();
 
     int turn();
