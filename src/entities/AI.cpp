@@ -7,12 +7,22 @@
 AI::AI(Game *game, int entityIndex, int level) : Entity(game, entityIndex)
 {
     this->winnerChecker = new WinnerChecker(game, false);
+    if(level == 0)
+    {
+        this->adaptative = true;
+        level = 2;
+    }
     this->difficulty = level;
     //Logger::log << EVAL_MIN << "," << EVAL_MAX << std::endl;
 }
 AI::~AI()
 {
     delete this->winnerChecker;
+}
+
+int AI::getDifficulty()
+{
+    return this->difficulty;
 }
 
 double AI::getOperationPercent() const
@@ -358,6 +368,21 @@ UpdateState AI::update(chtype)
     {
         Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") AI fail turn, retrying" << std::endl;
         turn();
+    }
+    else if(this->adaptative)
+    {
+        if(turn_choice.score < 0)
+        {
+            this->difficulty++;
+            if(this->difficulty > 15)
+                this->difficulty = 15;
+        }
+        else if(turn_choice.score > 0)
+        {
+            this->difficulty--;
+            if(this->difficulty <= 0)
+                this->difficulty = 1;
+        }
     }
     return SUCCESS;
 }

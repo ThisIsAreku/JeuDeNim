@@ -110,13 +110,13 @@ GameSettings *GameSettings::input(Window *win, int baseLine)
     win->printAt(0, baseLine++, "(IA n'est pas encore implémenté)");
 
     char msg[19] = "Type du joueur X: ";
-    char msg_lvl[44] = "Difficulté (0: Ghââ!?.., 15: hardcore): ";
+    char msg_lvl[59] = "Difficulté (1: Ghââ!?.., 15: hardcore, 0: adaptative): ";
     for(int i = 0; i < numPlayers; i++)
     {
         msg[15] = '0' + static_cast<char>(i + 1);
         askForProperty(win, baseLine++, msg, playerTypes[i], 0, 2);
         if(playerTypes[i] == ENTITY_AI)
-            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 0, 15);
+            askForProperty(win, baseLine++, msg_lvl, aiLevel[i], 1, 15);
 
     }
     return this;

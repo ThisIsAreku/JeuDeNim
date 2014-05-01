@@ -29,11 +29,12 @@ struct IATurnChoice
 class AI : public Entity
 {
     int difficulty = 1;
+    bool adaptative = false;
     int nextEntityIndex;
 
     IATurnChoice turn_choice;
-    int EVAL_MAX = 10000000;
-    int EVAL_MIN = -10000000;
+    const int EVAL_MAX = 1000000;
+    const int EVAL_MIN = -1000000;
 
     int cellChoiceC;
 
@@ -57,6 +58,8 @@ public:
     void init();
     UpdateState update(chtype);
     void render();
+
+    int getDifficulty();
 
     const char *getId();
     int getEntityType();
