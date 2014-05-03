@@ -35,6 +35,10 @@ Game::Game()
     displayingHelp = false;
     random_testing = false;
 
+
+    saveFileName = new char[8];
+    strcpy(saveFileName, "SAVE_0");
+
 #ifdef __linux__
     char *tmp = getenv("HOME");
     saveFilePath = new char[strlen(tmp) + 12];
@@ -48,6 +52,7 @@ Game::Game()
     strncpy(saveFilePath, "./", 3);
 #endif
     Logger::log << "Save file path is : " << saveFilePath << std::endl;
+    Logger::log << "Default file name : " << saveFileName << std::endl;
 }
 Game::~Game()
 {
@@ -279,17 +284,29 @@ void Game::renderOps()
     if(e->getEntityType() != ENTITY_AI)
         return;
 
+    Window* win = getWindowManager()->getWindow(WIN_GAME_TURN);
+
     double p = static_cast<AI *>(e)->getOperationPercent();
-    if(p == 100)
+    if(p >= 100)
     {
-        getWindowManager()->print(WIN_GAME_TURN, -7, 1, "       ");
-        getWindowManager()->print(WIN_GAME_TURN, -18, 0, "                   ");
-        getWindowManager()->refreshWindow(WIN_GAME_TURN);
+        if(p > 100)
+         Logger::log << "renderOps overflow..." <<std::endl;
+        win->printAt(-7, 1, "       ");
+        win->printAt(-18, 0, "                   ");
+        win->refresh();
         return;
     }
-    if(p == 0)
+
+    char str[6];
+    if(p <= 0)
     {
-        getWindowManager()->print(WIN_GAME_TURN, -18, 0, "Calcul en cours...");
+        if(p < 0){
+            Logger::log << "renderOps overflow..." <<std::endl;
+            sprintf(str, "----");
+        }
+        win->printAt(-18, 0, "Calcul en cours...");
+    }else{
+        sprintf(str, "%.2f", p);
     }
 
     int i = 0;
@@ -300,13 +317,11 @@ void Game::renderOps()
     else if(p == 100)
         i = 3;
 
-    char str[6];
-    sprintf(str, "%.2f", p);
-    getWindowManager()->print(WIN_GAME_TURN, -4 - i, 1, str);
-    getWindowManager()->print(WIN_GAME_TURN, -1, 1, "%%");
+    win->printAt(-4 - i, 1, str);
+    win->printAt(-1, 1, "%%");
 
 
-    getWindowManager()->refreshWindow(WIN_GAME_TURN);
+    win->refresh();
 }
 
 void Game::doKeyboardActions(chtype ch)

@@ -45,6 +45,9 @@ bool Random::doChoice()
         x = ROTATE_COUNTERCLOCKWISE;
         y = -1;
         return getGame()->onEntityTurnCompleted(ROTATE, x, y);
+    default:
+        // empty
+        break;
     }
     return false;
 }

@@ -53,7 +53,7 @@ class Game
     const unsigned long konami[10] {259, 259, 258, 258, 260, 261, 260, 261, 98, 97};
     int konamiStep;
 
-    const char saveFileName[7] = "SAVE_0";
+    char *saveFileName;
     char *saveFilePath;
 
     void createEntities();

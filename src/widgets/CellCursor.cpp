@@ -217,9 +217,20 @@ UpdateState CellCursor::update(chtype ch)
     case KEY_RIGHT:
         x++;
         break;
+    case 27:
+        if(selectionCanceled_callback != NULL)
+        {
+            selectionCanceled_callback();
+            return REMOVE;        
+        }
+        break;
     case 10:
         if(cellSelected_callback != NULL && cellSelected_callback(x, y))
             return REMOVE;
+        break;
+    default:
+        // empty
+        break;
     }
 
     this->max_x = this->grid->getWidth() - this->cursor_width;

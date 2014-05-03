@@ -38,7 +38,7 @@ void AI::startAIComputation()
     Grid grid(*getGame()->getGrid());
 
     // cols + delete + rotate
-    int numPossibles = getGame()->getGrid()->getWidth() + getGame()->getGrid()->getTotalCells()/* + 2*/;
+    numPossibles = getGame()->getGrid()->getWidth() + getGame()->getGrid()->getTotalCells() + 2;
     totalEvalOps = static_cast<long>(pow(numPossibles, difficulty));
 
     turn_choice.valid = false;
@@ -57,7 +57,7 @@ void AI::startAIComputation()
     /****************************/
     /******* PLACE_TOKEN *******/
     /**************************/
-
+    Logger::log << "PLACE_TOKEN" << std::endl;
     for (int i = 0; i < grid.getWidth(); ++i)
     {
 
@@ -72,16 +72,19 @@ void AI::startAIComputation()
             cellChoiceC = 0;
             evalMax = r_eval;
         }
-        if(r_eval == evalMax)
+        if(r_eval == evalMax){
+            Logger::log << "S: ";
             cellChoice[cellChoiceC++].set(TOKEN_PLACE, r_eval, i, placePos);
+        }
 
         grid.clone(*getGame()->getGrid());
+        Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
     }
 
     /****************************/
     /******* REMOVE_TOKEN *******/
     /**************************/
-
+    Logger::log << "REMOVE_TOKEN" << std::endl;
     for (int i = 0; i < grid.getWidth(); ++i)
     {
         for (int j = 0; j < grid.getHeight(); ++j)
@@ -99,11 +102,14 @@ void AI::startAIComputation()
                 cellChoiceC = 0;
                 evalMax = r_eval;
             }
-            if(r_eval == evalMax)
+            if(r_eval == evalMax){
+                Logger::log << "S: ";
                 cellChoice[cellChoiceC++].set(TOKEN_REMOVE, r_eval, i, j);
+            }
 
 
             grid.clone(*getGame()->getGrid());
+            Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
         }
     }
 
@@ -112,7 +118,7 @@ void AI::startAIComputation()
     /***************************/
     // ROTATE_CLOCKWISE = 1
     // ROTATE_COUNTERCLOCKWISE = -1
-
+    Logger::log << "ROTATE" << std::endl;
     for (int i = -1; i <= 1; i += 2)
     {
         grid.rotate(i);
@@ -124,10 +130,13 @@ void AI::startAIComputation()
             cellChoiceC = 0;
             evalMax = r_eval;
         }
-        if(r_eval == evalMax)
+        if(r_eval == evalMax){
+            Logger::log << "S: ";
             cellChoice[cellChoiceC++].set(ROTATE, r_eval, i, -1);
+        }
 
         grid.clone(*getGame()->getGrid());
+        Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
     }
 
 
@@ -201,16 +210,20 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
         if(thisEntityIndex == getEntityIndex()) // noeud MAX
         {
             best = Helpers::__max(best, value);
-            if(best >= beta) // coupure beta
+            if(best >= beta){ // coupure beta
+                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                 return best;
+            }
 
             alpha = Helpers::__max(alpha, best);
         }
         else // noeud min
         {
             best = Helpers::__min(best, value);
-            if(alpha >= best) // coupure alpha
+            if(alpha >= best){ // coupure alpha
+                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                 return best;
+            }
 
             beta = Helpers::__min(beta, best);
         }
@@ -239,16 +252,20 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
             if(thisEntityIndex == getEntityIndex()) // noeud MAX (self)
             {
                 best = Helpers::__max(best, value);
-                if(best >= beta) // coupure beta
+                if(best >= beta){ // coupure beta
+                    totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                     return best;
+                }
 
                 alpha = Helpers::__max(alpha, best);
             }
             else // noeud min
             {
                 best = Helpers::__min(best, value);
-                if(alpha >= best) // coupure alpha
+                if(alpha >= best){ // coupure alpha
+                    totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                     return best;
+                }
 
                 beta = Helpers::__min(beta, best);
             }
@@ -274,16 +291,20 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
         if(thisEntityIndex == getEntityIndex()) // noeud MAX
         {
             best = Helpers::__max(best, value);
-            if(best >= beta) // coupure beta
+            if(best >= beta){ // coupure beta
+                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                 return best;
+            }
 
             alpha = Helpers::__max(alpha, best);
         }
         else // noeud min
         {
             best = Helpers::__min(best, value);
-            if(alpha >= best) // coupure alpha
+            if(alpha >= best){ // coupure alpha
+                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
                 return best;
+            }
 
             beta = Helpers::__min(beta, best);
         }
@@ -321,8 +342,8 @@ int AI::eval(Grid &grid, const int &prof)
 
         score += (this->winnerChecker->getNumWinAlignements(i) * 100 +
                   algn * 50 +
-                  this->winnerChecker->getNumAlign(i) * 2 +
-                  grid.getCellsForPlayer(i)) * multiplier;
+                  this->winnerChecker->getNumAlign(i) * 2/* +
+                  grid.getCellsForPlayer(i)*/) * multiplier;
     }
     return score;
 }
@@ -350,7 +371,7 @@ UpdateState AI::update(chtype)
     if(getGame()->getGrid()->getCellsForPlayer(getEntityIndex() - 1) < 1)
     {
         turn_choice.action = TOKEN_PLACE;
-        turn_choice.x = rand() % getGame()->getGrid()->getWidth();
+        turn_choice.x = (rand() % (getGame()->getGrid()->getWidth() - 4)) + 2;
         turn_choice.valid = true;
     }
     else
@@ -381,7 +402,7 @@ UpdateState AI::update(chtype)
                 this->difficulty = 15;
             Logger::log << difficulty << std::endl;
         }
-        else
+        else if(turn_choice.score > 10)
         {
             Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Decrementing difficulty to ";
             this->difficulty--;

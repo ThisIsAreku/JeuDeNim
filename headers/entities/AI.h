@@ -12,17 +12,18 @@
 struct IATurnChoice
 {
     EntityTurnAction action = TOKEN_PLACE;
-    int score = 0;
-    int x = 0;
-    int y = 0;
-    bool valid = false;
+    int score, x, y;
+    bool valid;
+    IATurnChoice() : action(TOKEN_PLACE), score(0), x(0), y(0), valid(false) {};
     void set(EntityTurnAction _action, int _score, int _x, int _y)
     {
+        Logger::log << "Setting... ";
         action = _action;
         score = _score;
         x = _x;
         y = _y;
         valid = true;
+        Logger::log << "OK" << std::endl;
     }
 };
 
@@ -37,6 +38,7 @@ class AI : public Entity
     static const int EVAL_MIN = -1000000;
 
     int cellChoiceC;
+    int numPossibles;
 
     long totalEvalOps;
     long currentEvalOps;
