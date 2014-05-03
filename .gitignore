@@ -1,3 +1,4 @@
 obj/
 bin/
 cerr.txt
+callgrind.out
