@@ -8,13 +8,27 @@ AI::AI(Game *game, int entityIndex, int level, bool adaptative) : Entity(game, e
 {
     this->winnerChecker = new WinnerChecker(game, false);
     this->adaptative = adaptative;
-    this->difficulty = level;
+    this->totalEvalOpsByLevel = NULL;
+    setDifficulty(level);
     if(adaptative)
         Logger::log << "(" << entityIndex << ") Tree power ACTIVATE!" << std::endl;
 }
 AI::~AI()
 {
     delete this->winnerChecker;
+    delete [] totalEvalOpsByLevel;
+}
+
+void AI::setDifficulty(int difficulty)
+{
+    if(difficulty > 15)
+        difficulty = 15;
+    else if(difficulty < 1)
+        difficulty = 1;
+    this->difficulty = difficulty;
+    if(totalEvalOpsByLevel != NULL)
+        delete [] totalEvalOpsByLevel;
+    totalEvalOpsByLevel = new long[difficulty];
 }
 
 int AI::getDifficulty()
@@ -26,9 +40,9 @@ bool AI::isAdaptative()
     return this->adaptative;
 }
 
-double AI::getOperationPercent() const
+float AI::getOperationPercent() const
 {
-    return (currentEvalOps * 100) / static_cast<double>(totalEvalOps);
+    return (currentEvalOps * 100) / static_cast<float>(totalEvalOps);
 }
 
 void AI::startAIComputation()
@@ -40,16 +54,19 @@ void AI::startAIComputation()
     // cols + delete + rotate
     numPossibles = getGame()->getGrid()->getWidth() + getGame()->getGrid()->getTotalCells() + 2;
     totalEvalOps = static_cast<long>(pow(numPossibles, difficulty));
+    for(int i = 0; i < difficulty; ++i)
+        totalEvalOpsByLevel[i] = static_cast<long>(pow(numPossibles, i));
 
     turn_choice.valid = false;
 
     currentEvalOps = 0;
+    Logger::log << "numPossibles: " << numPossibles << std::endl;
     Logger::log << "totalEvalOps: " << totalEvalOps << std::endl;
 
-    cellChoiceC = 0;
-    int cellFinalChoiceC = 0;
+    int cellChoiceC = 0;
+    //int cellFinalChoiceC = 0;
     IATurnChoice *cellChoice = new IATurnChoice[numPossibles];
-    IATurnChoice *cellFinalChoice = new IATurnChoice[numPossibles];
+    //IATurnChoice *cellFinalChoice = new IATurnChoice[numPossibles];
 
     int evalMax = EVAL_MIN;
     getGame()->renderOps();
@@ -57,59 +74,69 @@ void AI::startAIComputation()
     /****************************/
     /******* PLACE_TOKEN *******/
     /**************************/
-    Logger::log << "PLACE_TOKEN" << std::endl;
-    for (int i = 0; i < grid.getWidth(); ++i)
+    if(!grid.isFull()) // grille pleine, pas d'ajout
     {
-
-        int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
-        if(placePos == -1)
-            continue;
-
-        grid.setGridAt(i, placePos, getEntityIndex());
-        r_eval = alphabeta(grid, difficulty, nextEntityIndex, EVAL_MIN, EVAL_MAX);
-        if(r_eval > evalMax)
-        {
-            cellChoiceC = 0;
-            evalMax = r_eval;
-        }
-        if(r_eval == evalMax){
-            Logger::log << "S: ";
-            cellChoice[cellChoiceC++].set(TOKEN_PLACE, r_eval, i, placePos);
-        }
-
-        grid.clone(*getGame()->getGrid());
-        Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
-    }
-
-    /****************************/
-    /******* REMOVE_TOKEN *******/
-    /**************************/
-    Logger::log << "REMOVE_TOKEN" << std::endl;
-    for (int i = 0; i < grid.getWidth(); ++i)
-    {
-        for (int j = 0; j < grid.getHeight(); ++j)
+        Logger::log << "PLACE_TOKEN" << std::endl;
+        for (int i = 0; i < grid.getWidth(); ++i)
         {
 
-            if(grid.getGridAt(i, j) != getEntityIndex())
+            int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
+            if(placePos == -1)
+            {
+                //totalEvalOps -= totalEvalOpsByLevel[difficulty - 1];
                 continue;
+            }
 
-            grid.forceSetGridAt(i, j, 0);
-            grid.getGravityProvider()->doColumnGravity(i, NULL);
-
-            r_eval = alphabeta(grid, difficulty, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+            grid.setGridAt(i, placePos, getEntityIndex());
+            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
             if(r_eval > evalMax)
             {
                 cellChoiceC = 0;
                 evalMax = r_eval;
             }
-            if(r_eval == evalMax){
-                Logger::log << "S: ";
-                cellChoice[cellChoiceC++].set(TOKEN_REMOVE, r_eval, i, j);
+            if(r_eval == evalMax)
+            {
+                cellChoice[cellChoiceC++].set(TOKEN_PLACE, r_eval, i, placePos);
             }
 
-
             grid.clone(*getGame()->getGrid());
-            Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
+        }
+    }
+
+    /****************************/
+    /******* REMOVE_TOKEN *******/
+    /**************************/
+    if(grid.getCellsForPlayer(getEntityIndex()) > 0) // pas de jetons, pas de remove
+    {
+        Logger::log << "REMOVE_TOKEN" << std::endl;
+        for (int i = 0; i < grid.getWidth(); ++i)
+        {
+            for (int j = 0; j < grid.getHeight(); ++j)
+            {
+
+                if(grid.getGridAt(i, j) != getEntityIndex())
+                {
+                    //totalEvalOps -= totalEvalOpsByLevel[difficulty - 1];
+                    continue;
+                }
+
+                grid.forceSetGridAt(i, j, 0);
+                grid.getGravityProvider()->doColumnGravity(i, NULL);
+
+                r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+                if(r_eval > evalMax)
+                {
+                    cellChoiceC = 0;
+                    evalMax = r_eval;
+                }
+                if(r_eval == evalMax)
+                {
+                    cellChoice[cellChoiceC++].set(TOKEN_REMOVE, r_eval, i, j);
+                }
+
+
+                grid.clone(*getGame()->getGrid());
+            }
         }
     }
 
@@ -118,25 +145,27 @@ void AI::startAIComputation()
     /***************************/
     // ROTATE_CLOCKWISE = 1
     // ROTATE_COUNTERCLOCKWISE = -1
-    Logger::log << "ROTATE" << std::endl;
-    for (int i = -1; i <= 1; i += 2)
+    if(grid.getFilledCells() >= getGame()->getGameSettings()->getAlignSize()) //
     {
-        grid.rotate(i);
-        grid.getGravityProvider()->doGravity(NULL);
-
-        r_eval = alphabeta(grid, difficulty, nextEntityIndex, EVAL_MIN, EVAL_MAX);
-        if(r_eval > evalMax)
+        Logger::log << "ROTATE" << std::endl;
+        for (int i = -1; i <= 1; i += 2)
         {
-            cellChoiceC = 0;
-            evalMax = r_eval;
-        }
-        if(r_eval == evalMax){
-            Logger::log << "S: ";
-            cellChoice[cellChoiceC++].set(ROTATE, r_eval, i, -1);
-        }
+            grid.rotate(i);
+            grid.getGravityProvider()->doGravity(NULL);
 
-        grid.clone(*getGame()->getGrid());
-        Logger::log << cellChoiceC << "/" << numPossibles << std::endl;
+            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+            if(r_eval > evalMax)
+            {
+                cellChoiceC = 0;
+                evalMax = r_eval;
+            }
+            if(r_eval == evalMax)
+            {
+                cellChoice[cellChoiceC++].set(ROTATE, r_eval, i, -1);
+            }
+
+            grid.clone(*getGame()->getGrid());
+        }
     }
 
 
@@ -146,40 +175,70 @@ void AI::startAIComputation()
     getGame()->renderOps();
 
 
-    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") --------------- all turn calculated ------------" << std::endl;
-
-    // partie aléatoire
-    for (int i = 0; i < cellChoiceC; ++i) // <= car resultIndex = max-1
+    if(Logger::log.isDebugEnabled())
     {
-        if(!cellChoice[i].valid)
-            continue;
-        Logger::log << "Index: " << i << ", ";
-        Logger::log << "score: " << cellChoice[i].score;
-        Logger::log << "\twith " << cellChoice[i].action << " @ " << cellChoice[i].x << "," << cellChoice[i].y;
-        if(cellChoice[i].score == evalMax) // si le coup est idéal
+        Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") --------------- all turn calculated ------------" << std::endl;
+
+        // partie aléatoire
+
+        for (int i = 0; i < cellChoiceC; ++i) // <= car resultIndex = max-1
         {
-            Logger::log << " <--- ";
-            cellFinalChoice[cellFinalChoiceC++] = cellChoice[i];
+            if(!cellChoice[i].valid)
+                continue;
+            Logger::log << "Index: " << i << ", ";
+            Logger::log << "score: " << cellChoice[i].score;
+            Logger::log << "\twith " << cellChoice[i].action << " @ " << cellChoice[i].x << "," << cellChoice[i].y;
+            /*if(cellChoice[i].score == evalMax) // si le coup est idéal
+            {
+                Logger::log << " <--- ";
+                cellFinalChoice[cellFinalChoiceC++] = cellChoice[i];
+            }*/
+            Logger::log << std::endl;
         }
-        Logger::log << std::endl;
+        Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") ------------------------------------------------" << std::endl;
     }
-    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") ------------------------------------------------" << std::endl;
 
     Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") ";
-    if(cellFinalChoiceC > 1) // si plusieurs coup idéaux
+    if(cellChoiceC > 1) // si plusieurs coup idéaux
     {
-        turn_choice = cellFinalChoice[rand() % cellFinalChoiceC];
+        turn_choice = cellChoice[rand() % cellChoiceC];
         Logger::log << "Random: ";
     }
     else   // sinon, une seule possibilité
     {
-        turn_choice = cellFinalChoice[0];
+        turn_choice = cellChoice[0];
         Logger::log << "First : ";
     }
     Logger::log << turn_choice.score << " (" << turn_choice.action << ") @ " << turn_choice.x << "," << turn_choice.y << std::endl;
 
     delete [] cellChoice;
-    delete [] cellFinalChoice;
+    //delete [] cellFinalChoice;
+}
+
+int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex, int &alpha, int &beta, int &t_alpha, int &t_beta)
+{
+    int value;
+    if(thisEntityIndex != getEntityIndex()) // noeud MIN
+    {
+        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, Helpers::__min(beta, t_beta));
+        t_beta = Helpers::__min(t_beta, value);
+        if(alpha >= t_beta)
+        {
+            //Logger::log << "beta prune" << std::endl;
+            return t_beta;
+        }
+    }
+    else // noeud MAX
+    {
+        value = alphabeta(grid, prof - 1, nextEntityIndex, Helpers::__max(alpha, t_alpha), beta);
+        t_alpha = Helpers::__max(t_alpha, value);
+        if(t_alpha >= beta)
+        {
+            //Logger::log << "alpha prune" << std::endl;
+            return t_alpha;
+        }
+    }
+    return 0;
 }
 
 int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, int beta)
@@ -189,89 +248,56 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
         return r_eval;
 
     int nextEntityIndex = (thisEntityIndex % getGame()->getGameSettings()->getNumPlayers()) + 1;
-    int best = (thisEntityIndex == getEntityIndex()) ? EVAL_MIN : EVAL_MAX;
     int value;
+    int t_alpha = EVAL_MIN;
+    int t_beta = EVAL_MAX;
+
     Grid grid(parent_grid);
 
     /***************************/
     /******* PLACE_TOKEN *******/
     /***************************/
-
-    for (int i = 0; i < grid.getWidth(); ++i)
+    if(!grid.isFull()) // grille pleine, pas d'ajout
     {
-        int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
-        if(placePos == -1)
-            continue;
-
-        grid.setGridAt(i, placePos, thisEntityIndex);
-
-        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, beta);
-
-        if(thisEntityIndex == getEntityIndex()) // noeud MAX
+        for (int i = 0; i < grid.getWidth(); ++i)
         {
-            best = Helpers::__max(best, value);
-            if(best >= beta){ // coupure beta
-                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                return best;
-            }
+            int placePos = grid.getGravityProvider()->getFirstEmptyCell(i);
+            if(placePos == -1)
+                continue;
 
-            alpha = Helpers::__max(alpha, best);
+            grid.setGridAt(i, placePos, thisEntityIndex);
+
+            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+            if(value != 0)
+                return value;
+
+
+            grid.clone(parent_grid);
         }
-        else // noeud min
-        {
-            best = Helpers::__min(best, value);
-            if(alpha >= best){ // coupure alpha
-                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                return best;
-            }
-
-            beta = Helpers::__min(beta, best);
-        }
-
-
-        grid.clone(parent_grid);
     }
 
     /***************************/
     /******* REMOVE_TOKEN ******/
     /***************************/
-
-    for (int i = 0; i < grid.getWidth(); ++i)
+    if(grid.getCellsForPlayer(thisEntityIndex) > 0) // pas de jetons, pas de remove
     {
-        for (int j = 0; j < grid.getHeight(); ++j)
+        for (int i = 0; i < grid.getWidth(); ++i)
         {
-
-            if(grid.getGridAt(i, j) != thisEntityIndex)
-                continue;
-
-            grid.forceSetGridAt(i, j, 0);
-            grid.getGravityProvider()->doColumnGravity(i, NULL);
-
-            value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, beta);
-
-            if(thisEntityIndex == getEntityIndex()) // noeud MAX (self)
+            for (int j = 0; j < grid.getHeight(); ++j)
             {
-                best = Helpers::__max(best, value);
-                if(best >= beta){ // coupure beta
-                    totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                    return best;
-                }
 
-                alpha = Helpers::__max(alpha, best);
+                if(grid.getGridAt(i, j) != thisEntityIndex)
+                    continue;
+
+                grid.forceSetGridAt(i, j, 0);
+                grid.getGravityProvider()->doColumnGravity(i, NULL);
+
+                value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+                if(value != 0)
+                    return value;
+
+                grid.clone(parent_grid);
             }
-            else // noeud min
-            {
-                best = Helpers::__min(best, value);
-                if(alpha >= best){ // coupure alpha
-                    totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                    return best;
-                }
-
-                beta = Helpers::__min(beta, best);
-            }
-
-
-            grid.clone(parent_grid);
         }
     }
 
@@ -280,38 +306,21 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
     /***************************/
     // ROTATE_CLOCKWISE = 1
     // ROTATE_COUNTERCLOCKWISE = -1
-
-    for (int i = -1; i <= 1; i += 2)
+    if(grid.getFilledCells() >= getGame()->getGameSettings()->getAlignSize()) //
     {
-        grid.rotate(i);
-        grid.getGravityProvider()->doGravity(NULL);
-
-        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, beta);
-
-        if(thisEntityIndex == getEntityIndex()) // noeud MAX
+        for (int i = -1; i <= 1; i += 2)
         {
-            best = Helpers::__max(best, value);
-            if(best >= beta){ // coupure beta
-                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                return best;
-            }
+            grid.rotate(i);
+            grid.getGravityProvider()->doGravity(NULL);
 
-            alpha = Helpers::__max(alpha, best);
+            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+            if(value != 0)
+                return value;
+
+            grid.clone(parent_grid);
         }
-        else // noeud min
-        {
-            best = Helpers::__min(best, value);
-            if(alpha >= best){ // coupure alpha
-                totalEvalOps -= static_cast<long>(pow(numPossibles, prof));
-                return best;
-            }
-
-            beta = Helpers::__min(beta, best);
-        }
-
-        grid.clone(parent_grid);
     }
-    return best;
+    return (thisEntityIndex == getEntityIndex()) ? t_alpha : t_beta;
 }
 
 int AI::eval(Grid &grid, const int &prof)
@@ -368,7 +377,7 @@ UpdateState AI::update(chtype)
     Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Entity-AI: update" << std::endl;
     clock_t begin = std::clock();
     srand(static_cast<unsigned int>(time(NULL)));
-    if(getGame()->getGrid()->getCellsForPlayer(getEntityIndex() - 1) < 1)
+    if(getGame()->getGrid()->isEmpty()) // premier tour ?
     {
         turn_choice.action = TOKEN_PLACE;
         turn_choice.x = (rand() % (getGame()->getGrid()->getWidth() - 4)) + 2;
@@ -396,18 +405,13 @@ UpdateState AI::update(chtype)
         if(turn_choice.score <= 0)
         {
             Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Incrementing difficulty to ";
-
-            this->difficulty++;
-            if(this->difficulty > 15)
-                this->difficulty = 15;
+            setDifficulty(difficulty + 1);
             Logger::log << difficulty << std::endl;
         }
         else if(turn_choice.score > 10)
         {
             Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") Decrementing difficulty to ";
-            this->difficulty--;
-            if(this->difficulty <= 0)
-                this->difficulty = 1;
+            setDifficulty(difficulty - 1);
             Logger::log << difficulty << std::endl;
         }
     }

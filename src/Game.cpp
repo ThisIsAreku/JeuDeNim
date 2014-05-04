@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <thread>
 
 #ifdef __linux__
@@ -59,6 +60,7 @@ Game::~Game()
     delete this->gameSettings;
     delete this->manager;
     delete [] saveFilePath;
+    delete [] saveFileName;
 }
 bool Game::isRandomTesting()
 {
@@ -284,29 +286,33 @@ void Game::renderOps()
     if(e->getEntityType() != ENTITY_AI)
         return;
 
-    Window* win = getWindowManager()->getWindow(WIN_GAME_TURN);
+    Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
 
     double p = static_cast<AI *>(e)->getOperationPercent();
     if(p >= 100)
     {
         if(p > 100)
-         Logger::log << "renderOps overflow..." <<std::endl;
+            Logger::log << "renderOps overflow..." << std::endl;
         win->printAt(-7, 1, "       ");
         win->printAt(-18, 0, "                   ");
         win->refresh();
         return;
     }
 
-    char str[6];
+    std::string str;
     if(p <= 0)
     {
-        if(p < 0){
-            Logger::log << "renderOps overflow..." <<std::endl;
-            sprintf(str, "----");
+        if(p < 0)
+        {
+            str =  "----";
         }
         win->printAt(-18, 0, "Calcul en cours...");
-    }else{
-        sprintf(str, "%.2f", p);
+    }
+    else
+    {
+        std::ostringstream ss;
+        ss << std::setprecision(2) << p;
+        str = ss.str();
     }
 
     int i = 0;
@@ -317,7 +323,7 @@ void Game::renderOps()
     else if(p == 100)
         i = 3;
 
-    win->printAt(-4 - i, 1, str);
+    win->printAt(-4 - i, 1, str.c_str());
     win->printAt(-1, 1, "%%");
 
 

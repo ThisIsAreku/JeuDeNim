@@ -12,6 +12,16 @@ O,K,L,M: Déplacer le plateau
 En ligne de commande, -debug active les informations de debogage dans stderr
 ```./bin/JeuDeNim -debug 2>debug.txt```
 
+### Note
+Ncurses ne libère pas toute la mémoire, entre 300 et 500 blocs ne sont psa libéré ("still reachable" dans valgrind).
+D'après la documentation Ncurses: 
+~~~
+Any implementation of curses must not free the memory associated with
+a screen, since (even after calling endwin()), it must be available
+for use in the next call to refresh().  There are also chunks of
+memory held for performance reasons.
+~~~
+
 ### Sites web utilisés:
 * http://tldp.org/HOWTO/text/NCURSES-Programming-HOWTO
 * http://pubs.opengroup.org/onlinepubs/7990989775/xcurses/curses.h.html

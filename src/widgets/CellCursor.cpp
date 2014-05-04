@@ -221,7 +221,7 @@ UpdateState CellCursor::update(chtype ch)
         if(selectionCanceled_callback != NULL)
         {
             selectionCanceled_callback();
-            return REMOVE;        
+            return REMOVE;
         }
         break;
     case 10:
