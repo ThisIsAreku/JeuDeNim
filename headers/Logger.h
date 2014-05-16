@@ -17,7 +17,7 @@ public:
     {
         this->debug = debug;
         if(debug)
-            std::cerr << "Enabled" << std::endl;
+            std::cerr << "Logging Enabled" << std::endl;
     }
 
     bool isDebugEnabled()
