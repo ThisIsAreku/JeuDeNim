@@ -1,6 +1,6 @@
 # Makefile
 # Copyright 2013 Alexandre Boucey <alexandre.boucey@alumni.univ-avignon.fr>
-FLAGS=-pthread
+FLAGS=
 CXXFLAGS+=-std=c++0x -Wall -Wextra -Wno-null-conversion# -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused -Wno-shadow
 LDFLAGS=-lncurses -ltinfo
 NCURSES= $(shell find /usr/lib -name "libncurses.so" -print -quit 2>/dev/null)
@@ -11,13 +11,14 @@ HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.h")
 OBJ= $(SRC:src/%.cpp=obj/%.o)
 
 all: CXXFLAGS+= -O3
+all: FLAGS= 
 all: init compile
 
 debug: CXXFLAGS+= -g -pg
 debug: init compile
 
-nothreads: FLAGS=
-nothreads: init compile
+threads: FLAGS=-pthread
+threads: init compile
 
 build: $(OBJ)
 compile: $(EXEC)
