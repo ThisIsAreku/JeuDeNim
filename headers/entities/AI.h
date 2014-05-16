@@ -2,6 +2,9 @@
 #define _AI_H_
 
 #include <limits>   // std::numeric_limits
+#ifdef _REENTRANT
+#include <mutex>
+#endif
 
 #include "entities/Entity.h"
 #include "WinnerChecker.h"
@@ -14,7 +17,7 @@ struct IATurnChoice
     EntityTurnAction action = TOKEN_PLACE;
     int score, x, y;
     bool valid;
-    IATurnChoice() : action(TOKEN_PLACE), score(0), x(0), y(0), valid(false) {};
+    IATurnChoice() : action(TOKEN_PLACE), score(-1000001), x(0), y(0), valid(false) {};
     void set(EntityTurnAction _action, int _score, int _x, int _y)
     {
         action = _action;
@@ -42,11 +45,18 @@ class AI : public Entity
     long currentEvalOps;
 
     WinnerChecker *winnerChecker;
+#ifdef _REENTRANT
+    std::mutex g_mutex;
+#endif
 
     void startAIComputation();
 
     int alphabeta(Grid, int, int, int, int);
     int prune(Grid &, int &, int &, int &, int &, int &, int &, int &);
+
+    void doComputationPlace(IATurnChoice *);
+    void doComputationRemove(IATurnChoice *);
+    void doComputationRotate(IATurnChoice *);
 
     int eval(Grid &, const int &);
 
