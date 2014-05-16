@@ -25,9 +25,9 @@ Logger::Logger Logger::log;
 Game::Game()
 {
     Logger::log << "Game start" << std::endl;
-    #ifdef _REENTRANT
+#ifdef _REENTRANT
     Logger::log << "Compiled with thread support" << std::endl;
-    #endif
+#endif
 
     this->manager = new WindowManager();
     this->gameSettings = new GameSettings();

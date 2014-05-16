@@ -18,9 +18,9 @@ int main(int argc, char **argv)
     }
 
     Logger::log.setDebug(doDebug);
-    #ifdef __clang__
-        Logger::log << "Vive Clang !" << std::endl;
-    #endif
+#ifdef __clang__
+    Logger::log << "Vive Clang !" << std::endl;
+#endif
     Logger::log << "Compiled on " << __DATE__ << std::endl;
     Game game;
     game.setRandomTesting(doRndTest);
