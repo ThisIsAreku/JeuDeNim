@@ -28,11 +28,15 @@ class WinnerChecker
     void resetWinner();
     void resetWinner(int);
 
-    void checkDiagonalAlign();
+    void checkDiagonalsAlign();
+    void checkColumnsAlign();
+    void checkRowsAlign();
+
     void checkDiagonal1Align(int, int);
     void checkDiagonal2Align(int, int);
     void checkColumnAlign(int);
     void checkRowAlign(int);
+    
     void searchAlign(int, int, int &, int &, int &, int &);
 
     void updateFlags();

@@ -1,3 +1,4 @@
+#include <thread>
 #include "WinnerChecker.h"
 
 
@@ -87,22 +88,7 @@ void WinnerChecker::updateFlags()
         drawFlag = false;
 }
 
-void WinnerChecker::checkColumnAlign(int x)
-{
-    if(hasWinner())
-        return;
-    if(grid->getFilledCells() < this->minCells)
-        return;
-
-    int win = -1;
-    int alc = 0;
-    int fx(0), fy(0);
-    for (int y = 0; y < grid->getHeight(); ++y)
-    {
-        searchAlign(x, y, win, alc, fx, fy);
-    }
-}
-void WinnerChecker::checkDiagonalAlign()
+void WinnerChecker::checkDiagonalsAlign()
 {
     if(hasWinner())
         return;
@@ -124,6 +110,28 @@ void WinnerChecker::checkDiagonalAlign()
         checkDiagonal2Align(x, v);
     }
 }
+void WinnerChecker::checkColumnsAlign()
+{    
+    if(hasWinner())
+        return;
+    if(grid->getFilledCells() < this->minCells)
+        return;
+    for (int i = 0; i < grid->getWidth(); ++i)
+    {
+        checkColumnAlign(i);
+    }
+}
+void WinnerChecker::checkRowsAlign()
+{
+    if(hasWinner())
+        return;
+    if(grid->getFilledCells() < this->minCells)
+        return;
+    for (int i = 0; i < grid->getHeight(); ++i)
+    {
+        checkRowAlign(i);
+    }
+}
 void WinnerChecker::checkDiagonal1Align(int x, int y) // tl->br
 {
     int win = -1;
@@ -142,6 +150,21 @@ void WinnerChecker::checkDiagonal2Align(int x, int y) // tr->bl
     while((x < grid->getWidth() && y < grid->getHeight()) && (x >= 0 && y >= 0))
     {
         searchAlign(x--, y++, win, alc, fx, fy);
+    }
+}
+void WinnerChecker::checkColumnAlign(int x)
+{
+    if(hasWinner())
+        return;
+    if(grid->getFilledCells() < this->minCells)
+        return;
+
+    int win = -1;
+    int alc = 0;
+    int fx(0), fy(0);
+    for (int y = 0; y < grid->getHeight(); ++y)
+    {
+        searchAlign(x, y, win, alc, fx, fy);
     }
 }
 void WinnerChecker::checkRowAlign(int y)
@@ -231,25 +254,17 @@ void WinnerChecker::searchWinner(Grid *grid, bool forceCheck)
         Logger::log << "WinnerChecker::searchWinner skipped" << std::endl;
         return;
     }
-    //grid->debugGrid();
-
-
-    //Logger::log << "WinnerChecker::searchWinner start" <<  std::endl;
     resetWinAlignementsCount();
 
-    //Logger::log << "WinnerChecker::searchWinner checkColumnAlign" <<  std::endl;
-    for (int i = 0; i < grid->getWidth(); ++i)
-    {
-        checkColumnAlign(i);
-    }
-    //Logger::log << "WinnerChecker::searchWinner checkRowAlign" <<  std::endl;
-    for (int i = 0; i < grid->getHeight(); ++i)
-    {
-        checkRowAlign(i);
-    }
+    /*timespec ts1, ts2;
+    clock_gettime(CLOCK_REALTIME, &ts1);*/
 
-    //Logger::log << "WinnerChecker::searchWinner checkDiagonalAlign" <<  std::endl;
-    checkDiagonalAlign();
+    checkColumnsAlign();
+    checkRowsAlign();
+    checkDiagonalsAlign();
+
+    /*clock_gettime(CLOCK_REALTIME, &ts2);
+    Logger::log << "Time searchWinner: " << (ts2.tv_nsec - ts1.tv_nsec) << " nano" << std::endl;*/
 
     updateFlags();
 
