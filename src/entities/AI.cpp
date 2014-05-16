@@ -1,5 +1,8 @@
 #include "entities/AI.h"
 
+#ifdef _REENTRANT
+#include <thread>
+#endif
 #include <ctime>
 #include <cmath>
 #include "Logger.h"
@@ -47,10 +50,6 @@ float AI::getOperationPercent() const
 
 void AI::startAIComputation()
 {
-    int r_eval;
-
-    Grid grid(*getGame()->getGrid());
-
     // cols + delete + rotate
     numPossibles = getGame()->getGrid()->getWidth() + getGame()->getGrid()->getTotalCells() + 2;
     totalEvalOps = static_cast<long>(pow(numPossibles, difficulty));
@@ -63,19 +62,100 @@ void AI::startAIComputation()
     Logger::log << "numPossibles: " << numPossibles << std::endl;
     Logger::log << "totalEvalOps: " << totalEvalOps << std::endl;
 
-    int cellChoiceC = 0;
-    //int cellFinalChoiceC = 0;
-    IATurnChoice *cellChoice = new IATurnChoice[numPossibles];
-    //IATurnChoice *cellFinalChoice = new IATurnChoice[numPossibles];
-
-    int evalMax = EVAL_MIN;
     getGame()->renderOps();
 
+    IATurnChoice placeChoice, removeChoice, rotateChoice;
+#ifdef _REENTRANT
+    Logger::log << "Computation using 3 threads" << std::endl;
+    std::thread computationPlaceThread(&AI::doComputationPlace, this, &placeChoice);
+    std::thread computationRemoveThread(&AI::doComputationRemove, this, &removeChoice);
+    std::thread computationRotateThread(&AI::doComputationRotate, this, &rotateChoice);
+
+    computationPlaceThread.join();
+    computationRemoveThread.join();
+    computationRotateThread.join();
+
+#else
+    Logger::log << "Computation on a single thread" << std::endl;
     /****************************/
     /******* PLACE_TOKEN *******/
     /**************************/
-    if(!grid.isFull()) // grille pleine, pas d'ajout
+    doComputationPlace(&placeChoice);
+
+    /****************************/
+    /******* REMOVE_TOKEN *******/
+    /**************************/
+    doComputationRemove(&removeChoice);
+
+    /***************************/
+    /********* ROTATE **********/
+    /***************************/
+    // ROTATE_CLOCKWISE = 1
+    // ROTATE_COUNTERCLOCKWISE = -1
+    doComputationRotate(&rotateChoice);
+#endif
+
+
+
+
+    Logger::log << "totalEvalOps: " << totalEvalOps << ", iterated " << currentEvalOps << std::endl;
+    currentEvalOps = totalEvalOps; // reach 100%
+    getGame()->renderOps();
+
+    if(Logger::log.isDebugEnabled())
     {
+        Logger::log << "placeChoice: " << (placeChoice.valid ? "OK" : "NO") << " " << placeChoice.score << " (" << placeChoice.action << ") @ " << placeChoice.x << "," << placeChoice.y << std::endl;
+        Logger::log << "removeChoice: " << (removeChoice.valid ? "OK" : "NO") << " " << removeChoice.score << " (" << removeChoice.action << ") @ " << removeChoice.x << "," << removeChoice.y << std::endl;
+        Logger::log << "rotateChoice: " << (rotateChoice.valid ? "OK" : "NO") << " " << rotateChoice.score << " (" << rotateChoice.action << ") @ " << rotateChoice.x << "," << rotateChoice.y << std::endl;
+    }
+
+
+    if(placeChoice.valid && !removeChoice.valid && !rotateChoice.valid)
+    {
+        turn_choice = placeChoice;
+    }
+    else if(!placeChoice.valid && removeChoice.valid && !rotateChoice.valid)
+    {
+        turn_choice = removeChoice;
+    }
+    else if(!placeChoice.valid && !removeChoice.valid && rotateChoice.valid)
+    {
+        turn_choice = rotateChoice;
+    }
+    else
+    {
+        if(placeChoice.score > removeChoice.score)
+        {
+            turn_choice = placeChoice;
+        }
+        else if(placeChoice.score == removeChoice.score)
+        {
+            turn_choice = (rand() % 100 < 50) ? placeChoice : removeChoice;
+        }
+        else
+        {
+            turn_choice = removeChoice;
+        }
+        if(rotateChoice.score > turn_choice.score)
+        {
+            turn_choice = rotateChoice;
+        }
+        else if(rotateChoice.score == turn_choice.score)
+        {
+            if(rand() % 100 < 50)
+                turn_choice = rotateChoice;
+        }
+    }
+    Logger::log << turn_choice.score << " (" << turn_choice.action << ") @ " << turn_choice.x << "," << turn_choice.y << std::endl;
+
+}
+void AI::doComputationPlace(IATurnChoice *thisChoice)
+{
+    if(!getGame()->getGrid()->isFull()) // grille pleine, pas d'ajout
+    {
+        int r_eval;
+        int evalMax = EVAL_MIN;
+        Grid grid(*getGame()->getGrid());
         Logger::log << "PLACE_TOKEN" << std::endl;
         for (int i = 0; i < grid.getWidth(); ++i)
         {
@@ -89,25 +169,23 @@ void AI::startAIComputation()
 
             grid.setGridAt(i, placePos, getEntityIndex());
             r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
-            if(r_eval > evalMax)
+            if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
             {
-                cellChoiceC = 0;
                 evalMax = r_eval;
-            }
-            if(r_eval == evalMax)
-            {
-                cellChoice[cellChoiceC++].set(TOKEN_PLACE, r_eval, i, placePos);
+                thisChoice->set(TOKEN_PLACE, r_eval, i, placePos);
             }
 
             grid.clone(*getGame()->getGrid());
         }
     }
-
-    /****************************/
-    /******* REMOVE_TOKEN *******/
-    /**************************/
-    if(grid.getCellsForPlayer(getEntityIndex()) > 0) // pas de jetons, pas de remove
+}
+void AI::doComputationRemove(IATurnChoice *thisChoice)
+{
+    if(getGame()->getGrid()->getCellsForPlayer(getEntityIndex()) > 0) // pas de jetons, pas de remove
     {
+        int r_eval;
+        int evalMax = EVAL_MIN;
+        Grid grid(*getGame()->getGrid());
         Logger::log << "REMOVE_TOKEN" << std::endl;
         for (int i = 0; i < grid.getWidth(); ++i)
         {
@@ -124,29 +202,24 @@ void AI::startAIComputation()
                 grid.getGravityProvider()->doColumnGravity(i, NULL);
 
                 r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
-                if(r_eval > evalMax)
+                if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
                 {
-                    cellChoiceC = 0;
                     evalMax = r_eval;
+                    thisChoice->set(TOKEN_REMOVE, r_eval, i, j);
                 }
-                if(r_eval == evalMax)
-                {
-                    cellChoice[cellChoiceC++].set(TOKEN_REMOVE, r_eval, i, j);
-                }
-
 
                 grid.clone(*getGame()->getGrid());
             }
         }
     }
-
-    /***************************/
-    /********* ROTATE **********/
-    /***************************/
-    // ROTATE_CLOCKWISE = 1
-    // ROTATE_COUNTERCLOCKWISE = -1
-    if(grid.getFilledCells() >= getGame()->getGameSettings()->getAlignSize()) //
+}
+void AI::doComputationRotate(IATurnChoice *thisChoice)
+{
+    if(getGame()->getGrid()->getFilledCells() >= getGame()->getGameSettings()->getAlignSize()) //
     {
+        int r_eval;
+        int evalMax = EVAL_MIN;
+        Grid grid(*getGame()->getGrid());
         Logger::log << "ROTATE" << std::endl;
         for (int i = -1; i <= 1; i += 2)
         {
@@ -154,65 +227,15 @@ void AI::startAIComputation()
             grid.getGravityProvider()->doGravity(NULL);
 
             r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
-            if(r_eval > evalMax)
+            if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
             {
-                cellChoiceC = 0;
                 evalMax = r_eval;
-            }
-            if(r_eval == evalMax)
-            {
-                cellChoice[cellChoiceC++].set(ROTATE, r_eval, i, -1);
+                thisChoice->set(ROTATE, r_eval, i, -1j);
             }
 
             grid.clone(*getGame()->getGrid());
         }
     }
-
-
-
-    Logger::log << "totalEvalOps: " << totalEvalOps << ", iterated " << currentEvalOps << std::endl;
-    currentEvalOps = totalEvalOps; // reach 100%
-    getGame()->renderOps();
-
-
-    if(Logger::log.isDebugEnabled())
-    {
-        Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") --------------- all turn calculated ------------" << std::endl;
-
-        // partie aléatoire
-
-        for (int i = 0; i < cellChoiceC; ++i) // <= car resultIndex = max-1
-        {
-            if(!cellChoice[i].valid)
-                continue;
-            Logger::log << "Index: " << i << ", ";
-            Logger::log << "score: " << cellChoice[i].score;
-            Logger::log << "\twith " << cellChoice[i].action << " @ " << cellChoice[i].x << "," << cellChoice[i].y;
-            /*if(cellChoice[i].score == evalMax) // si le coup est idéal
-            {
-                Logger::log << " <--- ";
-                cellFinalChoice[cellFinalChoiceC++] = cellChoice[i];
-            }*/
-            Logger::log << std::endl;
-        }
-        Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") ------------------------------------------------" << std::endl;
-    }
-
-    Logger::log << "(" << getEntityIndex() << ")(" << difficulty << ") ";
-    if(cellChoiceC > 1) // si plusieurs coup idéaux
-    {
-        turn_choice = cellChoice[rand() % cellChoiceC];
-        Logger::log << "Random: ";
-    }
-    else   // sinon, une seule possibilité
-    {
-        turn_choice = cellChoice[0];
-        Logger::log << "First : ";
-    }
-    Logger::log << turn_choice.score << " (" << turn_choice.action << ") @ " << turn_choice.x << "," << turn_choice.y << std::endl;
-
-    delete [] cellChoice;
-    //delete [] cellFinalChoice;
 }
 
 int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex, int &alpha, int &beta, int &t_alpha, int &t_beta)
@@ -243,7 +266,13 @@ int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex,
 
 int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, int beta)
 {
+#ifdef _REENTRANT
+    g_mutex.lock();
+#endif
     int r_eval = eval(parent_grid, prof);
+#ifdef _REENTRANT
+    g_mutex.unlock();
+#endif
     if(prof == 0 || this->winnerChecker->hasWinner())
         return r_eval;
 
@@ -335,7 +364,9 @@ int AI::eval(Grid &grid, const int &prof)
     if(this->winnerChecker->hasWinner())
     {
         if(this->winnerChecker->hasDraw())
+        {
             return 0;
+        }
         return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX - prof : EVAL_MIN + prof;
     }
     int score = 0;
