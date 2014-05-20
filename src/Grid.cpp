@@ -262,7 +262,7 @@ int Grid::getTotalCells() const
 }
 int Grid::getCellsForPlayer(const int &p) const
 {
-    return this->countCellsByPlayers[p];
+    return this->countCellsByPlayers[p - 1];
 }
 int Grid::getRotation() const
 {
