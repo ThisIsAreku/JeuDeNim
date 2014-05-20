@@ -36,15 +36,18 @@ class WinnerChecker
     void checkDiagonal2Align(int, int);
     void checkColumnAlign(int);
     void checkRowAlign(int);
-    
+
     void searchAlign(int, int, int &, int &, int &, int &);
 
     void updateFlags();
 
 
 public:
+    WinnerChecker();
     WinnerChecker(Game *, bool);
     ~WinnerChecker();
+
+    void init(Game *, bool);
 
     void setGridToCheck(const Grid *);
 

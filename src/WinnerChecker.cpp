@@ -7,6 +7,30 @@
 
 WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
 {
+    init(game, useGraphics);
+}
+WinnerChecker::WinnerChecker()
+{
+}
+WinnerChecker::~WinnerChecker()
+{
+    delete [] this->winner;
+    delete [] winAlignementsCount;
+    delete [] alignementsCount;
+    delete [] maxAlignementsSizes;
+
+    if(useGraphics)
+    {
+        for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
+        {
+            delete [] winAlignements[i];
+        }
+        delete [] winAlignements;
+    }
+}
+
+void WinnerChecker::init(Game *game, bool useGraphics)
+{
     this->useGraphics = useGraphics;
     this->game = game;
     grid = game->getGrid();
@@ -25,22 +49,6 @@ WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
         winAlignements = new TokenAlignement*[game->getGameSettings()->getNumPlayers()];
         for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
             winAlignements[i] = new TokenAlignement[game->getGameSettings()->getAlignSize()];
-    }
-}
-WinnerChecker::~WinnerChecker()
-{
-    delete [] this->winner;
-    delete [] winAlignementsCount;
-    delete [] alignementsCount;
-    delete [] maxAlignementsSizes;
-
-    if(useGraphics)
-    {
-        for (int i = 0; i < game->getGameSettings()->getNumPlayers(); ++i)
-        {
-            delete [] winAlignements[i];
-        }
-        delete [] winAlignements;
     }
 }
 
@@ -111,7 +119,7 @@ void WinnerChecker::checkDiagonalsAlign()
     }
 }
 void WinnerChecker::checkColumnsAlign()
-{    
+{
     if(hasWinner())
         return;
     if(grid->getFilledCells() < this->minCells)
