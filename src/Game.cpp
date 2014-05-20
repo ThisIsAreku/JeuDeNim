@@ -314,7 +314,7 @@ void Game::renderOps()
     else
     {
         std::ostringstream ss;
-        ss << std::setprecision(2) << p;
+        ss << std::setprecision(2) << std::fixed << p;
         str = ss.str();
     }
 
