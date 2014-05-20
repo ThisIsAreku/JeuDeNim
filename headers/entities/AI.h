@@ -51,14 +51,14 @@ class AI : public Entity
 
     void startAIComputation();
 
-    int alphabeta(Grid, int, int, int, int);
-    int prune(Grid &, int &, int &, int &, int &, int &, int &, int &);
+    int alphabeta(Grid, int, int, int, int, const int &);
+    int prune(Grid &, int &, int &, int &, int &, int &, int &, int &, const int &);
 
-    void doComputationPlace(IATurnChoice *);
-    void doComputationRemove(IATurnChoice *);
-    void doComputationRotate(IATurnChoice *);
+    void doComputationPlace(IATurnChoice *, int threadId = 0);
+    void doComputationRemove(IATurnChoice *, int threadId = 0);
+    void doComputationRotate(IATurnChoice *, int threadId = 0);
 
-    int eval(Grid &, const int &);
+    inline int eval(Grid &, const int &, const int &);
 
 public:
     AI(Game *, int, int, bool);

@@ -9,7 +9,15 @@
 
 AI::AI(Game *game, int entityIndex, int level, bool adaptative) : Entity(game, entityIndex)
 {
+#ifdef _REENTRANT
+    this->winnerChecker = new WinnerChecker[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        this->winnerChecker[i].init(game, false);
+    }
+#else
     this->winnerChecker = new WinnerChecker(game, false);
+#endif
     this->adaptative = adaptative;
     this->totalEvalOpsByLevel = NULL;
     setDifficulty(level);
@@ -67,9 +75,9 @@ void AI::startAIComputation()
     IATurnChoice placeChoice, removeChoice, rotateChoice;
 #ifdef _REENTRANT
     Logger::log << "Computation using 3 threads" << std::endl;
-    std::thread computationPlaceThread(&AI::doComputationPlace, this, &placeChoice);
-    std::thread computationRemoveThread(&AI::doComputationRemove, this, &removeChoice);
-    std::thread computationRotateThread(&AI::doComputationRotate, this, &rotateChoice);
+    std::thread computationPlaceThread(&AI::doComputationPlace, this, &placeChoice, 0);
+    std::thread computationRemoveThread(&AI::doComputationRemove, this, &removeChoice, 1);
+    std::thread computationRotateThread(&AI::doComputationRotate, this, &rotateChoice, 2);
 
     computationPlaceThread.join();
     computationRemoveThread.join();
@@ -149,14 +157,14 @@ void AI::startAIComputation()
     Logger::log << turn_choice.score << " (" << turn_choice.action << ") @ " << turn_choice.x << "," << turn_choice.y << std::endl;
 
 }
-void AI::doComputationPlace(IATurnChoice *thisChoice)
+void AI::doComputationPlace(IATurnChoice *thisChoice, int threadId)
 {
     if(!getGame()->getGrid()->isFull()) // grille pleine, pas d'ajout
     {
         int r_eval;
         int evalMax = EVAL_MIN;
         Grid grid(*getGame()->getGrid());
-        Logger::log << "PLACE_TOKEN" << std::endl;
+        Logger::log << "PLACE_TOKEN " << threadId << std::endl;
         for (int i = 0; i < grid.getWidth(); ++i)
         {
 
@@ -168,7 +176,7 @@ void AI::doComputationPlace(IATurnChoice *thisChoice)
             }
 
             grid.setGridAt(i, placePos, getEntityIndex());
-            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX, threadId);
             if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
             {
                 evalMax = r_eval;
@@ -179,14 +187,14 @@ void AI::doComputationPlace(IATurnChoice *thisChoice)
         }
     }
 }
-void AI::doComputationRemove(IATurnChoice *thisChoice)
+void AI::doComputationRemove(IATurnChoice *thisChoice, int threadId)
 {
     if(getGame()->getGrid()->getCellsForPlayer(getEntityIndex()) > 0) // pas de jetons, pas de remove
     {
         int r_eval;
         int evalMax = EVAL_MIN;
         Grid grid(*getGame()->getGrid());
-        Logger::log << "REMOVE_TOKEN" << std::endl;
+        Logger::log << "REMOVE_TOKEN " << threadId << std::endl;
         for (int i = 0; i < grid.getWidth(); ++i)
         {
             for (int j = 0; j < grid.getHeight(); ++j)
@@ -201,7 +209,7 @@ void AI::doComputationRemove(IATurnChoice *thisChoice)
                 grid.forceSetGridAt(i, j, 0);
                 grid.getGravityProvider()->doColumnGravity(i, NULL);
 
-                r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+                r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX, threadId);
                 if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
                 {
                     evalMax = r_eval;
@@ -213,20 +221,20 @@ void AI::doComputationRemove(IATurnChoice *thisChoice)
         }
     }
 }
-void AI::doComputationRotate(IATurnChoice *thisChoice)
+void AI::doComputationRotate(IATurnChoice *thisChoice, int threadId)
 {
     if(getGame()->getGrid()->getFilledCells() >= getGame()->getGameSettings()->getAlignSize()) //
     {
         int r_eval;
         int evalMax = EVAL_MIN;
         Grid grid(*getGame()->getGrid());
-        Logger::log << "ROTATE" << std::endl;
+        Logger::log << "ROTATE " << threadId << std::endl;
         for (int i = -1; i <= 1; i += 2)
         {
             grid.rotate(i);
             grid.getGravityProvider()->doGravity(NULL);
 
-            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX);
+            r_eval = alphabeta(grid, difficulty - 1, nextEntityIndex, EVAL_MIN, EVAL_MAX, threadId);
             if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
             {
                 evalMax = r_eval;
@@ -238,12 +246,12 @@ void AI::doComputationRotate(IATurnChoice *thisChoice)
     }
 }
 
-int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex, int &alpha, int &beta, int &t_alpha, int &t_beta)
+int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex, int &alpha, int &beta, int &t_alpha, int &t_beta, const int &threadId)
 {
     int value;
     if(thisEntityIndex != getEntityIndex()) // noeud MIN
     {
-        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, Helpers::__min(beta, t_beta));
+        value = alphabeta(grid, prof - 1, nextEntityIndex, alpha, Helpers::__min(beta, t_beta), threadId);
         t_beta = Helpers::__min(t_beta, value);
         if(alpha >= t_beta)
         {
@@ -253,7 +261,7 @@ int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex,
     }
     else // noeud MAX
     {
-        value = alphabeta(grid, prof - 1, nextEntityIndex, Helpers::__max(alpha, t_alpha), beta);
+        value = alphabeta(grid, prof - 1, nextEntityIndex, Helpers::__max(alpha, t_alpha), beta, threadId);
         t_alpha = Helpers::__max(t_alpha, value);
         if(t_alpha >= beta)
         {
@@ -264,14 +272,14 @@ int AI::prune(Grid &grid, int &prof, int &nextEntityIndex, int &thisEntityIndex,
     return 0;
 }
 
-int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, int beta)
+int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, int beta, const int &threadId)
 {
 #ifdef _REENTRANT
-    g_mutex.lock();
+    //g_mutex.lock();
 #endif
-    int r_eval = eval(parent_grid, prof);
+    int r_eval = eval(parent_grid, prof, threadId);
 #ifdef _REENTRANT
-    g_mutex.unlock();
+    //g_mutex.unlock();
 #endif
     if(prof == 0 || this->winnerChecker->hasWinner())
         return r_eval;
@@ -296,7 +304,7 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
 
             grid.setGridAt(i, placePos, thisEntityIndex);
 
-            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta, threadId);
             if(value != 0)
                 return value;
 
@@ -321,7 +329,7 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
                 grid.forceSetGridAt(i, j, 0);
                 grid.getGravityProvider()->doColumnGravity(i, NULL);
 
-                value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+                value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta, threadId);
                 if(value != 0)
                     return value;
 
@@ -342,7 +350,7 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
             grid.rotate(i);
             grid.getGravityProvider()->doGravity(NULL);
 
-            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta);
+            value = prune(grid, prof, nextEntityIndex, thisEntityIndex, alpha, beta, t_alpha, t_beta, threadId);
             if(value != 0)
                 return value;
 
@@ -352,38 +360,39 @@ int AI::alphabeta(Grid parent_grid, int prof, int thisEntityIndex, int alpha, in
     return (thisEntityIndex == getEntityIndex()) ? t_alpha : t_beta;
 }
 
-int AI::eval(Grid &grid, const int &prof)
+int AI::eval(Grid &grid, const int &prof, const int &threadId)
 {
     if(prof == 0)
     {
         currentEvalOps++;
         getGame()->renderOps();
     }
-    this->winnerChecker->searchWinner(&grid, true);
+    WinnerChecker &localWinnerChecker = this->winnerChecker[threadId];
+    localWinnerChecker.searchWinner(&grid, true);
 
-    if(this->winnerChecker->hasWinner())
+    if(localWinnerChecker.hasWinner())
     {
-        if(this->winnerChecker->hasDraw())
+        if(localWinnerChecker.hasDraw())
         {
             return 0;
         }
-        return this->winnerChecker->isWinner(getEntityIndex() - 1) ? EVAL_MAX - prof : EVAL_MIN + prof;
+        return localWinnerChecker.isWinner(getEntityIndex() - 1) ? EVAL_MAX - prof : EVAL_MIN + prof;
     }
     int score = 0;
     int multiplier;
     for (int i = 0; i < getGame()->getGameSettings()->getNumPlayers(); ++i)
     {
         multiplier = (getEntityIndex() - 1 == i) ? 1 : -1;
-        int algn = this->winnerChecker->getMaxAlignSize(i);
+        int algn = localWinnerChecker.getMaxAlignSize(i);
         if(algn <= 1)
             algn = 0;
 
 
 
-        score += (this->winnerChecker->getNumWinAlignements(i) * 100 +
+        score += (localWinnerChecker.getNumWinAlignements(i) * 100 +
                   algn * 50 +
-                  this->winnerChecker->getNumAlign(i) * 2/* +
-                  grid.getCellsForPlayer(i)*/) * multiplier;
+                  localWinnerChecker.getNumAlign(i) * 2/* +
+                  grid.getCellsForPlayer(i+1)*/) * multiplier;
     }
     return score;
 }
