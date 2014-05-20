@@ -41,8 +41,8 @@ class AI : public Entity
     int numPossibles;
 
     long *totalEvalOpsByLevel;
-    long totalEvalOps;
-    long currentEvalOps;
+    unsigned long totalEvalOps;
+    unsigned long currentEvalOps;
 
     WinnerChecker *winnerChecker;
 #ifdef _REENTRANT
