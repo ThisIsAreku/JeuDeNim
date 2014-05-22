@@ -238,7 +238,7 @@ void AI::doComputationRotate(IATurnChoice *thisChoice, int threadId)
             if(r_eval > evalMax || (r_eval == evalMax && rand() % 100 < 50))
             {
                 evalMax = r_eval;
-                thisChoice->set(ROTATE, r_eval, i, -1j);
+                thisChoice->set(ROTATE, r_eval, i, -1);
             }
 
             grid.clone(*getGame()->getGrid());
