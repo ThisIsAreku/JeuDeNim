@@ -14,6 +14,9 @@ all: CXXFLAGS+= -O3
 all: FLAGS= 
 all: init compile
 
+trololo:
+	@echo Faut pas rêver non plus...
+
 debug: CXXFLAGS+= -g -pg
 debug: init compile
 
