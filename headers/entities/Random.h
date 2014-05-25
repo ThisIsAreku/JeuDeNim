@@ -4,8 +4,6 @@
 #include "entities/Entity.h"
 #include "structs/EntityTurnAction.h"
 
-class Game;
-
 class Random : public Entity
 {
     typedef Entity super;
