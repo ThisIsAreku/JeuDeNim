@@ -14,6 +14,11 @@ all: CXXFLAGS+= -O3
 all: FLAGS= 
 all: init compile
 
+doc:
+	-rm -rf doc
+	mkdir doc
+	doxygen
+
 trololo:
 	@echo Faut pas rêver non plus...
 
