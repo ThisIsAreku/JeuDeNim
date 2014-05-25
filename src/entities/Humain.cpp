@@ -3,7 +3,7 @@
 
 #include "Logger.h"
 
-Humain::Humain(Game *game, int entityIndex) : Entity(game, entityIndex)
+Humain::Humain(Game *game, int entityIndex) : super(game, entityIndex)
 {
 
     this->cursor = new CellCursor(game->getWindowManager(), WIN_GAME_GRID, game->getGrid(), entityIndex + 4);

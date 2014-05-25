@@ -10,7 +10,7 @@ class TokenAnimator;
 
 class DisplayGrid : public Renderable
 {
-
+    typedef Renderable super;
     Game *game;
 
     bool shiftEnabled;

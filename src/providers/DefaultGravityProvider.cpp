@@ -4,7 +4,7 @@
 #include "Logger.h"
 #include "Helpers.h"
 
-DefaultGravityProvider::DefaultGravityProvider(Grid *grid) : GravityProvider(grid)
+DefaultGravityProvider::DefaultGravityProvider(Grid *grid) : super(grid)
 {
     int maxVal = Helpers::__max(grid->getWidth(), grid->getHeight());
     lowerCellForColumn = new int[maxVal];

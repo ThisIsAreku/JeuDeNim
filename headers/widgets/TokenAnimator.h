@@ -6,6 +6,7 @@ class Renderable;
 
 class TokenAnimator : public Renderable
 {
+    typedef Renderable super;
     Game *game;
     double modifier;
 public:

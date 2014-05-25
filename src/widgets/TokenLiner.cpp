@@ -2,7 +2,7 @@
 
 #include "Logger.h"
 
-TokenLiner::TokenLiner(WindowManager *manager, int winId) : Renderable(manager, winId) {}
+TokenLiner::TokenLiner(WindowManager *manager, int winId) : super(manager, winId) {}
 
 void TokenLiner::displayAlignement(TokenAlignement align)
 {

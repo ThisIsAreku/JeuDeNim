@@ -4,7 +4,7 @@
 
 #include "Logger.h"
 
-TokenAnimator::TokenAnimator(WindowManager *manager, int winId, Game *game) : Renderable(manager, winId)
+TokenAnimator::TokenAnimator(WindowManager *manager, int winId, Game *game) : super(manager, winId)
 {
     this->game = game;
     modifier = 1.0;

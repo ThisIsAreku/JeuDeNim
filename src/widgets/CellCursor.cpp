@@ -5,7 +5,7 @@
 
 
 #include "Logger.h"
-CellCursor::CellCursor(WindowManager *manager, int winId, Grid *grid, int color) : Renderable(manager, winId)
+CellCursor::CellCursor(WindowManager *manager, int winId, Grid *grid, int color) : super(manager, winId)
 {
     this->color = color;
 

@@ -5,6 +5,7 @@
 
 class DefaultGravityProvider : public GravityProvider
 {
+    typedef GravityProvider super;
     int findNewTokenY(const int &, const int &, int) const;
     int *lowerCellForColumn;
 public:

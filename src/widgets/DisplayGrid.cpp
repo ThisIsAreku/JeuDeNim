@@ -6,7 +6,7 @@
 
 #include "Logger.h"
 
-DisplayGrid::DisplayGrid(WindowManager *manager, int winId, Game *game) : Renderable(manager, winId)
+DisplayGrid::DisplayGrid(WindowManager *manager, int winId, Game *game) : super(manager, winId)
 {
     Logger::log << "Creating DisplayGrid" << std::endl;
     this->game = game;

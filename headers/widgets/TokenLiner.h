@@ -7,6 +7,7 @@
 
 class TokenLiner : public Renderable
 {
+    typedef Renderable super;
 public:
     TokenLiner(WindowManager *, int);
 

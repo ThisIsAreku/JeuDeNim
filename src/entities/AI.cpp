@@ -7,7 +7,7 @@
 #include <cmath>
 #include "Logger.h"
 
-AI::AI(Game *game, int entityIndex, int level, bool adaptative) : Entity(game, entityIndex)
+AI::AI(Game *game, int entityIndex, int level, bool adaptative) : super(game, entityIndex)
 {
 #ifdef _REENTRANT
     this->winnerChecker = new WinnerChecker[3];

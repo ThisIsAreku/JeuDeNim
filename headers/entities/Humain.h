@@ -7,6 +7,7 @@
 
 class Humain : public Entity
 {
+    typedef Entity super;
     CellCursor *cursor;
     EntityTurnAction turnAction;
 

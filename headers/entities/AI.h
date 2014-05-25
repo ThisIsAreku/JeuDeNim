@@ -30,6 +30,7 @@ struct IATurnChoice
 
 class AI : public Entity
 {
+    typedef Entity super;
     int difficulty;
     bool adaptative;
     int nextEntityIndex;

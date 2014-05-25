@@ -8,6 +8,7 @@
 
 class CellCursor : public Renderable
 {
+    typedef Renderable super;
     std::function<bool(int, int)> cellSelected_callback;
     std::function<void( )> selectionCanceled_callback;
     int color;

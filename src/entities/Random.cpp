@@ -5,7 +5,7 @@
 
 #include "Logger.h"
 
-Random::Random(Game *game, int entityIndex) : Entity(game, entityIndex)
+Random::Random(Game *game, int entityIndex) : super(game, entityIndex)
 {
     srand(static_cast<unsigned int>(time(NULL)));
 }

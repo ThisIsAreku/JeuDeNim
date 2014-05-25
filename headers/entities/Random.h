@@ -5,6 +5,7 @@
 
 class Random : public Entity
 {
+    typedef Entity super;
     bool doChoice();
 public:
     Random(Game *, int);
