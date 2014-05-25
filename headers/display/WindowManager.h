@@ -7,6 +7,7 @@
 #include <ncurses.h>
 
 #include "display/Window.h"
+class Overlay;
 #include "constants.h"
 
 class WindowManager
@@ -15,6 +16,7 @@ class WindowManager
     bool releasing;
 
     Window **win;
+    Overlay *currentOverlay;
 
 
     void createWindow(int, int, int, int, int);
@@ -75,6 +77,11 @@ public:
 
     void refreshAll();
     void refreshWindow(int);
+
+
+    void setOverlay(Overlay *);
+    void clearOverlay();
+    Overlay *getOverlay();
 };
 
 #endif

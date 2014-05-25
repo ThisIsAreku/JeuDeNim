@@ -23,6 +23,7 @@ class WinnerChecker;
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 class Game
 {
@@ -35,6 +36,9 @@ class Game
 
     TokenLiner *tokenLiner;
 
+    Overlay *helpOverlay;
+    Overlay *saveOverlay;
+
     int playTurnIndex;
 
     Entity **players;
@@ -45,8 +49,6 @@ class Game
     bool turn_end;
 
     bool random_testing;
-
-    bool displayingHelp;
 
     unsigned long tick;
 
@@ -89,8 +91,6 @@ public:
     void renderOps();
 
     void playerWin();
-
-    void displayHelp();
 
     bool onEntityTurnCompleted(EntityTurnAction, int, int);
 

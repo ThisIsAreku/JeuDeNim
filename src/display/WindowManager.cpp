@@ -1,4 +1,5 @@
 #include "display/WindowManager.h"
+#include "display/Overlay.h"
 
 
 #include "Logger.h"
@@ -69,7 +70,7 @@ void WindowManager::initWindows()
     createWindow(WIN_SCOREBOARD,    18,     lines,  cols + 1,   1);
     createWindow(WIN_GAME_TURN,     COLS,   4,      0,          lines + 1);
 
-    createWindow(WIN_HELP,          cols,   lines,  0,          1);
+    createWindow(WIN_OVERLAY,          cols,   lines,  0,          1);
 }
 void WindowManager::initNcurses()
 {
@@ -284,4 +285,32 @@ void WindowManager::leaveCurseMode()
 void WindowManager::restoreCurseMode()
 {
     reset_prog_mode();
+}
+
+
+
+void WindowManager::setOverlay(Overlay *_overlay)
+{
+    if(_overlay == NULL)
+        return clearOverlay();
+
+    if(getOverlay() != NULL)
+        clearOverlay();
+
+    this->currentOverlay = _overlay;
+    this->currentOverlay->visible = true;
+    this->currentOverlay->render();
+
+    refreshWindow(WIN_OVERLAY);
+    overlay(getWindow(WIN_GAME_GRID)->getHandle(), getWindow(WIN_OVERLAY)->getHandle());
+    refresh();
+}
+void WindowManager::clearOverlay()
+{
+    this->currentOverlay->visible = false;
+    this->currentOverlay = NULL;
+}
+Overlay *WindowManager::getOverlay()
+{
+    return this->currentOverlay;
 }

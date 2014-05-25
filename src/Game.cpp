@@ -16,6 +16,8 @@
 #include "entities/AI.h"
 #include "providers/DefaultGravityProvider.h"
 
+#include "overlays/HelpOverlay.h"
+
 
 #include "Logger.h"
 
@@ -36,7 +38,6 @@ Game::Game()
     playTurnIndex = 0;
     currentPlayer = 0;
     game_end = turn_end = false;
-    displayingHelp = false;
     random_testing = false;
 
 
@@ -189,6 +190,8 @@ void Game::init()
     this->winnerChecker = new WinnerChecker(this, true);
     this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
 
+    this->helpOverlay = new HelpOverlay(this->manager);
+
     createEntities();
 
     this->displayGrid->init();
@@ -203,6 +206,8 @@ void Game::deinit()
     delete this->displayGrid;
     delete this->winnerChecker;
     delete this->tokenLiner;
+
+    delete this->helpOverlay;
 
     delete this->grid;
 }
@@ -224,7 +229,7 @@ void Game::update()
 
     doKeyboardActions(ch);
 
-    if(!displayingHelp)
+    if(getWindowManager()->getOverlay() == NULL)
     {
         this->displayGrid->update(ch);
         getCurrentPlayer()->update(ch);
@@ -274,7 +279,7 @@ void Game::render()
     win->refresh();
 
 
-    if(!displayingHelp)
+    if(getWindowManager()->getOverlay() == NULL)
     {
         getCurrentPlayer()->render();
 
@@ -338,9 +343,14 @@ void Game::doKeyboardActions(chtype ch)
     if(ch == KEY_F(12))
         interrupted = true;
     if(ch == 'h')
-        displayHelp();
+    {
+        if(this->helpOverlay->isVisible())
+            getWindowManager()->clearOverlay();
+        else
+            getWindowManager()->setOverlay(this->helpOverlay);
+    }
 
-    if(displayingHelp)
+    if(getWindowManager()->getOverlay() != NULL)
         return;
     if(ch == KEY_F(9))
         getGameSettings()->animate = !getGameSettings()->animate;
@@ -498,47 +508,6 @@ void Game::logKeyboard(chtype ch)
         }
     Logger::log << std::endl;
 }
-
-void Game::displayHelp()
-{
-    displayingHelp = !displayingHelp;
-    if(!displayingHelp)
-        return;
-
-
-    Window *win = getWindowManager()->getWindow(WIN_HELP);
-    if(win == NULL)
-        return;
-
-    win->clear();
-    win->printAt(0, 0, "Donc là c'est l'aide...");
-
-    int i = 2;
-    win->printAt(0, i++, "Touches d'actions");
-    win->printAt(0, i++, "- P: Placer un jeton");
-    win->printAt(0, i++, "- D: Supprimer un jeton");
-    win->printAt(0, i++, "- R: Rotation antihoraire");
-    win->printAt(0, i++, "- T: Rotation horaire");
-
-    i = 2;
-    win->printAt(34, i++, "Déplacer le plateau");
-    win->printAt(34, i++, "- O: Haut");
-    win->printAt(34, i++, "- L: Bas");
-    win->printAt(34, i++, "- K: Gauche");
-    win->printAt(34, i++, "- M: Droite");
-    i++;
-    win->printAt(0, i, "Appuyez sur F6 pour sauvegarder, F7 pour charger");
-
-
-    win->printAt(0, -1, "Appuyez sur [H] pour fermer l'aide");
-
-    win->refresh();
-
-
-    overlay(getWindowManager()->getWindow(WIN_GAME_GRID)->getHandle(), win->getHandle());
-    refresh();
-}
-
 
 void Game::saveState(int slotId)
 {
