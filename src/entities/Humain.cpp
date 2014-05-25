@@ -1,6 +1,9 @@
 #include "entities/Humain.h"
 
-
+#include "widgets/CellCursor.h"
+#include "Game.h"
+#include "Grid.h"
+#include "constants.h"
 #include "Logger.h"
 
 Humain::Humain(Game *game, int entityIndex) : super(game, entityIndex)

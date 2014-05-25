@@ -5,6 +5,14 @@
 #endif
 #include <ctime>
 #include <cmath>
+
+#include "providers/GravityProvider.h"
+#include "config/GameSettings.h"
+#include "WinnerChecker.h"
+#include "Helpers.h"
+#include "Game.h"
+#include "Grid.h"
+#include "constants.h"
 #include "Logger.h"
 
 AI::AI(Game *game, int entityIndex, int level, bool adaptative) : super(game, entityIndex)

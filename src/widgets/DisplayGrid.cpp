@@ -1,8 +1,15 @@
-#include <thread>
 #include "widgets/DisplayGrid.h"
+
+#include "widgets/TokenAnimator.h"
 #include "providers/GravityProvider.h"
+#include "config/GameSettings.h"
+#include "Game.h"
+#include "Grid.h"
+#include "constants.h"
 
 #include "WinnerChecker.h"
+
+#include "display/Window.h"
 
 #include "Logger.h"
 

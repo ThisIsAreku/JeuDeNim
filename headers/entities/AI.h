@@ -7,10 +7,11 @@
 #endif
 
 #include "entities/Entity.h"
-#include "WinnerChecker.h"
+#include "structs/EntityTurnAction.h"
 
-
-#include "Grid.h"
+class Game;
+class Grid;
+class WinnerChecker;
 
 struct IATurnChoice
 {

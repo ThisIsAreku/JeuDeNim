@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "display/Window.h"
+class Window;
 
 class GameSettings
 {

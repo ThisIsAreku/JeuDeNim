@@ -1,8 +1,10 @@
 #ifndef _RENDERABLE_H_
 #define _RENDERABLE_H_
 
-#include "display/WindowManager.h"
-class Game;
+#include <ncurses.h>
+
+class WindowManager;
+class Window;
 
 #include "structs/UpdateState.h"
 
@@ -23,7 +25,5 @@ public:
     virtual void render() = 0;
 
 };
-
-#include "Game.h"
 
 #endif

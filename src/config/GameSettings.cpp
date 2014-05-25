@@ -1,4 +1,6 @@
 #include "config/GameSettings.h"
+
+#include "display/Window.h"
 #include "constants.h"
 
 GameSettings::GameSettings()

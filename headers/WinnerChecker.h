@@ -2,10 +2,8 @@
 #define _WINNER_CHECKER_H_
 
 class Game;
-
-#include "Game.h"
-
-#include "structs/TokenAlignement.h"
+class Grid;
+struct TokenAlignement;
 
 class WinnerChecker
 {

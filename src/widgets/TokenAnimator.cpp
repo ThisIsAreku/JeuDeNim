@@ -1,6 +1,11 @@
-#include <thread>
 #include "widgets/TokenAnimator.h"
+
+#include "config/GameSettings.h"
+#include "Game.h"
+#include "Grid.h"
+
 #include "constants.h"
+#include "display/Window.h"
 
 #include "Logger.h"
 

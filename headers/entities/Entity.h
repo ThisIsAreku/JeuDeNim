@@ -1,11 +1,10 @@
 #ifndef _ENTITIY_H_
 #define _ENTITIY_H_
 
-class Game; // forward declaration
-
-#include "Game.h"
-
+#include <ncurses.h>
 #include "structs/UpdateState.h"
+
+class Game;
 
 class Entity
 {

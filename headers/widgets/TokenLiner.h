@@ -3,7 +3,7 @@
 
 #include "display/Renderable.h"
 
-#include "structs/TokenAlignement.h"
+struct TokenAlignement;
 
 class TokenLiner : public Renderable
 {

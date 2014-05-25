@@ -2,7 +2,10 @@
 
 #include "widgets/CellCursor.h"
 
+#include "Grid.h"
+#include "constants.h"
 
+#include "display/Window.h"
 
 #include "Logger.h"
 CellCursor::CellCursor(WindowManager *manager, int winId, Grid *grid, int color) : super(manager, winId)

@@ -2,8 +2,9 @@
 #define _HUMAIN_H_
 
 #include "entities/Entity.h"
+#include "structs/EntityTurnAction.h"
 
-#include "widgets/CellCursor.h"
+class CellCursor;
 
 class Humain : public Entity
 {

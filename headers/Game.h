@@ -1,29 +1,19 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "Game.h"
+#include <ncurses.h>
 
-#include "config/GameSettings.h"
-
-#include "display/WindowManager.h"
-
-#include "widgets/DisplayGrid.h"
+class Grid;
 class DisplayGrid;
-#include "widgets/TokenLiner.h"
+class WindowManager;
+class GameSettings;
+class GravityProvider;
+class WinnerChecker;
 class TokenLiner;
-
-#include "entities/Entity.h"
+class Overlay;
 class Entity;
 
-#include "providers/GravityProvider.h"
-
-#include "WinnerChecker.h"
-class WinnerChecker;
-#include "Grid.h"
-
-#include <iostream>
-#include <fstream>
-#include <vector>
+#include "structs/EntityTurnAction.h"
 
 class Game
 {

@@ -1,5 +1,10 @@
 #include "widgets/TokenLiner.h"
 
+#include "display/Window.h"
+#include "constants.h"
+
+#include "structs/TokenAlignement.h"
+
 #include "Logger.h"
 
 TokenLiner::TokenLiner(WindowManager *manager, int winId) : super(manager, winId) {}

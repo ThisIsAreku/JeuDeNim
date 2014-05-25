@@ -1,7 +1,12 @@
 #include <thread>
 #include "WinnerChecker.h"
 
+#include "Game.h"
+#include "Grid.h"
 
+#include "config/GameSettings.h"
+
+#include "structs/TokenAlignement.h"
 
 #include "Logger.h"
 

@@ -4,7 +4,8 @@
 #include <functional>   // std::bind
 
 #include "display/Renderable.h"
-#include "Grid.h"
+
+class Grid;
 
 class CellCursor : public Renderable
 {

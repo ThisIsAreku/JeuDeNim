@@ -1,7 +1,6 @@
 #ifndef _GRAVITY_PROVIDER_H_
 #define _GRAVITY_PROVIDER_H_
 
-#include "Grid.h"
 class Grid;
 #include <functional>   // std::bind
 

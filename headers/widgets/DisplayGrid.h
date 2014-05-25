@@ -1,12 +1,13 @@
 #ifndef _DISPLAY_GRID_H_
 #define _DISPLAY_GRID_H_
 
-#include "Grid.h"
 #include "display/Renderable.h"
 
+#include "structs/EntityTurnAction.h"
 
-#include "widgets/TokenAnimator.h"
 class TokenAnimator;
+class Grid;
+class Game;
 
 class DisplayGrid : public Renderable
 {

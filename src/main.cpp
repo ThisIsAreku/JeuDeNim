@@ -1,7 +1,8 @@
 #include <iostream>
-#include "Game.h"
 #include <cstdlib>
+#include <cstring>
 
+#include "Game.h"
 
 #include "Logger.h"
 int main(int argc, char **argv)

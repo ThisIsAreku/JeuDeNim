@@ -3,8 +3,6 @@
 
 #include <fstream>
 
-#include "structs/EntityTurnAction.h"
-#include "providers/GravityProvider.h"
 class GravityProvider;
 
 class Grid

@@ -9,11 +9,26 @@
 #endif
 
 #include "Game.h"
+#include "WinnerChecker.h"
+#include "Grid.h"
+
+#include "config/GameSettings.h"
+
+#include "structs/EntityTurnAction.h"
+#include "structs/TokenAlignement.h"
+
+#include "display/WindowManager.h"
+#include "display/Window.h"
+
+#include "widgets/DisplayGrid.h"
+#include "widgets/TokenLiner.h"
 
 #include "widgets/CellCursor.h"
+
 #include "entities/Random.h"
 #include "entities/Humain.h"
 #include "entities/AI.h"
+
 #include "providers/DefaultGravityProvider.h"
 
 #include "overlays/HelpOverlay.h"

@@ -1,4 +1,6 @@
 #include "display/WindowManager.h"
+
+#include "display/Window.h"
 #include "display/Overlay.h"
 
 

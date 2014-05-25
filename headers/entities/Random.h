@@ -2,6 +2,9 @@
 #define _RANDOM_H_
 
 #include "entities/Entity.h"
+#include "structs/EntityTurnAction.h"
+
+class Game;
 
 class Random : public Entity
 {

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "providers/DefaultGravityProvider.h"
 
+#include "Grid.h"
 #include "Logger.h"
 #include "Helpers.h"
 

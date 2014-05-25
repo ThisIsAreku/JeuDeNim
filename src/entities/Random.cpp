@@ -1,8 +1,10 @@
-#include "entities/Random.h"
 #include <cstdlib>
 #include <ctime>
+#include "entities/Random.h"
 
-
+#include "Game.h"
+#include "Grid.h"
+#include "constants.h"
 #include "Logger.h"
 
 Random::Random(Game *game, int entityIndex) : super(game, entityIndex)

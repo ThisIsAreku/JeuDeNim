@@ -6,7 +6,7 @@
 #include <csignal>
 #include <ncurses.h>
 
-#include "display/Window.h"
+class Window;
 class Overlay;
 #include "constants.h"
 

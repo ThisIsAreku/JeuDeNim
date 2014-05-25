@@ -2,7 +2,8 @@
 #define _TOKEN_ANIMATOR_H_
 
 #include "display/Renderable.h"
-class Renderable;
+
+class Game;
 
 class TokenAnimator : public Renderable
 {

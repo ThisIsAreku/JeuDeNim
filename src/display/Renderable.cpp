@@ -1,5 +1,7 @@
 #include "display/Renderable.h"
 
+#include "display/WindowManager.h"
+
 Renderable::Renderable(WindowManager *manager, int winId)
 {
     this->winId = winId;
