@@ -1,7 +1,7 @@
 #ifndef _HELP_OVERLAY_H_
 #define _HELP_OVERLAY_H_
 
-#include "display/Overlay.h"
+#include "display/Overlay.hpp"
 
 class HelpOverlay : public Overlay
 {

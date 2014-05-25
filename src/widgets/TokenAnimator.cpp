@@ -1,13 +1,13 @@
-#include "widgets/TokenAnimator.h"
+#include "widgets/TokenAnimator.hpp"
 
-#include "config/GameSettings.h"
-#include "Game.h"
-#include "Grid.h"
+#include "config/GameSettings.hpp"
+#include "Game.hpp"
+#include "Grid.hpp"
 
-#include "constants.h"
-#include "display/Window.h"
+#include "constants.hpp"
+#include "display/Window.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 TokenAnimator::TokenAnimator(WindowManager *manager, int winId, Game *game) : super(manager, winId)
 {

@@ -1,7 +1,7 @@
 #ifndef _TOKEN_LINER_H_
 #define _TOKEN_LINER_H_
 
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
 struct TokenAlignement;
 

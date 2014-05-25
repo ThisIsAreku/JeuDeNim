@@ -1,7 +1,7 @@
-#include "config/GameSettings.h"
+#include "config/GameSettings.hpp"
 
-#include "display/Window.h"
-#include "constants.h"
+#include "display/Window.hpp"
+#include "constants.hpp"
 
 GameSettings::GameSettings()
 {

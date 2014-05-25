@@ -1,4 +1,4 @@
-#include "display/Window.h"
+#include "display/Window.hpp"
 
 Window::Window(int winId, int w, int h, int x, int y)
 {

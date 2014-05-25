@@ -8,7 +8,7 @@
 
 class Window;
 class Overlay;
-#include "constants.h"
+#include "constants.hpp"
 
 class WindowManager
 {

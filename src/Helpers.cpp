@@ -1,4 +1,4 @@
-#include "Helpers.h"
+#include "Helpers.hpp"
 
 // helper
 void Helpers::__switch_vars(int &a, int &b)

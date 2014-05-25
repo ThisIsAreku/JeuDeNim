@@ -1,7 +1,7 @@
 #ifndef _TOKEN_ANIMATOR_H_
 #define _TOKEN_ANIMATOR_H_
 
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
 class Game;
 

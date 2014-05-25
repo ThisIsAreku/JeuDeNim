@@ -7,7 +7,7 @@ NCURSES= $(shell find /usr/lib -name "libncurses.so" -print -quit 2>/dev/null)
 EXEC=JeuDeNim
 HEADERS_DIR=headers
 SRC= $(shell find src/ -name "*.cpp")
-HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.h")
+HEADERS= $(shell find ${HEADERS_DIR}/ -name "*.hpp")
 OBJ= $(SRC:src/%.cpp=obj/%.o)
 
 all: CXXFLAGS+= -O3

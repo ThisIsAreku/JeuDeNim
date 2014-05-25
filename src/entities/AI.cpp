@@ -1,4 +1,4 @@
-#include "entities/AI.h"
+#include "entities/AI.hpp"
 
 #ifdef _REENTRANT
 #include <thread>
@@ -6,14 +6,14 @@
 #include <ctime>
 #include <cmath>
 
-#include "providers/GravityProvider.h"
-#include "config/GameSettings.h"
-#include "WinnerChecker.h"
-#include "Helpers.h"
-#include "Game.h"
-#include "Grid.h"
-#include "constants.h"
-#include "Logger.h"
+#include "providers/GravityProvider.hpp"
+#include "config/GameSettings.hpp"
+#include "WinnerChecker.hpp"
+#include "Helpers.hpp"
+#include "Game.hpp"
+#include "Grid.hpp"
+#include "constants.hpp"
+#include "Logger.hpp"
 
 AI::AI(Game *game, int entityIndex, int level, bool adaptative) : super(game, entityIndex)
 {

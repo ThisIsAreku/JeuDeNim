@@ -1,14 +1,14 @@
 #include <thread>
-#include "WinnerChecker.h"
+#include "WinnerChecker.hpp"
 
-#include "Game.h"
-#include "Grid.h"
+#include "Game.hpp"
+#include "Grid.hpp"
 
-#include "config/GameSettings.h"
+#include "config/GameSettings.hpp"
 
-#include "structs/TokenAlignement.h"
+#include "structs/TokenAlignement.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 WinnerChecker::WinnerChecker(Game *game, bool useGraphics)
 {

@@ -1,9 +1,9 @@
 #include <iostream>
-#include "providers/DefaultGravityProvider.h"
+#include "providers/DefaultGravityProvider.hpp"
 
-#include "Grid.h"
-#include "Logger.h"
-#include "Helpers.h"
+#include "Grid.hpp"
+#include "Logger.hpp"
+#include "Helpers.hpp"
 
 DefaultGravityProvider::DefaultGravityProvider(Grid *grid) : super(grid)
 {

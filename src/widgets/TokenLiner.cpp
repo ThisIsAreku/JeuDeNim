@@ -1,11 +1,11 @@
-#include "widgets/TokenLiner.h"
+#include "widgets/TokenLiner.hpp"
 
-#include "display/Window.h"
-#include "constants.h"
+#include "display/Window.hpp"
+#include "constants.hpp"
 
-#include "structs/TokenAlignement.h"
+#include "structs/TokenAlignement.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 TokenLiner::TokenLiner(WindowManager *manager, int winId) : super(manager, winId) {}
 

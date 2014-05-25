@@ -2,7 +2,7 @@
 #define _ENTITIY_H_
 
 #include <ncurses.h>
-#include "structs/UpdateState.h"
+#include "structs/UpdateState.hpp"
 
 class Game;
 

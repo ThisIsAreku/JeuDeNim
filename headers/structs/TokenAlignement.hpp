@@ -1,9 +1,9 @@
 #ifndef _STRUCT_TOKEN_ALIGNEMENT_
 #define _STRUCT_TOKEN_ALIGNEMENT_
 
-#include "Helpers.h"
+#include "Helpers.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 enum AlignOrientation
 {

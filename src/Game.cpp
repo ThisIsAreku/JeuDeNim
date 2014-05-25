@@ -8,33 +8,33 @@
 #else
 #endif
 
-#include "Game.h"
-#include "WinnerChecker.h"
-#include "Grid.h"
+#include "Game.hpp"
+#include "WinnerChecker.hpp"
+#include "Grid.hpp"
 
-#include "config/GameSettings.h"
+#include "config/GameSettings.hpp"
 
-#include "structs/EntityTurnAction.h"
-#include "structs/TokenAlignement.h"
+#include "structs/EntityTurnAction.hpp"
+#include "structs/TokenAlignement.hpp"
 
-#include "display/WindowManager.h"
-#include "display/Window.h"
+#include "display/WindowManager.hpp"
+#include "display/Window.hpp"
 
-#include "widgets/DisplayGrid.h"
-#include "widgets/TokenLiner.h"
+#include "widgets/DisplayGrid.hpp"
+#include "widgets/TokenLiner.hpp"
 
-#include "widgets/CellCursor.h"
+#include "widgets/CellCursor.hpp"
 
-#include "entities/Random.h"
-#include "entities/Humain.h"
-#include "entities/AI.h"
+#include "entities/Random.hpp"
+#include "entities/Humain.hpp"
+#include "entities/AI.hpp"
 
-#include "providers/DefaultGravityProvider.h"
+#include "providers/DefaultGravityProvider.hpp"
 
-#include "overlays/HelpOverlay.h"
+#include "overlays/HelpOverlay.hpp"
 
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 // definition of Logger::log
 Logger::Logger Logger::log;

@@ -1,13 +1,13 @@
 #include <sstream>
 
-#include "widgets/CellCursor.h"
+#include "widgets/CellCursor.hpp"
 
-#include "Grid.h"
-#include "constants.h"
+#include "Grid.hpp"
+#include "constants.hpp"
 
-#include "display/Window.h"
+#include "display/Window.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 CellCursor::CellCursor(WindowManager *manager, int winId, Grid *grid, int color) : super(manager, winId)
 {
     this->color = color;

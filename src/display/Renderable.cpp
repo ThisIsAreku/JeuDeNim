@@ -1,6 +1,6 @@
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
-#include "display/WindowManager.h"
+#include "display/WindowManager.hpp"
 
 Renderable::Renderable(WindowManager *manager, int winId)
 {

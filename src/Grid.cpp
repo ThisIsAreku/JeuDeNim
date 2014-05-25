@@ -1,7 +1,7 @@
-#include "Grid.h"
-#include "providers/DefaultGravityProvider.h"
+#include "Grid.hpp"
+#include "providers/DefaultGravityProvider.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 Grid::Grid(int initWidth, int initHeight)
 {
     Logger::log << "Creating grid with " << initWidth << "x" << initHeight << std::endl;

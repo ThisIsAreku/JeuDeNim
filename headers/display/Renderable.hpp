@@ -6,7 +6,7 @@
 class WindowManager;
 class Window;
 
-#include "structs/UpdateState.h"
+#include "structs/UpdateState.hpp"
 
 class Renderable
 {

@@ -1,4 +1,4 @@
-#include "providers/GravityProvider.h"
+#include "providers/GravityProvider.hpp"
 
 GravityProvider::GravityProvider(Grid *grid)
 {

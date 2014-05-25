@@ -1,10 +1,10 @@
-#include "display/WindowManager.h"
+#include "display/WindowManager.hpp"
 
-#include "display/Window.h"
-#include "display/Overlay.h"
+#include "display/Window.hpp"
+#include "display/Overlay.hpp"
 
 
-#include "Logger.h"
+#include "Logger.hpp"
 WindowManager::WindowManager()
 {
     this->win = new Window*[WIN_COUNT];

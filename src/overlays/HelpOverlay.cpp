@@ -1,6 +1,6 @@
-#include "overlays/HelpOverlay.h"
+#include "overlays/HelpOverlay.hpp"
 
-#include "display/Window.h"
+#include "display/Window.hpp"
 
 HelpOverlay::HelpOverlay(WindowManager *manager) : super(manager)
 {

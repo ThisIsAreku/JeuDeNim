@@ -1,6 +1,6 @@
-#include "display/Overlay.h"
+#include "display/Overlay.hpp"
 
-#include "constants.h"
+#include "constants.hpp"
 
 Overlay::Overlay(WindowManager *manager) : super(manager, WIN_OVERLAY)
 {

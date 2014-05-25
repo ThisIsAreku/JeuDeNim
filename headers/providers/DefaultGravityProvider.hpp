@@ -1,7 +1,7 @@
 #ifndef _DEFAULT_GRAVITY_PROVIDER_H_
 #define _DEFAULT_GRAVITY_PROVIDER_H_
 
-#include "providers/GravityProvider.h"
+#include "providers/GravityProvider.hpp"
 
 class DefaultGravityProvider : public GravityProvider
 {

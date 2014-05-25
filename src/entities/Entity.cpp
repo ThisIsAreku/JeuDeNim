@@ -1,7 +1,7 @@
-#include "entities/Entity.h"
+#include "entities/Entity.hpp"
 
 
-#include "Logger.h"
+#include "Logger.hpp"
 Entity::Entity(Game *game, int entityIndex)
 {
     Logger::log << "Init new Entity with index " << entityIndex << std::endl;

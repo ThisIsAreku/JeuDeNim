@@ -1,10 +1,10 @@
-#include "entities/Humain.h"
+#include "entities/Humain.hpp"
 
-#include "widgets/CellCursor.h"
-#include "Game.h"
-#include "Grid.h"
-#include "constants.h"
-#include "Logger.h"
+#include "widgets/CellCursor.hpp"
+#include "Game.hpp"
+#include "Grid.hpp"
+#include "constants.hpp"
+#include "Logger.hpp"
 
 Humain::Humain(Game *game, int entityIndex) : super(game, entityIndex)
 {

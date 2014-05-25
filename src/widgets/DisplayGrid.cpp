@@ -1,17 +1,17 @@
-#include "widgets/DisplayGrid.h"
+#include "widgets/DisplayGrid.hpp"
 
-#include "widgets/TokenAnimator.h"
-#include "providers/GravityProvider.h"
-#include "config/GameSettings.h"
-#include "Game.h"
-#include "Grid.h"
-#include "constants.h"
+#include "widgets/TokenAnimator.hpp"
+#include "providers/GravityProvider.hpp"
+#include "config/GameSettings.hpp"
+#include "Game.hpp"
+#include "Grid.hpp"
+#include "constants.hpp"
 
-#include "WinnerChecker.h"
+#include "WinnerChecker.hpp"
 
-#include "display/Window.h"
+#include "display/Window.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 DisplayGrid::DisplayGrid(WindowManager *manager, int winId, Game *game) : super(manager, winId)
 {

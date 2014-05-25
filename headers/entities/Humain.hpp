@@ -1,8 +1,8 @@
 #ifndef _HUMAIN_H_
 #define _HUMAIN_H_
 
-#include "entities/Entity.h"
-#include "structs/EntityTurnAction.h"
+#include "entities/Entity.hpp"
+#include "structs/EntityTurnAction.hpp"
 
 class CellCursor;
 

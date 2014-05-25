@@ -1,7 +1,7 @@
 #ifndef _OVERLAY_H_
 #define _OVERLAY_H_
 
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
 class Overlay : public Renderable
 {

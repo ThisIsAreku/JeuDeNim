@@ -1,9 +1,9 @@
 #ifndef _DISPLAY_GRID_H_
 #define _DISPLAY_GRID_H_
 
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
-#include "structs/EntityTurnAction.h"
+#include "structs/EntityTurnAction.hpp"
 
 class TokenAnimator;
 class Grid;

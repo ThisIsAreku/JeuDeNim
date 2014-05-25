@@ -13,7 +13,7 @@ class TokenLiner;
 class Overlay;
 class Entity;
 
-#include "structs/EntityTurnAction.h"
+#include "structs/EntityTurnAction.hpp"
 
 class Game
 {

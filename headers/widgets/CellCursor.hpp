@@ -3,7 +3,7 @@
 
 #include <functional>   // std::bind
 
-#include "display/Renderable.h"
+#include "display/Renderable.hpp"
 
 class Grid;
 

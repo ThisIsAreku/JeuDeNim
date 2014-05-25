@@ -1,8 +1,8 @@
 #ifndef _RANDOM_H_
 #define _RANDOM_H_
 
-#include "entities/Entity.h"
-#include "structs/EntityTurnAction.h"
+#include "entities/Entity.hpp"
+#include "structs/EntityTurnAction.hpp"
 
 class Random : public Entity
 {

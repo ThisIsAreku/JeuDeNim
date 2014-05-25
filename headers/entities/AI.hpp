@@ -6,8 +6,8 @@
 #include <mutex>
 #endif
 
-#include "entities/Entity.h"
-#include "structs/EntityTurnAction.h"
+#include "entities/Entity.hpp"
+#include "structs/EntityTurnAction.hpp"
 
 class Game;
 class Grid;

@@ -2,9 +2,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "Game.h"
+#include "Game.hpp"
 
-#include "Logger.h"
+#include "Logger.hpp"
 int main(int argc, char **argv)
 {
 
