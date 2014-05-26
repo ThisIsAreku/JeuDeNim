@@ -71,7 +71,6 @@ void WindowManager::initWindows()
     int lines = LINES - 5;
 
     createWindow(WIN_OVERLAY,          COLS-10,   LINES-8,  5,          3);
-    nodelay(getWindow(WIN_OVERLAY)->getHandle(), true);
 
     createWindow(WIN_GAME_GRID,     cols,   lines,  0,          1);
     createWindow(WIN_SCOREBOARD,    19,     lines,  cols,   1);
@@ -89,7 +88,6 @@ void WindowManager::initNcurses()
     cbreak();
     noecho();
     curs_set(0);
-    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     refresh();
 }
@@ -280,6 +278,7 @@ void WindowManager::refreshWindow(int winId)
 {
     if(releasing)
         return;
+    Logger::log << "WindowManager::refreshWindow(" << winId << ")" << std::endl;
     getWindow(winId)->refresh();
 }
 
@@ -313,6 +312,7 @@ void WindowManager::setOverlay(Overlay *_overlay)
 
     this->currentOverlay = _overlay;
     this->currentOverlay->visible = true;
+    this->currentOverlay->init();
     this->currentOverlay->render();
 
     /*refreshWindow(WIN_OVERLAY);
@@ -324,10 +324,15 @@ void WindowManager::clearOverlay()
 {
     this->currentOverlay->visible = false;
     this->currentOverlay = NULL;
-    for(int i = 0; i < WIN_COUNT-1; i++)
-        getWindow(i)->refresh();
-    //refresh();
+    getWindow(WIN_OVERLAY)->clear();
+    refresh();
+    for(int i = WIN_COUNT-1; i >= 0; i--){
+        if(i != WIN_OVERLAY)
+            refreshWindow(i);
+    }
+    refresh();
     Logger::log << "WindowManager::clearOverlay" << std::endl;
+    ungetch(-1);
 }
 Overlay *WindowManager::getOverlay()
 {

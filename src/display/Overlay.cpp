@@ -24,8 +24,11 @@ bool Overlay::isVisible()
 }
 void Overlay::close()
 {
-	if(isVisible())
+	if(isVisible()){
+		Logger::log << "Overlay::close" << std::endl;
 		getWindowManager()->clearOverlay();
+		visible = false;
+	}
 }
 
 void Overlay::init()
@@ -39,8 +42,9 @@ UpdateState Overlay::update(chtype ch)
 	if(!isVisible())
 		return SUCCESS;
 
+	Logger::log << "Overlay::update" << std::endl;
+
 	if(static_cast<int>(ch) == 27){
-		Logger::log << static_cast<int>(ch) << "hh hhh" << std::endl;
 		close();
 		return SUCCESS;
 	}
@@ -50,8 +54,11 @@ UpdateState Overlay::update(chtype ch)
 
 void Overlay::render()
 {
-	if(isVisible())
-    	renderOverlay();
+	if(!isVisible())
+		return;
+    
+	Logger::log << "Overlay::render" << std::endl;
+    renderOverlay();
     getWindow()->refresh();
     overlay(stdscr, getWindow()->getHandle());
     refresh();

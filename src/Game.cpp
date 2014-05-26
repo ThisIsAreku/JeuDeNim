@@ -207,7 +207,7 @@ void Game::init()
     this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
 
     this->helpOverlay = new HelpOverlay(this->manager);
-    this->saveOverlay = new SaveOverlay(this->manager);
+    this->saveOverlay = new SaveOverlay(this);
 
     createEntities();
 
@@ -250,6 +250,7 @@ void Game::update()
 
     if(getWindowManager()->getOverlay() == NULL)
     {
+        Logger::log << "update default" << std::endl;
         if(doKeyboardActions(ch))
             return;
         this->displayGrid->update(ch);
@@ -257,6 +258,7 @@ void Game::update()
     }
     else
     {
+        Logger::log << "update overlay" << std::endl;
         getWindowManager()->getOverlay()->update(ch);
     }
     if(turn_end)
@@ -269,7 +271,7 @@ void Game::render()
 {
     if(getWindowManager()->getOverlay() == NULL)
     {
-        Logger::log << "Rendering" << std::endl;
+        Logger::log << "Rendering default" << std::endl;
         Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
         win->printAt(0, 0, "(F9) Animations: ");
         if(getGameSettings()->animate)
@@ -311,6 +313,7 @@ void Game::render()
 
         this->displayGrid->render();
     }else{
+        Logger::log << "Rendering overlay" << std::endl;
         getWindowManager()->getOverlay()->render();
     }
 
@@ -577,11 +580,14 @@ void Game::restoreState(int slotId)
 
         createEntities();
 
-        getWindowManager()->getWindow(WIN_GAME_GRID)->clear();
-        getWindowManager()->getWindow(WIN_SCOREBOARD)->clear();
+        getWindowManager()->getWindow(WIN_GAME_GRID)->clear();        
+        getWindowManager()->getWindow(WIN_SCOREBOARD)->clear();        
+        getWindowManager()->getWindow(WIN_GAME_TURN)->clear();
+
         playTurnIndex = 0;
         getDisplayGrid()->init();
         invokeEntityTurn(currentPlayer);
+        refresh();
     }
     delete [] thisSaveFile;
 }
