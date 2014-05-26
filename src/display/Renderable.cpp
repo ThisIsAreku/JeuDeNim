@@ -17,3 +17,9 @@ Window *Renderable::getWindow()
         return NULL;
     return this->manager->getWindow(winId);
 }
+WindowManager *Renderable::getWindowManager()
+{
+    if(this->manager == NULL)
+        return NULL;
+       return this->manager;
+}

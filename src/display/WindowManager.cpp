@@ -14,6 +14,8 @@ WindowManager::WindowManager()
     initialized = false;
     releasing = false;
 
+    this->currentOverlay = NULL;
+
     initNcurses();
 
 }
@@ -68,11 +70,12 @@ void WindowManager::initWindows()
     int cols = COLS - 19;
     int lines = LINES - 5;
 
-    createWindow(WIN_GAME_GRID,     cols,   lines,  0,          1);
-    createWindow(WIN_SCOREBOARD,    18,     lines,  cols + 1,   1);
-    createWindow(WIN_GAME_TURN,     COLS,   4,      0,          lines + 1);
+    createWindow(WIN_OVERLAY,          COLS-10,   LINES-8,  5,          3);
+    nodelay(getWindow(WIN_OVERLAY)->getHandle(), true);
 
-    createWindow(WIN_OVERLAY,          cols,   lines,  0,          1);
+    createWindow(WIN_GAME_GRID,     cols,   lines,  0,          1);
+    createWindow(WIN_SCOREBOARD,    19,     lines,  cols,   1);
+    createWindow(WIN_GAME_TURN,     COLS,   4,      0,          lines + 1);
 }
 void WindowManager::initNcurses()
 {
@@ -86,6 +89,7 @@ void WindowManager::initNcurses()
     cbreak();
     noecho();
     curs_set(0);
+    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     refresh();
 }
@@ -290,7 +294,15 @@ void WindowManager::restoreCurseMode()
 }
 
 
-
+void WindowManager::toggleOverlay(Overlay *_overlay)
+{
+    if(_overlay != this->currentOverlay && this->currentOverlay != NULL)
+        clearOverlay();
+    if(_overlay->visible)
+        clearOverlay();
+    else
+        setOverlay(_overlay);
+}
 void WindowManager::setOverlay(Overlay *_overlay)
 {
     if(_overlay == NULL)
@@ -303,14 +315,19 @@ void WindowManager::setOverlay(Overlay *_overlay)
     this->currentOverlay->visible = true;
     this->currentOverlay->render();
 
-    refreshWindow(WIN_OVERLAY);
-    overlay(getWindow(WIN_GAME_GRID)->getHandle(), getWindow(WIN_OVERLAY)->getHandle());
-    refresh();
+    /*refreshWindow(WIN_OVERLAY);
+    overlay(stdscr, getWindow(WIN_OVERLAY)->getHandle());
+    refresh();*/
+    Logger::log << "WindowManager::setOverlay" << std::endl;
 }
 void WindowManager::clearOverlay()
 {
     this->currentOverlay->visible = false;
     this->currentOverlay = NULL;
+    for(int i = 0; i < WIN_COUNT-1; i++)
+        getWindow(i)->refresh();
+    //refresh();
+    Logger::log << "WindowManager::clearOverlay" << std::endl;
 }
 Overlay *WindowManager::getOverlay()
 {

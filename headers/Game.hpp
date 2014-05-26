@@ -74,7 +74,7 @@ public:
     GameSettings *getGameSettings();
     WinnerChecker *getWinnerChecker();
 
-    void doKeyboardActions(chtype);
+    bool doKeyboardActions(chtype);
 
     void invokeEntityTurn(int);
 

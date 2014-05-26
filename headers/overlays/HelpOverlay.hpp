@@ -10,9 +10,9 @@ public:
     HelpOverlay(WindowManager *);
     virtual ~HelpOverlay();
 
-    void init();
-    UpdateState update(chtype);
-    void render();
+    void initOverlay();
+    UpdateState updateOverlay(chtype);
+    void renderOverlay();
 };
 
 #endif

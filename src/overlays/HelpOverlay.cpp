@@ -9,13 +9,17 @@ HelpOverlay::~HelpOverlay()
 {
 }
 
-void HelpOverlay::init()
+void HelpOverlay::initOverlay()
 {}
 
-UpdateState HelpOverlay::update(chtype)
-{}
+UpdateState HelpOverlay::updateOverlay(chtype ch)
+{
+    if(ch == 'h')
+        close();
+    return SUCCESS;
+}
 
-void HelpOverlay::render()
+void HelpOverlay::renderOverlay()
 {
     Window *win = getWindow();
     if(win == NULL)

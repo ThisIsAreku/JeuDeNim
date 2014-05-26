@@ -17,6 +17,7 @@ protected:
     Renderable(WindowManager *, int);
 
     Window *getWindow();
+    WindowManager *getWindowManager();
 public:
     virtual ~Renderable() = 0;
 

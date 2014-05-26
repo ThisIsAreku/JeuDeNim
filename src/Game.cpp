@@ -32,6 +32,7 @@
 #include "providers/DefaultGravityProvider.hpp"
 
 #include "overlays/HelpOverlay.hpp"
+#include "overlays/SaveOverlay.hpp"
 
 
 #include "Logger.hpp"
@@ -206,6 +207,7 @@ void Game::init()
     this->tokenLiner = new TokenLiner(this->manager, WIN_GAME_GRID);
 
     this->helpOverlay = new HelpOverlay(this->manager);
+    this->saveOverlay = new SaveOverlay(this->manager);
 
     createEntities();
 
@@ -242,12 +244,20 @@ void Game::update()
             return;
     }
 
-    doKeyboardActions(ch);
+
+    if(ch == KEY_F(12))
+        interrupted = true;
 
     if(getWindowManager()->getOverlay() == NULL)
     {
+        if(doKeyboardActions(ch))
+            return;
         this->displayGrid->update(ch);
         getCurrentPlayer()->update(ch);
+    }
+    else
+    {
+        getWindowManager()->getOverlay()->update(ch);
     }
     if(turn_end)
     {
@@ -257,48 +267,51 @@ void Game::update()
 
 void Game::render()
 {
-    Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
-    win->printAt(0, 0, "(F9) Animations: ");
-    if(getGameSettings()->animate)
-        win->printAt(17, 0, "ON ");
-    else
-        win->printAt(17, 0, "OFF");
-
-
-    win->printAt(0, 1, "Joueur actuel: ");
-    getWindowManager()->printInt(WIN_GAME_TURN, 15, 1, currentPlayer + 1);
-    Entity *e = getCurrentPlayer();
-    win->printAt(16, 1, " (");
-
-    win->AttribOn(COLOR_PAIR(currentPlayer + 9));
-    win->printAt(18, 1, e->getId());
-    int len = static_cast<int>(strlen(e->getId()));
-    if(e->getEntityType() == ENTITY_AI)
-    {
-        AI *ai = static_cast<AI *>(e);
-        int level = ai->getDifficulty();
-        win->printAt(18 + len++, 1, "[");
-        getWindowManager()->printInt(WIN_GAME_TURN, 18 + len++, 1, level);
-        if(level > 9)
-            len++;
-        win->printAt(18 + len++, 1, "]");
-        if(ai->isAdaptative())
-        {
-            win->printAt(18 + len++, 1, "++");
-            len++;
-        }
-    }
-    win->AttribOff(COLOR_PAIR(currentPlayer + 9));
-    win->printAt(18 + len, 1, ")                      ");
-
-    win->refresh();
-
-
     if(getWindowManager()->getOverlay() == NULL)
     {
+        Logger::log << "Rendering" << std::endl;
+        Window *win = getWindowManager()->getWindow(WIN_GAME_TURN);
+        win->printAt(0, 0, "(F9) Animations: ");
+        if(getGameSettings()->animate)
+            win->printAt(17, 0, "ON ");
+        else
+            win->printAt(17, 0, "OFF");
+
+
+        win->printAt(0, 1, "Joueur actuel: ");
+        getWindowManager()->printInt(WIN_GAME_TURN, 15, 1, currentPlayer + 1);
+        Entity *e = getCurrentPlayer();
+        win->printAt(16, 1, " (");
+
+        win->AttribOn(COLOR_PAIR(currentPlayer + 9));
+        win->printAt(18, 1, e->getId());
+        int len = static_cast<int>(strlen(e->getId()));
+        if(e->getEntityType() == ENTITY_AI)
+        {
+            AI *ai = static_cast<AI *>(e);
+            int level = ai->getDifficulty();
+            win->printAt(18 + len++, 1, "[");
+            getWindowManager()->printInt(WIN_GAME_TURN, 18 + len++, 1, level);
+            if(level > 9)
+                len++;
+            win->printAt(18 + len++, 1, "]");
+            if(ai->isAdaptative())
+            {
+                win->printAt(18 + len++, 1, "++");
+                len++;
+            }
+        }
+        win->AttribOff(COLOR_PAIR(currentPlayer + 9));
+        win->printAt(18 + len, 1, ")                      ");
+
+        win->refresh();
+
+
         getCurrentPlayer()->render();
 
         this->displayGrid->render();
+    }else{
+        getWindowManager()->getOverlay()->render();
     }
 
 }
@@ -353,26 +366,21 @@ void Game::renderOps()
     win->refresh();
 }
 
-void Game::doKeyboardActions(chtype ch)
+bool Game::doKeyboardActions(chtype ch)
 {
-    if(ch == KEY_F(12))
-        interrupted = true;
     if(ch == 'h')
-    {
-        if(this->helpOverlay->isVisible())
-            getWindowManager()->clearOverlay();
-        else
-            getWindowManager()->setOverlay(this->helpOverlay);
-    }
+        getWindowManager()->setOverlay(this->helpOverlay);
 
-    if(getWindowManager()->getOverlay() != NULL)
-        return;
-    if(ch == KEY_F(9))
+    else if(ch == KEY_F(9))
         getGameSettings()->animate = !getGameSettings()->animate;
-    if(ch == KEY_F(6))
+    else if(ch == KEY_F(5))
+        getWindowManager()->toggleOverlay(this->saveOverlay);
+    else if(ch == KEY_F(6))
         saveState(0);
-    if(ch == KEY_F(7))
+    else if(ch == KEY_F(7))
         restoreState(0);
+    else return false;
+    return true;
 }
 
 void Game::invokeEntityTurn(int n)

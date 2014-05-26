@@ -79,6 +79,7 @@ public:
     void refreshWindow(int);
 
 
+    void toggleOverlay(Overlay *);
     void setOverlay(Overlay *);
     void clearOverlay();
     Overlay *getOverlay();
