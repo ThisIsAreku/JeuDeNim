@@ -384,7 +384,7 @@ int AI::eval(Grid &grid, const int &prof, const int &threadId)
         {
             return 0;
         }
-        return localWinnerChecker.isWinner(getEntityIndex() - 1) ? EVAL_MAX - prof : EVAL_MIN + prof;
+        return localWinnerChecker.isWinner(getEntityIndex() - 1) ? EVAL_MAX - (this->difficulty - prof) : EVAL_MIN + (this->difficulty - prof);
     }
     int score = 0;
     int multiplier;

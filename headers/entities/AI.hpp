@@ -13,32 +13,33 @@ class Game;
 class Grid;
 class WinnerChecker;
 
-struct IATurnChoice
-{
-    EntityTurnAction action = TOKEN_PLACE;
-    int score, x, y;
-    bool valid;
-    IATurnChoice() : action(TOKEN_PLACE), score(-1000001), x(0), y(0), valid(false) {};
-    void set(EntityTurnAction _action, int _score, int _x, int _y)
-    {
-        action = _action;
-        score = _score;
-        x = _x;
-        y = _y;
-        valid = true;
-    }
-};
-
 class AI : public Entity
 {
     typedef Entity super;
+
+    static const int EVAL_MAX = 1000000;
+    static const int EVAL_MIN = -1000000;
+    struct IATurnChoice
+    {
+        EntityTurnAction action = TOKEN_PLACE;
+        int score, x, y;
+        bool valid;
+        IATurnChoice() : action(TOKEN_PLACE), score(EVAL_MIN*2), x(0), y(0), valid(false) {};
+        void set(EntityTurnAction _action, int _score, int _x, int _y)
+        {
+            action = _action;
+            score = _score;
+            x = _x;
+            y = _y;
+            valid = true;
+        }
+    };
+
     int difficulty;
     bool adaptative;
     int nextEntityIndex;
 
     IATurnChoice turn_choice;
-    static const int EVAL_MAX = 1000000;
-    static const int EVAL_MIN = -1000000;
 
     int numPossibles;
 
